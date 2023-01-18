@@ -1,0 +1,18 @@
+{
+  "name": "remote-mobility-monitoring-backend",
+  "version": "1.0.0",
+  "description": "Backend for the Remote Mobility Monitoring Webapp",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "aws-cdk-lib": "^2.60.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18"
+  }
+}
