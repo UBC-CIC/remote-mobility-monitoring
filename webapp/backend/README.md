@@ -18,5 +18,5 @@ cdk bootstrap aws://YOUR_AWS_ACCOUNT_ID/us-west-2
 
 Deploy the CDK stacks:
 ```
-cdk deploy --all --profile health-platform
+cdk deploy
 ```

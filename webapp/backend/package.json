@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Backend for the Remote Mobility Monitoring Webapp",
   "private": true,
-  "main": "index.js",
   "scripts": {
     "build": "tsc"
   },

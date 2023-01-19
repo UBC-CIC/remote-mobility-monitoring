@@ -9,9 +9,9 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
-        "rootDir": "src",
+        "rootDir": "lib",
         "outDir": "build"
     },
-    "include": ["src/**/*"],
+    "include": ["lib/**/*"],
     "exclude": ["node_modules"]
 }
