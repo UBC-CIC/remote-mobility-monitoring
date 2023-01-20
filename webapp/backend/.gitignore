@@ -1,4 +1,5 @@
 node_modules/
+docker/
 
 # Typescript transpiled output
 build/
@@ -8,6 +9,7 @@ cdk.out/
 
 # Maven output
 target/
+assets/
 
 # IntelliJ
 .idea/

@@ -2,11 +2,17 @@
 
 Make sure you are in backend directory, then run the following:
 ```
+mvn clean package
+```
+This will build the AWS Lambda files written in Java and package it into ```./assets/function.jar```.
+
+After that, run the following:
+```
 npm i -g aws-cdk
 npm i
 npm run build
 ```
-This will install the necessary CDK, then the project's dependencies, and then build the TypeScript files.
+This will install the CDK dependencies, and then build the CDK files written in TypeScript.
 
 ## Deploy
 
@@ -18,5 +24,5 @@ cdk bootstrap aws://YOUR_AWS_ACCOUNT_ID/us-west-2
 
 Deploy the CDK stacks:
 ```
-cdk deploy
+cdk deploy --all
 ```
