@@ -39,6 +39,7 @@ public class DaoTestParent {
     void setupAdminTable() {
         setupDynamoDbClients();
 
+        // TODO: add constants for attribute names
         List<AttributeDefinition> attributeDefinitions = new ArrayList<>();
         attributeDefinitions.add(AttributeDefinition.builder()
                 .attributeName("id")
@@ -58,7 +59,6 @@ public class DaoTestParent {
                 .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
                 .build();
 
-        // TODO: add GSI
         CreateTableRequest request = CreateTableRequest.builder()
                 .attributeDefinitions(attributeDefinitions)
                 .keySchema(KeySchemaElement.builder()

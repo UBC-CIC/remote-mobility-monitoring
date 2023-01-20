@@ -36,7 +36,7 @@ class AdminDaoTest extends DaoTestParent {
         Admin newRecord = buildAdmin();
         table.putItem(newRecord);
 
-        Admin record = cut.find("123");
+        Admin record = cut.findById("123");
         System.out.println(record);
     }
 

@@ -6,8 +6,8 @@ export class DynamoDbStack extends cdk.Stack {
   public static ADMIN_TABLE_NAME = 'admin';
   public static CAREGIVER_TABLE_NAME = 'caregiver';
 
-  public static ADMIN_TABLE_EMAIL_GSI_NAME = 'adminEmailGsi';
-  public static CAREGIVER_TABLE_EMAIL_GSI_NAME = 'caregiverEmailGsi';
+  public static ADMIN_TABLE_EMAIL_GSI_NAME = 'email-gsi';
+  public static CAREGIVER_TABLE_EMAIL_GSI_NAME = 'email-gsi';
 
   public readonly organizationTable: dynamodb.Table;
   public readonly adminTable: dynamodb.Table;

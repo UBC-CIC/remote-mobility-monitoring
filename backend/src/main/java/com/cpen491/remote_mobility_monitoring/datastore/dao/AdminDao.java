@@ -28,21 +28,27 @@ public class AdminDao {
         try {
             table.putItem(newRecord);
         } catch (ConditionalCheckFailedException e) {
-            e.printStackTrace();
             // Do nothing for idempotence
         }
     }
 
-    public Admin find(String id) {
+    public Admin findById(String id) {
         log.info("Finding Admin record with id [{}]", id);
 
         Admin toFind = Admin.builder().id(id).build();
         Admin found = table.getItem(toFind);
         if (found == null) {
             log.error("Cannot find Admin record with id [{}]", id);
+            // TODO: create custom exception
             throw new RuntimeException("Cannot find Admin record");
         } else {
             return found;
         }
+    }
+
+    public Admin findByEmail(String email) {
+        log.info("Finding Admin record with email [{}]", email);
+
+        throw new RuntimeException("Not implemented");
     }
 }

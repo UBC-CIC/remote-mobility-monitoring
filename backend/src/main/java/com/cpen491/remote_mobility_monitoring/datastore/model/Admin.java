@@ -10,6 +10,8 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
+
 @DynamoDbBean
 @Data
 @Builder
@@ -26,12 +28,12 @@ public class Admin {
     private Long version;
 
     @DynamoDbPartitionKey
-    @DynamoDbAttribute("id")
+    @DynamoDbAttribute(AdminTable.ID_NAME)
     public String getId() {
         return id;
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = {"adminEmailGsi"})
+    @DynamoDbSecondaryPartitionKey(indexNames = {AdminTable.EMAIL_GSI_NAME})
     @DynamoDbAttribute("email")
     public String getEmail() {
         return email;
