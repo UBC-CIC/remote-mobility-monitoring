@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbVersionAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 
@@ -18,55 +16,41 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Admin
 @NoArgsConstructor
 @AllArgsConstructor
 public class Admin {
-    private String id;
     private String email;
     private String firstName;
     private String lastName;
     private String organizationId;
     private String createdAt;
     private String updatedAt;
-    private Long version;
 
     @DynamoDbPartitionKey
-    @DynamoDbAttribute(AdminTable.ID_NAME)
-    public String getId() {
-        return id;
-    }
-
-    @DynamoDbSecondaryPartitionKey(indexNames = {AdminTable.EMAIL_GSI_NAME})
-    @DynamoDbAttribute("email")
+    @DynamoDbAttribute(AdminTable.EMAIL_NAME)
     public String getEmail() {
         return email;
     }
 
-    @DynamoDbAttribute("first_name")
+    @DynamoDbAttribute(AdminTable.FIRST_NAME_NAME)
     public String getFirstName() {
         return firstName;
     }
 
-    @DynamoDbAttribute("last_name")
+    @DynamoDbAttribute(AdminTable.LAST_NAME_NAME)
     public String getLastName() {
         return lastName;
     }
 
-    @DynamoDbAttribute("organization_id")
+    @DynamoDbAttribute(AdminTable.ORGANIZATION_ID_NAME)
     public String getOrganizationId() {
         return organizationId;
     }
 
-    @DynamoDbAttribute("created_at")
+    @DynamoDbAttribute(AdminTable.CREATED_AT_NAME)
     public String getCreatedAt() {
         return createdAt;
     }
 
-    @DynamoDbAttribute("updated_at")
+    @DynamoDbAttribute(AdminTable.UPDATED_AT_NAME)
     public String getUpdatedAt() {
         return updatedAt;
-    }
-
-    @DynamoDbVersionAttribute
-    @DynamoDbAttribute("version")
-    public Long getVersion() {
-        return version;
     }
 }

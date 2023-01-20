@@ -8,17 +8,14 @@ import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
-import software.amazon.awssdk.services.dynamodb.model.GlobalSecondaryIndex;
 import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
-import software.amazon.awssdk.services.dynamodb.model.Projection;
-import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 
 public class DaoTestParent {
     private static final String PORT = "8000";
@@ -39,41 +36,23 @@ public class DaoTestParent {
     void setupAdminTable() {
         setupDynamoDbClients();
 
-        // TODO: add constants for attribute names
-        List<AttributeDefinition> attributeDefinitions = new ArrayList<>();
-        attributeDefinitions.add(AttributeDefinition.builder()
-                .attributeName("id")
-                .attributeType(ScalarAttributeType.S)
-                .build());
-        attributeDefinitions.add(AttributeDefinition.builder()
-                .attributeName("email")
-                .attributeType(ScalarAttributeType.S)
-                .build());
-
-        GlobalSecondaryIndex adminEmailGsi = GlobalSecondaryIndex.builder()
-                .keySchema(KeySchemaElement.builder()
-                        .attributeName("email")
-                        .keyType(KeyType.HASH)
-                        .build())
-                .indexName("adminEmailGsi")
-                .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
-                .build();
-
         CreateTableRequest request = CreateTableRequest.builder()
-                .attributeDefinitions(attributeDefinitions)
+                .attributeDefinitions(AttributeDefinition.builder()
+                        .attributeName(AdminTable.EMAIL_NAME)
+                        .attributeType(ScalarAttributeType.S)
+                        .build())
                 .keySchema(KeySchemaElement.builder()
-                        .attributeName("id")
+                        .attributeName(AdminTable.EMAIL_NAME)
                         .keyType(KeyType.HASH)
                         .build())
-                .globalSecondaryIndexes(adminEmailGsi)
                 .billingMode(BillingMode.PAY_PER_REQUEST)
-                .tableName("admin")
+                .tableName(AdminTable.TABLE_NAME)
                 .build();
         ddbClient.createTable(request);
 
         // Wait until table is created
         DescribeTableRequest tableRequest = DescribeTableRequest.builder()
-                .tableName("admin")
+                .tableName(AdminTable.TABLE_NAME)
                 .build();
         DynamoDbWaiter ddbWaiter = ddbClient.waiter();
         ddbWaiter.waitUntilTableExists(tableRequest);
@@ -81,13 +60,13 @@ public class DaoTestParent {
 
     void teardownAdminTable() {
         DeleteTableRequest request = DeleteTableRequest.builder()
-                .tableName("admin")
+                .tableName(AdminTable.TABLE_NAME)
                 .build();
         ddbClient.deleteTable(request);
 
         // Wait until table is deleted
         DescribeTableRequest tableRequest = DescribeTableRequest.builder()
-                .tableName("admin")
+                .tableName(AdminTable.TABLE_NAME)
                 .build();
         DynamoDbWaiter ddbWaiter = ddbClient.waiter();
         ddbWaiter.waitUntilTableNotExists(tableRequest);

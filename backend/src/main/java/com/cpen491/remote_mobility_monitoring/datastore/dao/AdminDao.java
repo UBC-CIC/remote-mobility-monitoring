@@ -1,14 +1,19 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
+import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
+import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 
 @Slf4j
 @AllArgsConstructor
@@ -18,37 +23,48 @@ public class AdminDao {
 
     public void create(Admin newRecord) {
         log.info("Creating new Admin record {}", newRecord);
+        Validator.validateAdmin(newRecord);
 
-        newRecord.setId(UUID.randomUUID().toString());
+        // TODO: ensure that organization actually exists, and write tests for it
 
         String currentTime = LocalDateTime.now().toString();
         newRecord.setCreatedAt(currentTime);
         newRecord.setUpdatedAt(currentTime);
 
+        Expression expression = Expression.builder()
+                .expression(String.format("attribute_not_exists(%s)", AdminTable.EMAIL_NAME))
+                .build();
+
+        PutItemEnhancedRequest<Admin> request = PutItemEnhancedRequest.builder(Admin.class)
+                .conditionExpression(expression)
+                .item(newRecord)
+                .build();
+
         try {
-            table.putItem(newRecord);
+            table.putItem(request);
         } catch (ConditionalCheckFailedException e) {
-            // Do nothing for idempotence
+            throw new DuplicateRecordException(newRecord.getEmail());
         }
     }
 
-    public Admin findById(String id) {
-        log.info("Finding Admin record with id [{}]", id);
+    public Admin find(String email) {
+        log.info("Finding Admin record with email [{}]", email);
+        Validator.validateEmail(email);
 
-        Admin toFind = Admin.builder().id(id).build();
+        Admin toFind = Admin.builder().email(email).build();
         Admin found = table.getItem(toFind);
         if (found == null) {
-            log.error("Cannot find Admin record with id [{}]", id);
-            // TODO: create custom exception
-            throw new RuntimeException("Cannot find Admin record");
-        } else {
-            return found;
+            log.info("Cannot find Admin record with email [{}]", email);
         }
+
+        return found;
     }
 
-    public Admin findByEmail(String email) {
-        log.info("Finding Admin record with email [{}]", email);
+    public void delete(String email) {
+        log.info("Deleting Admin record with email [{}]", email);
+        Validator.validateEmail(email);
 
-        throw new RuntimeException("Not implemented");
+        Admin toDelete = Admin.builder().email(email).build();
+        table.deleteItem(toDelete);
     }
 }

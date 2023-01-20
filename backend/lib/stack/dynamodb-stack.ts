@@ -6,9 +6,6 @@ export class DynamoDbStack extends cdk.Stack {
   public static ADMIN_TABLE_NAME = 'admin';
   public static CAREGIVER_TABLE_NAME = 'caregiver';
 
-  public static ADMIN_TABLE_EMAIL_GSI_NAME = 'email-gsi';
-  public static CAREGIVER_TABLE_EMAIL_GSI_NAME = 'email-gsi';
-
   public readonly organizationTable: dynamodb.Table;
   public readonly adminTable: dynamodb.Table;
   public readonly caregiverTable: dynamodb.Table;
@@ -30,23 +27,19 @@ export class DynamoDbStack extends cdk.Stack {
   }
 
   private createAdminTable(): dynamodb.Table {
-    const table = new dynamodb.Table(
+    return new dynamodb.Table(
       this,
       DynamoDbStack.ADMIN_TABLE_NAME,
       DynamoDbStack.createTableProps(DynamoDbStack.ADMIN_TABLE_NAME)
     );
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_TABLE_EMAIL_GSI_NAME, 'email'));
-    return table;
   }
 
   private createCaregiverTable(): dynamodb.Table {
-    const table = new dynamodb.Table(
+    return new dynamodb.Table(
       this,
       DynamoDbStack.CAREGIVER_TABLE_NAME,
       DynamoDbStack.createTableProps(DynamoDbStack.CAREGIVER_TABLE_NAME)
     );
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_EMAIL_GSI_NAME, 'email'));
-    return table;
   }
 
   private static createTableProps(tableName: string): dynamodb.TableProps {
@@ -58,17 +51,6 @@ export class DynamoDbStack extends cdk.Stack {
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       // TODO: encryption
-    };
-  }
-
-  private static createGsiProps(gsiName: string, partitionKeyName: string): dynamodb.GlobalSecondaryIndexProps {
-    return {
-      indexName: gsiName,
-      partitionKey: {
-        name: partitionKeyName,
-        type: dynamodb.AttributeType.STRING,
-      },
-      projectionType: dynamodb.ProjectionType.ALL,
     };
   }
 }
