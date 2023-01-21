@@ -21,7 +21,6 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -143,12 +142,5 @@ class AdminDaoTest extends DaoTestParent {
                 .lastName(lastName)
                 .organizationId(organizationId)
                 .build();
-    }
-
-    // TODO: maybe move to parent class
-    private static void assertInvalidInputExceptionThrown(ThrowingCallable shouldRaiseThrowable, String errorMessage) {
-        assertThatThrownBy(shouldRaiseThrowable)
-                .isInstanceOfAny(IllegalArgumentException.class, NullPointerException.class)
-                .hasMessage(errorMessage);
     }
 }

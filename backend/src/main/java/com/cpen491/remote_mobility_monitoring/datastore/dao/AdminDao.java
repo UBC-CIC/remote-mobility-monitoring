@@ -21,6 +21,14 @@ public class AdminDao {
     @NonNull
     DynamoDbTable<Admin> table;
 
+    /**
+     * Creates a new Admin record. Record with the same email must not already exist.
+     *
+     * @param newRecord The Admin record to create
+     * @throws DuplicateRecordException If record with the same email already exists
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of email, firstName, lastName, or organizationId are empty
+     */
     public void create(Admin newRecord) {
         log.info("Creating new Admin record {}", newRecord);
         Validator.validateAdmin(newRecord);
@@ -43,10 +51,18 @@ public class AdminDao {
         try {
             table.putItem(request);
         } catch (ConditionalCheckFailedException e) {
-            throw new DuplicateRecordException(newRecord.getEmail());
+            throw new DuplicateRecordException(Admin.class.getSimpleName(), newRecord.getEmail());
         }
     }
 
+    /**
+     * Finds an Admin record by email. Returns null if record does not exist.
+     *
+     * @param email The email of the record to find
+     * @return {@link Admin}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if email is empty
+     */
     public Admin find(String email) {
         log.info("Finding Admin record with email [{}]", email);
         Validator.validateEmail(email);
@@ -60,6 +76,13 @@ public class AdminDao {
         return found;
     }
 
+    /**
+     * Deletes an Admin record by email. Does nothing if record does not exist.
+     *
+     * @param email The email of the record to delete
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if email is empty
+     */
     public void delete(String email) {
         log.info("Deleting Admin record with email [{}]", email);
         Validator.validateEmail(email);

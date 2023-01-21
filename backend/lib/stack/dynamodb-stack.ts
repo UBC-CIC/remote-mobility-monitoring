@@ -6,6 +6,8 @@ export class DynamoDbStack extends cdk.Stack {
   public static ADMIN_TABLE_NAME = 'admin';
   public static CAREGIVER_TABLE_NAME = 'caregiver';
 
+  public static ORGANIZATION_TABLE_NAME_GSI_NAME = 'name-gsi';
+
   public readonly organizationTable: dynamodb.Table;
   public readonly adminTable: dynamodb.Table;
   public readonly caregiverTable: dynamodb.Table;
@@ -19,18 +21,20 @@ export class DynamoDbStack extends cdk.Stack {
   }
 
   private createOrganizationTable(): dynamodb.Table {
-    return new dynamodb.Table(
+    const table = new dynamodb.Table(
       this,
       DynamoDbStack.ORGANIZATION_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.ORGANIZATION_TABLE_NAME)
+      DynamoDbStack.createTableProps(DynamoDbStack.ORGANIZATION_TABLE_NAME, 'id')
     );
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ORGANIZATION_TABLE_NAME_GSI_NAME, 'name'));
+    return table;
   }
 
   private createAdminTable(): dynamodb.Table {
     return new dynamodb.Table(
       this,
       DynamoDbStack.ADMIN_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.ADMIN_TABLE_NAME)
+      DynamoDbStack.createTableProps(DynamoDbStack.ADMIN_TABLE_NAME, 'email')
     );
   }
 
@@ -38,19 +42,30 @@ export class DynamoDbStack extends cdk.Stack {
     return new dynamodb.Table(
       this,
       DynamoDbStack.CAREGIVER_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.CAREGIVER_TABLE_NAME)
+      DynamoDbStack.createTableProps(DynamoDbStack.CAREGIVER_TABLE_NAME, 'email')
     );
   }
 
-  private static createTableProps(tableName: string): dynamodb.TableProps {
+  private static createTableProps(tableName: string, partitionKey: string): dynamodb.TableProps {
     return {
       tableName: tableName,
       partitionKey: {
-        name: 'id',
+        name: partitionKey,
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       // TODO: encryption
+    };
+  }
+
+  private static createGsiProps(gsiName: string, partitionKeyName: string): dynamodb.GlobalSecondaryIndexProps {
+    return {
+      indexName: gsiName,
+      partitionKey: {
+        name: partitionKeyName,
+        type: dynamodb.AttributeType.STRING,
+      },
+      projectionType: dynamodb.ProjectionType.ALL,
     };
   }
 }
