@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +28,9 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Organ
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OrganizationDaoTest extends DaoTestParent {
-    private static final String ID = "org-1";
+    private static final String ID = "org-id-abc";
     private static final String NAME1 = "ORG1";
+    private static final String NAME2 = "ORG2";
 
     DynamoDbTable<Organization> table;
     OrganizationDao cut;
@@ -72,8 +74,8 @@ public class OrganizationDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
                 Arguments.of(null, ORGANIZATION_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildOrganization(null), NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildOrganization(""), NAME_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildOrganization(ID, null), NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildOrganization(ID, ""), NAME_BLANK_ERROR_MESSAGE)
         );
     }
 
@@ -120,6 +122,45 @@ public class OrganizationDaoTest extends DaoTestParent {
     }
 
     @Test
+    public void testUpdate_HappyCase() {
+        Organization newRecord = buildOrganization();
+        cut.create(newRecord);
+
+        Organization updatedRecord = cut.findById(newRecord.getId());
+        assertEquals(newRecord, updatedRecord);
+        updatedRecord.setName(NAME2);
+        cut.update(updatedRecord);
+
+        Organization found = cut.findById(newRecord.getId());
+        assertEquals(newRecord.getId(), found.getId());
+        assertNotEquals(newRecord.getName(), found.getName());
+        assertNotEquals(newRecord.getUpdatedAt(), found.getUpdatedAt());
+        assertEquals(newRecord.getCreatedAt(), found.getCreatedAt());
+    }
+
+    @Test
+    public void testUpdate_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        Organization newRecord = buildOrganization();
+        assertThatThrownBy(() -> cut.update(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForUpdate")
+    public void testUpdate_WHEN_InvalidInput_THEN_ThrowInvalidInputException(Organization record, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.update(record), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForUpdate() {
+        return Stream.of(
+                Arguments.of(null, ORGANIZATION_RECORD_NULL_ERROR_MESSAGE),
+                Arguments.of(buildOrganization(null, NAME1), ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildOrganization("", NAME1), ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildOrganization(ID, null), NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildOrganization(ID, ""), NAME_BLANK_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
     public void testDelete_HappyCase() {
         Organization newRecord = buildOrganization();
         table.putItem(newRecord);
@@ -143,12 +184,12 @@ public class OrganizationDaoTest extends DaoTestParent {
     }
 
     private static Organization buildOrganization() {
-        return buildOrganization(NAME1);
+        return buildOrganization(ID, NAME1);
     }
 
-    private static Organization buildOrganization(String name) {
+    private static Organization buildOrganization(String id, String name) {
         return Organization.builder()
-                .id(ID)
+                .id(id)
                 .name(name)
                 .build();
     }

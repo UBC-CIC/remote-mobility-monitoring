@@ -1,20 +1,26 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
 
 @AllArgsConstructor
 public class GenericDao<T extends BaseModel> {
@@ -61,6 +67,26 @@ public class GenericDao<T extends BaseModel> {
                 .queryConditional(queryConditional)
                 .limit(INDEX_LIMIT)
                 .build()).iterator();
+    }
+
+    public void update(T updatedRecord, Class<T> itemClass) {
+        String currentTime = LocalDateTime.now().toString();
+        updatedRecord.setUpdatedAt(currentTime);
+
+        Expression expression = Expression.builder()
+                .expression(String.format("attribute_exists(%s)", BaseTable.ID_NAME))
+                .build();
+
+        UpdateItemEnhancedRequest<T> request = UpdateItemEnhancedRequest.builder(itemClass)
+                .conditionExpression(expression)
+                .item(updatedRecord)
+                .build();
+
+        try {
+            table.updateItem(request);
+        } catch (ConditionalCheckFailedException e) {
+            throw new RecordDoesNotExistException(itemClass.getSimpleName(), updatedRecord.getId());
+        }
     }
 
     public void delete(String partitionKey) {

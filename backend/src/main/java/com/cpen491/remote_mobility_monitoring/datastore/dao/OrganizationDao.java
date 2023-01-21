@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Const;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
@@ -15,10 +16,10 @@ public class OrganizationDao {
     GenericDao<Organization> dao;
 
     /**
-     * Creates a new Organization record. Record with the same name must not already exist.
+     * Creates a new Organization record. Record with the given name must not already exist.
      *
      * @param newRecord The Organization record to create
-     * @throws DuplicateRecordException If record with the same name already exists
+     * @throws DuplicateRecordException If record with the given name already exists
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if name is empty
      */
@@ -69,6 +70,22 @@ public class OrganizationDao {
             log.info("Cannot find Organization record with name [{}]", name);
         }
         return found;
+    }
+
+    /**
+     * Updates an Organization record. Record with given ID must already exist.
+     *
+     * @param updatedRecord The Organization record to update
+     * @throws RecordDoesNotExistException If record with the given ID does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if id or name are empty
+     */
+    public void update(Organization updatedRecord) {
+        log.info("Updating Organization record {}", updatedRecord);
+        Validator.validateOrganization(updatedRecord);
+        Validator.validateId(updatedRecord.getId());
+
+        dao.update(updatedRecord, Organization.class);
     }
 
     /**
