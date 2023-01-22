@@ -1,5 +1,6 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.api.ThrowableAssert;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
@@ -46,38 +47,47 @@ public class DaoTestParent {
 
     void setupOrganizationTable() {
         setupDynamoDbClients();
-        setupTable(OrganizationTable.TABLE_NAME, OrganizationTable.ID_NAME, OrganizationTable.NAME_INDEX_NAME, OrganizationTable.NAME_NAME);
+        setupTable(OrganizationTable.TABLE_NAME, OrganizationTable.ID_NAME, OrganizationTable.INDEX_NAMES_AND_KEYS);
     }
 
     void setupAdminTable() {
         setupDynamoDbClients();
-        setupTable(AdminTable.TABLE_NAME, AdminTable.ID_NAME, AdminTable.EMAIL_INDEX_NAME, AdminTable.EMAIL_NAME);
+        setupTable(AdminTable.TABLE_NAME, AdminTable.ID_NAME, AdminTable.INDEX_NAMES_AND_KEYS);
     }
 
     void setupCaregiverTable() {
         setupDynamoDbClients();
-        setupTable(CaregiverTable.TABLE_NAME, CaregiverTable.ID_NAME, CaregiverTable.EMAIL_INDEX_NAME, CaregiverTable.EMAIL_NAME);
+        setupTable(CaregiverTable.TABLE_NAME, CaregiverTable.ID_NAME, CaregiverTable.INDEX_NAMES_AND_KEYS);
     }
 
-    private void setupTable(String tableName, String partitionKey, String gsiName, String gsiPartitionKey) {
+    private void setupTable(String tableName, String partitionKey, List<Pair<String, String>> indexNamesAndKeys) {
         List<AttributeDefinition> attributeDefinitions = new ArrayList<>();
+        List<GlobalSecondaryIndex> globalSecondaryIndexes = new ArrayList<>();
+
         attributeDefinitions.add(AttributeDefinition.builder()
                 .attributeName(partitionKey)
                 .attributeType(ScalarAttributeType.S)
                 .build());
-        attributeDefinitions.add(AttributeDefinition.builder()
-                .attributeName(gsiPartitionKey)
-                .attributeType(ScalarAttributeType.S)
-                .build());
 
-        GlobalSecondaryIndex gsi = GlobalSecondaryIndex.builder()
-                .keySchema(KeySchemaElement.builder()
-                        .attributeName(gsiPartitionKey)
-                        .keyType(KeyType.HASH)
-                        .build())
-                .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
-                .indexName(gsiName)
-                .build();
+        for (Pair<String, String> indexNameAndKey : indexNamesAndKeys) {
+            String indexName = indexNameAndKey.getLeft();
+            String key = indexNameAndKey.getRight();
+
+            attributeDefinitions.add(AttributeDefinition.builder()
+                    .attributeName(key)
+                    .attributeType(ScalarAttributeType.S)
+                    .build());
+
+            GlobalSecondaryIndex gsi = GlobalSecondaryIndex.builder()
+                    .keySchema(KeySchemaElement.builder()
+                            .attributeName(key)
+                            .keyType(KeyType.HASH)
+                            .build())
+                    .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
+                    .indexName(indexName)
+                    .build();
+            globalSecondaryIndexes.add(gsi);
+        }
 
         CreateTableRequest request = CreateTableRequest.builder()
                 .attributeDefinitions(attributeDefinitions)
@@ -85,7 +95,7 @@ public class DaoTestParent {
                         .attributeName(partitionKey)
                         .keyType(KeyType.HASH)
                         .build())
-                .globalSecondaryIndexes(gsi)
+                .globalSecondaryIndexes(globalSecondaryIndexes)
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .tableName(tableName)
                 .build();

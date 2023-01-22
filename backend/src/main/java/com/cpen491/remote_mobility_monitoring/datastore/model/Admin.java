@@ -48,6 +48,7 @@ public class Admin extends BaseModel {
         return lastName;
     }
 
+    @DynamoDbSecondaryPartitionKey(indexNames = {AdminTable.ORGANIZATION_ID_INDEX_NAME})
     @DynamoDbAttribute(AdminTable.ORGANIZATION_ID_NAME)
     public String getOrganizationId() {
         return organizationId;

@@ -10,9 +10,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ID_BLANK_ERROR_MESSAGE;
@@ -39,7 +42,9 @@ public class OrganizationDaoTest extends DaoTestParent {
     public void setup() {
         setupOrganizationTable();
         table = ddbEnhancedClient.table(OrganizationTable.TABLE_NAME, TableSchema.fromBean(Organization.class));
-        cut = new OrganizationDao(new GenericDao<>(table));
+        Map<String, DynamoDbIndex<Organization>> indexMap = new HashMap<>();
+        indexMap.put(OrganizationTable.NAME_INDEX_NAME, table.index(OrganizationTable.NAME_INDEX_NAME));
+        cut = new OrganizationDao(new GenericDao<>(table, indexMap));
     }
 
     @AfterEach

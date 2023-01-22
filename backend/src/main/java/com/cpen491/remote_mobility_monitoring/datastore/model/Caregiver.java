@@ -66,6 +66,7 @@ public class Caregiver extends BaseModel {
         return imageUrl;
     }
 
+    @DynamoDbSecondaryPartitionKey(indexNames = {CaregiverTable.ORGANIZATION_ID_INDEX_NAME})
     @DynamoDbAttribute(CaregiverTable.ORGANIZATION_ID_NAME)
     public String getOrganizationId() {
         return organizationId;

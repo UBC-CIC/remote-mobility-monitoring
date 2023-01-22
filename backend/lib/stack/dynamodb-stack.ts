@@ -8,7 +8,9 @@ export class DynamoDbStack extends cdk.Stack {
 
   public static ORGANIZATION_TABLE_NAME_GSI_NAME = 'name-gsi';
   public static ADMIN_TABLE_EMAIL_GSI_NAME = 'email-gsi';
+  public static ADMIN_TABLE_ORGANIZATION_ID_GSI_NAME = 'organization_id-gsi';
   public static CAREGIVER_TABLE_EMAIL_GSI_NAME = 'email-gsi';
+  public static CAREGIVER_TABLE_ORGANIZATION_ID_GSI_NAME = 'organization_id-gsi';
 
   public readonly organizationTable: dynamodb.Table;
   public readonly adminTable: dynamodb.Table;
@@ -39,6 +41,7 @@ export class DynamoDbStack extends cdk.Stack {
       DynamoDbStack.createTableProps(DynamoDbStack.ADMIN_TABLE_NAME, 'id')
     );
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_TABLE_EMAIL_GSI_NAME, 'email'));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_TABLE_ORGANIZATION_ID_GSI_NAME, 'organization_id'));
     return table;
   }
 
@@ -49,6 +52,7 @@ export class DynamoDbStack extends cdk.Stack {
       DynamoDbStack.createTableProps(DynamoDbStack.CAREGIVER_TABLE_NAME, 'id')
     );
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_EMAIL_GSI_NAME, 'email'));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_ORGANIZATION_ID_GSI_NAME, 'organization_id'));
     return table;
   }
 

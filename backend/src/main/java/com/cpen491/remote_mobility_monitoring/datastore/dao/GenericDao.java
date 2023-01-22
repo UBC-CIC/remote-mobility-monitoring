@@ -18,16 +18,18 @@ import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedExce
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
 
 @AllArgsConstructor
 public class GenericDao<T extends BaseModel> {
-    private static final int INDEX_LIMIT = 5;
+    private static final int INDEX_LIMIT = 50;
 
     @NonNull
     DynamoDbTable<T> table;
+    Map<String, DynamoDbIndex<T>> indexMap;
 
     public void create(T newRecord) {
         newRecord.setId(UUID.randomUUID().toString());
@@ -57,7 +59,7 @@ public class GenericDao<T extends BaseModel> {
     }
 
     public Iterator<Page<T>> findAllByIndexPartitionKey(String indexName, String indexPartitionKey) {
-        DynamoDbIndex<T> index = table.index(indexName);
+        DynamoDbIndex<T> index = indexMap.get(indexName);
 
         AttributeValue val = AttributeValue.builder().s(indexPartitionKey).build();
         Key key = Key.builder().partitionValue(val).build();

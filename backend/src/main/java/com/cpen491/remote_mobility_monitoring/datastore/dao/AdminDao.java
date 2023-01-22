@@ -8,6 +8,9 @@ import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+
+import java.util.Iterator;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 
@@ -79,6 +82,21 @@ public class AdminDao {
             log.info("Cannot find Admin record with email [{}]", email);
         }
         return found;
+    }
+
+    /**
+     * Finds all Admin records by organizationId. Returns a paged iterator of Admin records.
+     *
+     * @param organizationId The organizationId of the records to find
+     * @return {@link Iterator}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty
+     */
+    public Iterator<Page<Admin>> findAllInOrganization(String organizationId) {
+        log.info("Finding all Admin records with organizationId [{}]", organizationId);
+        Validator.validateOrganizationId(organizationId);
+
+        return genericDao.findAllByIndexPartitionKey(AdminTable.ORGANIZATION_ID_INDEX_NAME, organizationId);
     }
 
     /**

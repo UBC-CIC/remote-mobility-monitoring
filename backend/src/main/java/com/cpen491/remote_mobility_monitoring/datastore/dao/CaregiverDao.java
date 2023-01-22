@@ -8,6 +8,9 @@ import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+
+import java.util.Iterator;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
@@ -81,6 +84,21 @@ public class CaregiverDao {
             log.info("Cannot find Caregiver record with email [{}]", email);
         }
         return found;
+    }
+
+    /**
+     * Finds all Caregiver records by organizationId. Returns a paged iterator of Caregiver records.
+     *
+     * @param organizationId The organizationId of the records to find
+     * @return {@link Iterator}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty
+     */
+    public Iterator<Page<Caregiver>> findAllInOrganization(String organizationId) {
+        log.info("Finding all Caregiver records with organizationId [{}]", organizationId);
+        Validator.validateOrganizationId(organizationId);
+
+        return genericDao.findAllByIndexPartitionKey(CaregiverTable.ORGANIZATION_ID_INDEX_NAME, organizationId);
     }
 
     /**
