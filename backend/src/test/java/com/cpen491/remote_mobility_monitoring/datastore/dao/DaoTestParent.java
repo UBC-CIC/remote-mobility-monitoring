@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
@@ -51,6 +52,11 @@ public class DaoTestParent {
     void setupAdminTable() {
         setupDynamoDbClients();
         setupTable(AdminTable.TABLE_NAME, AdminTable.ID_NAME, AdminTable.EMAIL_INDEX_NAME, AdminTable.EMAIL_NAME);
+    }
+
+    void setupCaregiverTable() {
+        setupDynamoDbClients();
+        setupTable(CaregiverTable.TABLE_NAME, CaregiverTable.ID_NAME, CaregiverTable.EMAIL_INDEX_NAME, CaregiverTable.EMAIL_NAME);
     }
 
     private void setupTable(String tableName, String partitionKey, String gsiName, String gsiPartitionKey) {
@@ -99,6 +105,10 @@ public class DaoTestParent {
 
     void teardownAdminTable() {
         teardownTable(AdminTable.TABLE_NAME);
+    }
+
+    void teardownCaregiverTable() {
+        teardownTable(CaregiverTable.TABLE_NAME);
     }
 
     private void teardownTable(String tableName) {

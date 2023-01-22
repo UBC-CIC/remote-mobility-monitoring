@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.dependency.utility;
 
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import org.apache.commons.lang3.Validate;
 
@@ -10,9 +11,13 @@ public class Validator {
     public static final String EMAIL_BLANK_ERROR_MESSAGE = "email must be present";
     public static final String FIRST_NAME_BLANK_ERROR_MESSAGE = "first_name must be present";
     public static final String LAST_NAME_BLANK_ERROR_MESSAGE = "last_name must be present";
+    public static final String TITLE_BLANK_ERROR_MESSAGE = "title must be present";
+    public static final String PHONE_NUMBER_BLANK_ERROR_MESSAGE = "phone_number must be present";
+    public static final String IMAGE_URL_BLANK_ERROR_MESSAGE = "image_url must be present";
     public static final String ORGANIZATION_ID_BLANK_ERROR_MESSAGE = "organization_id must be present";
     public static final String ORGANIZATION_RECORD_NULL_ERROR_MESSAGE = "Organization record must not be null";
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
+    public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
 
     public static void validateId(String id) {
         Validate.notBlank(id, ID_BLANK_ERROR_MESSAGE);
@@ -34,6 +39,18 @@ public class Validator {
         Validate.notBlank(lastName, LAST_NAME_BLANK_ERROR_MESSAGE);
     }
 
+    public static void validateTitle(String title) {
+        Validate.notBlank(title, TITLE_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validatePhoneNumber(String phoneNumber) {
+        Validate.notBlank(phoneNumber, PHONE_NUMBER_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validateImageUrl(String imageUrl) {
+        Validate.notBlank(imageUrl, IMAGE_URL_BLANK_ERROR_MESSAGE);
+    }
+
     public static void validateOrganizationId(String organizationId) {
         Validate.notBlank(organizationId, ORGANIZATION_ID_BLANK_ERROR_MESSAGE);
     }
@@ -49,5 +66,16 @@ public class Validator {
         validateFirstName(admin.getFirstName());
         validateLastName(admin.getLastName());
         validateOrganizationId(admin.getOrganizationId());
+    }
+
+    public static void validateCaregiver(Caregiver caregiver) {
+        Validate.notNull(caregiver, CAREGIVER_RECORD_NULL_ERROR_MESSAGE);
+        validateEmail(caregiver.getEmail());
+        validateFirstName(caregiver.getFirstName());
+        validateLastName(caregiver.getLastName());
+        validateTitle(caregiver.getTitle());
+        validatePhoneNumber(caregiver.getPhoneNumber());
+        validateImageUrl(caregiver.getImageUrl());
+        validateOrganizationId(caregiver.getOrganizationId());
     }
 }

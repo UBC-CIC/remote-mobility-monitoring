@@ -24,4 +24,16 @@ public final class Const {
         public static final String ORGANIZATION_ID_NAME = "organization_id";
         public static final String EMAIL_INDEX_NAME = EMAIL_NAME + "-gsi";
     }
+
+    public static class CaregiverTable extends BaseTable {
+        public static final String TABLE_NAME = "caregiver";
+        public static final String EMAIL_NAME = "email";
+        public static final String FIRST_NAME_NAME = "first_name";
+        public static final String LAST_NAME_NAME = "last_name";
+        public static final String TITLE_NAME = "title";
+        public static final String PHONE_NUMBER_NAME = "phone_number";
+        public static final String IMAGE_URL_NAME = "image_url";
+        public static final String ORGANIZATION_ID_NAME = "organization_id";
+        public static final String EMAIL_INDEX_NAME = EMAIL_NAME + "-gsi";
+    }
 }
