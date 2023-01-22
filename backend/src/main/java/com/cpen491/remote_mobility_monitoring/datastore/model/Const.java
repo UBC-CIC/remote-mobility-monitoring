@@ -22,5 +22,6 @@ public final class Const {
         public static final String FIRST_NAME_NAME = "first_name";
         public static final String LAST_NAME_NAME = "last_name";
         public static final String ORGANIZATION_ID_NAME = "organization_id";
+        public static final String EMAIL_INDEX_NAME = EMAIL_NAME + "-gsi";
     }
 }

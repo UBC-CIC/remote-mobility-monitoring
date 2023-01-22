@@ -1,17 +1,13 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
-
-import java.time.LocalDateTime;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 
@@ -19,13 +15,16 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Admin
 @AllArgsConstructor
 public class AdminDao {
     @NonNull
-    DynamoDbTable<Admin> table;
+    GenericDao<Admin> genericDao;
+    @NonNull
+    OrganizationDao organizationDao;
 
     /**
-     * Creates a new Admin record. Record with the same email must not already exist.
+     * Creates a new Admin record. Record with the given email must not already exist.
      *
      * @param newRecord The Admin record to create
-     * @throws DuplicateRecordException If record with the same email already exists
+     * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
+     * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of email, firstName, lastName, or organizationId are empty
      */
@@ -33,26 +32,34 @@ public class AdminDao {
         log.info("Creating new Admin record {}", newRecord);
         Validator.validateAdmin(newRecord);
 
-        // TODO: ensure that organization actually exists, and write tests for it
+        if (organizationDao.findById(newRecord.getOrganizationId()) == null) {
+            throw new RecordDoesNotExistException(Organization.class.getSimpleName(), newRecord.getOrganizationId());
+        }
 
-        String currentTime = LocalDateTime.now().toString();
-        newRecord.setCreatedAt(currentTime);
-        newRecord.setUpdatedAt(currentTime);
-
-        Expression expression = Expression.builder()
-                .expression(String.format("attribute_not_exists(%s)", AdminTable.EMAIL_NAME))
-                .build();
-
-        PutItemEnhancedRequest<Admin> request = PutItemEnhancedRequest.builder(Admin.class)
-                .conditionExpression(expression)
-                .item(newRecord)
-                .build();
-
-        try {
-            table.putItem(request);
-        } catch (ConditionalCheckFailedException e) {
+        if (findByEmail(newRecord.getEmail()) != null) {
             throw new DuplicateRecordException(Admin.class.getSimpleName(), newRecord.getEmail());
         }
+
+        genericDao.create(newRecord);
+    }
+
+    /**
+     * Finds an Admin record by id. Returns null if record does not exist.
+     *
+     * @param id The id of the record to find
+     * @return {@link Admin}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     */
+    public Admin findById(String id) {
+        log.info("Finding Admin record with id [{}]", id);
+        Validator.validateId(id);
+
+        Admin found = genericDao.findByPartitionKey(id);
+        if (found == null) {
+            log.info("Cannot find Admin record with id [{}]", id);
+        }
+        return found;
     }
 
     /**
@@ -63,31 +70,45 @@ public class AdminDao {
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if email is empty
      */
-    public Admin find(String email) {
+    public Admin findByEmail(String email) {
         log.info("Finding Admin record with email [{}]", email);
         Validator.validateEmail(email);
 
-        Admin toFind = Admin.builder().email(email).build();
-        Admin found = table.getItem(toFind);
+        Admin found = genericDao.findOneByIndexPartitionKey(AdminTable.EMAIL_INDEX_NAME, email);
         if (found == null) {
             log.info("Cannot find Admin record with email [{}]", email);
         }
-
         return found;
     }
 
     /**
-     * Deletes an Admin record by email. Does nothing if record does not exist.
+     * Updates an Admin record. Record with given id must already exist.
      *
-     * @param email The email of the record to delete
+     * @param updatedRecord The Admin record to update
+     * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if email is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if any of id, email,
+     *                              firstName, lastName, or organizationId are empty
      */
-    public void delete(String email) {
-        log.info("Deleting Admin record with email [{}]", email);
-        Validator.validateEmail(email);
+    public void update(Admin updatedRecord) {
+        log.info("Updating Admin record {}", updatedRecord);
+        Validator.validateAdmin(updatedRecord);
+        Validator.validateId(updatedRecord.getId());
 
-        Admin toDelete = Admin.builder().email(email).build();
-        table.deleteItem(toDelete);
+        genericDao.update(updatedRecord, Admin.class);
+    }
+
+    /**
+     * Deletes an Admin record by id. Does nothing if record does not exist.
+     *
+     * @param id The id of the record to delete
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     */
+    public void delete(String id) {
+        log.info("Deleting Admin record with id [{}]", id);
+        Validator.validateId(id);
+
+        genericDao.delete(id);
     }
 }

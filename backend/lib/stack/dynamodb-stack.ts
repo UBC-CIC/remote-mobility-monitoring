@@ -7,6 +7,8 @@ export class DynamoDbStack extends cdk.Stack {
   public static CAREGIVER_TABLE_NAME = 'caregiver';
 
   public static ORGANIZATION_TABLE_NAME_GSI_NAME = 'name-gsi';
+  public static ADMIN_TABLE_EMAIL_GSI_NAME = 'email-gsi';
+  public static CAREGIVER_TABLE_EMAIL_GSI_NAME = 'email-gsi';
 
   public readonly organizationTable: dynamodb.Table;
   public readonly adminTable: dynamodb.Table;
@@ -31,19 +33,23 @@ export class DynamoDbStack extends cdk.Stack {
   }
 
   private createAdminTable(): dynamodb.Table {
-    return new dynamodb.Table(
+    const table = new dynamodb.Table(
       this,
       DynamoDbStack.ADMIN_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.ADMIN_TABLE_NAME, 'email')
+      DynamoDbStack.createTableProps(DynamoDbStack.ADMIN_TABLE_NAME, 'id')
     );
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_TABLE_EMAIL_GSI_NAME, 'email'));
+    return table;
   }
 
   private createCaregiverTable(): dynamodb.Table {
-    return new dynamodb.Table(
+    const table = new dynamodb.Table(
       this,
       DynamoDbStack.CAREGIVER_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.CAREGIVER_TABLE_NAME, 'email')
+      DynamoDbStack.createTableProps(DynamoDbStack.CAREGIVER_TABLE_NAME, 'id')
     );
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_EMAIL_GSI_NAME, 'email'));
+    return table;
   }
 
   private static createTableProps(tableName: string, partitionKey: string): dynamodb.TableProps {

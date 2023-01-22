@@ -2,18 +2,19 @@ package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
-import com.cpen491.remote_mobility_monitoring.datastore.model.Const;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
+
 @Slf4j
 @AllArgsConstructor
 public class OrganizationDao {
     @NonNull
-    GenericDao<Organization> dao;
+    GenericDao<Organization> genericDao;
 
     /**
      * Creates a new Organization record. Record with the given name must not already exist.
@@ -31,7 +32,7 @@ public class OrganizationDao {
             throw new DuplicateRecordException(Organization.class.getSimpleName(), newRecord.getName());
         }
 
-        dao.create(newRecord);
+        genericDao.create(newRecord);
     }
 
     /**
@@ -46,7 +47,7 @@ public class OrganizationDao {
         log.info("Finding Organization record with id [{}]", id);
         Validator.validateId(id);
 
-        Organization found = dao.findByPartitionKey(id);
+        Organization found = genericDao.findByPartitionKey(id);
         if (found == null) {
             log.info("Cannot find Organization record with id [{}]", id);
         }
@@ -65,7 +66,7 @@ public class OrganizationDao {
         log.info("Finding Organization record with name [{}]", name);
         Validator.validateName(name);
 
-        Organization found = dao.findOneByIndexPartitionKey(Const.OrganizationTable.NAME_INDEX_NAME, name);
+        Organization found = genericDao.findOneByIndexPartitionKey(OrganizationTable.NAME_INDEX_NAME, name);
         if (found == null) {
             log.info("Cannot find Organization record with name [{}]", name);
         }
@@ -73,10 +74,10 @@ public class OrganizationDao {
     }
 
     /**
-     * Updates an Organization record. Record with given ID must already exist.
+     * Updates an Organization record. Record with given id must already exist.
      *
      * @param updatedRecord The Organization record to update
-     * @throws RecordDoesNotExistException If record with the given ID does not exist
+     * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if id or name are empty
      */
@@ -85,7 +86,7 @@ public class OrganizationDao {
         Validator.validateOrganization(updatedRecord);
         Validator.validateId(updatedRecord.getId());
 
-        dao.update(updatedRecord, Organization.class);
+        genericDao.update(updatedRecord, Organization.class);
     }
 
     /**
@@ -99,7 +100,7 @@ public class OrganizationDao {
         log.info("Deleting Organization record with id [{}]", id);
         Validator.validateId(id);
 
-        dao.delete(id);
+        genericDao.delete(id);
 
         // TODO: delete all admins, caregivers, and patients
     }

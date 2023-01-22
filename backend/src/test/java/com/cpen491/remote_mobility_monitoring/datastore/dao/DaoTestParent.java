@@ -50,27 +50,7 @@ public class DaoTestParent {
 
     void setupAdminTable() {
         setupDynamoDbClients();
-
-        CreateTableRequest request = CreateTableRequest.builder()
-                .attributeDefinitions(AttributeDefinition.builder()
-                        .attributeName(AdminTable.EMAIL_NAME)
-                        .attributeType(ScalarAttributeType.S)
-                        .build())
-                .keySchema(KeySchemaElement.builder()
-                        .attributeName(AdminTable.EMAIL_NAME)
-                        .keyType(KeyType.HASH)
-                        .build())
-                .billingMode(BillingMode.PAY_PER_REQUEST)
-                .tableName(AdminTable.TABLE_NAME)
-                .build();
-        ddbClient.createTable(request);
-
-        // Wait until table is created
-        DescribeTableRequest tableRequest = DescribeTableRequest.builder()
-                .tableName(AdminTable.TABLE_NAME)
-                .build();
-        DynamoDbWaiter ddbWaiter = ddbClient.waiter();
-        ddbWaiter.waitUntilTableExists(tableRequest);
+        setupTable(AdminTable.TABLE_NAME, AdminTable.ID_NAME, AdminTable.EMAIL_INDEX_NAME, AdminTable.EMAIL_NAME);
     }
 
     private void setupTable(String tableName, String partitionKey, String gsiName, String gsiPartitionKey) {

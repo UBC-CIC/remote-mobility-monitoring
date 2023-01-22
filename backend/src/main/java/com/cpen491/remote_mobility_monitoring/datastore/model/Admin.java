@@ -1,29 +1,38 @@
 package com.cpen491.remote_mobility_monitoring.datastore.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 
 @DynamoDbBean
-@Data
-@Builder
+@Setter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Admin {
+public class Admin extends BaseModel {
     private String email;
     private String firstName;
     private String lastName;
     private String organizationId;
-    private String createdAt;
-    private String updatedAt;
 
     @DynamoDbPartitionKey
+    @DynamoDbAttribute(AdminTable.ID_NAME)
+    public String getId() {
+        return id;
+    }
+
+    @DynamoDbSecondaryPartitionKey(indexNames = {AdminTable.EMAIL_INDEX_NAME})
     @DynamoDbAttribute(AdminTable.EMAIL_NAME)
     public String getEmail() {
         return email;
