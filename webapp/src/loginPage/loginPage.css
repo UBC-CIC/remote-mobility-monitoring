@@ -1,0 +1,17 @@
+p, div {
+    font-family: Lato;
+  }
+
+.wrapper {
+    border: 3px solid #fff;
+    padding: 20px;
+}
+
+.login {
+    width: 47%;
+    float: left;
+    padding: 20px;
+    text-align: center;
+}
+
+
