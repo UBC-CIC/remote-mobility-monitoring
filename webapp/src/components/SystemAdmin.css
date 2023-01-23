@@ -1,0 +1,96 @@
+p, div {
+    font-family: Lato;
+  }
+    
+  .wrapper {
+    height: 97vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(255, 255, 255);
+  }
+  
+  .form-wrapper {
+    margin-right: -40%;
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    max-width: 80%;
+    min-width: 100px;
+    min-height: 400px;
+    padding: 20px 40px;
+    border-radius: 6px;
+    box-shadow: 0px 8px 36px #222;
+    background-color: #fefefe;
+  }
+  
+  .form-wrapper > h2 {
+    display: flex;
+    justify-content: center;
+    font-family: "Segoe UI", "Ubuntu", "Roboto", "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 0.25em;
+    color: #222;
+  }
+  
+  form {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }  
+  
+  label {
+    margin-bottom: 0.5em;
+    color: #444;
+    font-weight: lighter;
+  }
+  
+  input {
+    padding: 10px 10px;
+    border-radius: 5px;
+    outline: none;
+    border:#f0efff;
+    background-color: #f0efff;
+  }
+  
+  input::placeholder {
+    font-size: 0.7em;
+    font-weight: lighter;
+    color: #A7A3FF;
+  }
+  
+  button {
+    min-width: 100%;
+    cursor: pointer;
+    margin-right: 0.25em;
+    margin-top: 0.5em;
+    padding:  0.938em;
+    border: none;
+    border-radius: 4px;
+    background-color: #4D47C3;
+    color: #FFFFFF;
+  }
+  button:hover {
+    background-color: rgb(166, 214, 24);
+    color: #FFFFFF;
+  }
+   
+  .username,
+  .email,
+  .contact_number,
+  .Confirm_Password,
+  .password {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    width: 100%;
+  }
+   
+  .submit {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
