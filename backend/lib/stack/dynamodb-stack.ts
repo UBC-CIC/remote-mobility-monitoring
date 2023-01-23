@@ -62,9 +62,9 @@ export class DynamoDbStack extends cdk.Stack {
 
   private createPatientTable(): dynamodb.Table {
     const table = new dynamodb.Table(
-        this,
-        DynamoDbStack.PATIENT_TABLE_NAME,
-        DynamoDbStack.createTableProps(DynamoDbStack.PATIENT_TABLE_NAME, 'id')
+      this,
+      DynamoDbStack.PATIENT_TABLE_NAME,
+      DynamoDbStack.createTableProps(DynamoDbStack.PATIENT_TABLE_NAME, 'id')
     );
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.PATIENT_TABLE_DEVICE_ID_GSI_NAME, 'device_id'));
     return table;

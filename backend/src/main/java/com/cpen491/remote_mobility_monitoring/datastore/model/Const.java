@@ -69,6 +69,7 @@ public final class Const {
         public static final String AUTH_CODE_NAME = "auth_code";
         public static final String AUTH_CODE_TIMESTAMP_NAME = "auth_code_timestamp";
         public static final String VERIFIED_NAME = "verified";
+        public static final String CAREGIVER_IDS_NAME = "caregiver_ids";
         public static final String DEVICE_ID_INDEX_NAME = DEVICE_ID_NAME + INDEX_NAME_SUFFIX;
         public static final List<Pair<String, String>> INDEX_NAMES_AND_KEYS = Arrays.asList(
                 new ImmutablePair<>(DEVICE_ID_INDEX_NAME, DEVICE_ID_NAME)

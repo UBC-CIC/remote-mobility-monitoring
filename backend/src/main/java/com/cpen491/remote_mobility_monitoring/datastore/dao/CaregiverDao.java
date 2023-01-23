@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
@@ -98,6 +100,20 @@ public class CaregiverDao {
         Validator.validateOrganizationId(organizationId);
 
         return genericDao.findAllByIndexPartitionKey(CaregiverTable.ORGANIZATION_ID_INDEX_NAME, organizationId);
+    }
+
+    /**
+     * Batch finds all Caregiver records by IDs.
+     *
+     * @param ids Set of IDs of the records to find
+     * @return {@link List}
+     * @throws NullPointerException If ids is null
+     */
+    public List<Caregiver> batchFindById(Set<String> ids) {
+        log.info("Batch finding caregiver records matching IDs {}", ids);
+        Validator.validateIds(ids);
+
+        return genericDao.batchFindByPartitionKey(ids, Caregiver.class);
     }
 
     /**

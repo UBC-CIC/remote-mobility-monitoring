@@ -29,6 +29,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Organ
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_RECORD_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IDS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IMAGE_URL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
@@ -234,6 +235,31 @@ public class CaregiverDaoTest extends DaoTestParent {
     @NullAndEmptySource
     public void testFindAllInOrganization_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String organizationId) {
         assertInvalidInputExceptionThrown(() -> cut.findAllInOrganization(organizationId), ORGANIZATION_ID_BLANK_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void testBatchFindById_HappyCase() {
+        Caregiver newRecord1 = buildCaregiver();
+        cut.create(newRecord1);
+        Caregiver newRecord2 = buildCaregiver();
+        newRecord2.setEmail(EMAIL2);
+        cut.create(newRecord2);
+
+        Set<String> ids = Set.of(newRecord1.getId(), newRecord2.getId());
+        List<Caregiver> results = cut.batchFindById(ids);
+        assertThat(results).containsExactlyInAnyOrder(newRecord1, newRecord2);
+    }
+
+    @Test
+    public void testBatchFindById_WHEN_RecordsDoNotExist_THEN_ReturnEmptyList() {
+        Set<String> ids = Set.of(ID);
+        List<Caregiver> results = cut.batchFindById(ids);
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    public void testBatchFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException() {
+        assertInvalidInputExceptionThrown(() -> cut.batchFindById(null), IDS_NULL_ERROR_MESSAGE);
     }
 
     @Test

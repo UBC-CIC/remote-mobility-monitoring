@@ -47,6 +47,8 @@ public class PatientDaoTest extends DaoTestParent {
     private static final String LAST_NAME = "Jackson";
     private static final String DATE_OF_BIRTH = "2000-12-31";
     private static final String PHONE_NUMBER = "1234567890";
+    private static final String CAREGIVER_ID1 = "caregiver-id-1";
+    private static final String CAREGIVER_ID2 = "caregiver-id-2";
 
     DynamoDbTable<Patient> table;
     PatientDao cut;
@@ -72,6 +74,8 @@ public class PatientDaoTest extends DaoTestParent {
     @Test
     public void testCreate_HappyCase() {
         Patient newRecord = buildPatient();
+        Set<String> caregiverIds = Set.of(CAREGIVER_ID1, CAREGIVER_ID2);
+        newRecord.setCaregiverIds(caregiverIds);
         cut.create(newRecord);
 
         assertNotEquals(ID, newRecord.getId());
@@ -83,6 +87,7 @@ public class PatientDaoTest extends DaoTestParent {
         assertNotNull(newRecord.getAuthCode());
         assertNotNull(newRecord.getAuthCodeTimestamp());
         assertFalse(newRecord.getVerified());
+        assertEquals(caregiverIds, newRecord.getCaregiverIds());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
     }

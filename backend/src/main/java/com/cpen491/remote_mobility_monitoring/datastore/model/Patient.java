@@ -11,6 +11,8 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
+import java.util.Set;
+
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 
 @DynamoDbBean
@@ -29,6 +31,7 @@ public class Patient extends BaseModel {
     private String authCode;
     private String authCodeTimestamp;
     private Boolean verified;
+    private Set<String> caregiverIds;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute(PatientTable.ID_NAME)
@@ -75,6 +78,11 @@ public class Patient extends BaseModel {
     @DynamoDbAttribute(PatientTable.VERIFIED_NAME)
     public Boolean getVerified() {
         return verified;
+    }
+
+    @DynamoDbAttribute(PatientTable.CAREGIVER_IDS_NAME)
+    public Set<String> getCaregiverIds() {
+        return caregiverIds;
     }
 
     @DynamoDbAttribute(PatientTable.CREATED_AT_NAME)
