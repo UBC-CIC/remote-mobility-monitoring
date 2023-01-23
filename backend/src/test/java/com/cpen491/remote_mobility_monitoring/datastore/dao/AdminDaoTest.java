@@ -62,7 +62,7 @@ class AdminDaoTest extends DaoTestParent {
         organizationTable = ddbEnhancedClient.table(OrganizationTable.TABLE_NAME, TableSchema.fromBean(Organization.class));
         Map<String, DynamoDbIndex<Organization>> organizationIndexMap = new HashMap<>();
         organizationIndexMap.put(OrganizationTable.NAME_INDEX_NAME, organizationTable.index(OrganizationTable.NAME_INDEX_NAME));
-        OrganizationDao organizationDao = new OrganizationDao(new GenericDao<>(organizationTable, organizationIndexMap));
+        OrganizationDao organizationDao = new OrganizationDao(new GenericDao<>(organizationTable, organizationIndexMap, ddbEnhancedClient));
 
         table = ddbEnhancedClient.table(AdminTable.TABLE_NAME, TableSchema.fromBean(Admin.class));
         Map<String, DynamoDbIndex<Admin>> adminIndexMap = new HashMap<>();
@@ -70,7 +70,7 @@ class AdminDaoTest extends DaoTestParent {
             String indexName = indexNameAndKey.getLeft();
             adminIndexMap.put(indexName, table.index(indexName));
         }
-        cut = new AdminDao(new GenericDao<>(table, adminIndexMap), organizationDao);
+        cut = new AdminDao(new GenericDao<>(table, adminIndexMap, ddbEnhancedClient), organizationDao);
 
         Organization organization = Organization.builder().id(EXISTS_ORGANIZATION_ID).build();
         organizationTable.putItem(organization);

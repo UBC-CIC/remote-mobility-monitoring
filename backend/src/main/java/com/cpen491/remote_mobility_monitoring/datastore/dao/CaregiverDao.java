@@ -14,7 +14,6 @@ import java.util.Iterator;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
-// TODO: figure out how to do many-to-many with patients
 @Slf4j
 @AllArgsConstructor
 public class CaregiverDao {

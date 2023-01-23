@@ -5,16 +5,19 @@ export class DynamoDbStack extends cdk.Stack {
   public static ORGANIZATION_TABLE_NAME = 'organization';
   public static ADMIN_TABLE_NAME = 'admin';
   public static CAREGIVER_TABLE_NAME = 'caregiver';
+  public static PATIENT_TABLE_NAME = 'patient';
 
   public static ORGANIZATION_TABLE_NAME_GSI_NAME = 'name-gsi';
   public static ADMIN_TABLE_EMAIL_GSI_NAME = 'email-gsi';
   public static ADMIN_TABLE_ORGANIZATION_ID_GSI_NAME = 'organization_id-gsi';
   public static CAREGIVER_TABLE_EMAIL_GSI_NAME = 'email-gsi';
   public static CAREGIVER_TABLE_ORGANIZATION_ID_GSI_NAME = 'organization_id-gsi';
+  public static PATIENT_TABLE_DEVICE_ID_GSI_NAME = 'device_id-gsi';
 
   public readonly organizationTable: dynamodb.Table;
   public readonly adminTable: dynamodb.Table;
   public readonly caregiverTable: dynamodb.Table;
+  public readonly patientTable: dynamodb.Table;
 
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -22,6 +25,7 @@ export class DynamoDbStack extends cdk.Stack {
     this.organizationTable = this.createOrganizationTable();
     this.adminTable = this.createAdminTable();
     this.caregiverTable = this.createCaregiverTable();
+    this.patientTable = this.createPatientTable();
   }
 
   private createOrganizationTable(): dynamodb.Table {
@@ -53,6 +57,16 @@ export class DynamoDbStack extends cdk.Stack {
     );
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_EMAIL_GSI_NAME, 'email'));
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_ORGANIZATION_ID_GSI_NAME, 'organization_id'));
+    return table;
+  }
+
+  private createPatientTable(): dynamodb.Table {
+    const table = new dynamodb.Table(
+        this,
+        DynamoDbStack.PATIENT_TABLE_NAME,
+        DynamoDbStack.createTableProps(DynamoDbStack.PATIENT_TABLE_NAME, 'id')
+    );
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.PATIENT_TABLE_DEVICE_ID_GSI_NAME, 'device_id'));
     return table;
   }
 

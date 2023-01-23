@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
@@ -55,6 +56,8 @@ public class CaregiverDaoTest extends DaoTestParent {
     private static final String IMAGE_URL = "image.png";
     private static final String EXISTS_ORGANIZATION_ID = "org-id-abc";
     private static final String NOT_EXISTS_ORGANIZATION_ID = "org-id-not";
+    private static final String PATIENT_ID1 = "patient-id-1";
+    private static final String PATIENT_ID2 = "patient-id-2";
 
     DynamoDbTable<Organization> organizationTable;
     DynamoDbTable<Caregiver> table;
@@ -68,7 +71,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         organizationTable = ddbEnhancedClient.table(OrganizationTable.TABLE_NAME, TableSchema.fromBean(Organization.class));
         Map<String, DynamoDbIndex<Organization>> organizationIndexMap = new HashMap<>();
         organizationIndexMap.put(OrganizationTable.NAME_INDEX_NAME, organizationTable.index(OrganizationTable.NAME_INDEX_NAME));
-        OrganizationDao organizationDao = new OrganizationDao(new GenericDao<>(organizationTable, organizationIndexMap));
+        OrganizationDao organizationDao = new OrganizationDao(new GenericDao<>(organizationTable, organizationIndexMap, ddbEnhancedClient));
 
         table = ddbEnhancedClient.table(CaregiverTable.TABLE_NAME, TableSchema.fromBean(Caregiver.class));
         Map<String, DynamoDbIndex<Caregiver>> caregiverIndexMap = new HashMap<>();
@@ -76,7 +79,7 @@ public class CaregiverDaoTest extends DaoTestParent {
             String indexName = indexNameAndKey.getLeft();
             caregiverIndexMap.put(indexName, table.index(indexName));
         }
-        cut = new CaregiverDao(new GenericDao<>(table, caregiverIndexMap), organizationDao);
+        cut = new CaregiverDao(new GenericDao<>(table, caregiverIndexMap, ddbEnhancedClient), organizationDao);
 
         Organization organization = Organization.builder().id(EXISTS_ORGANIZATION_ID).build();
         organizationTable.putItem(organization);
@@ -91,6 +94,8 @@ public class CaregiverDaoTest extends DaoTestParent {
     @Test
     public void testCreate_HappyCase() {
         Caregiver newRecord = buildCaregiver();
+        Set<String> patientIds = Set.of(PATIENT_ID1, PATIENT_ID2);
+        newRecord.setPatientIds(patientIds);
         cut.create(newRecord);
 
         assertNotEquals(ID, newRecord.getId());
@@ -101,6 +106,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         assertEquals(PHONE_NUMBER, newRecord.getPhoneNumber());
         assertEquals(IMAGE_URL, newRecord.getImageUrl());
         assertEquals(EXISTS_ORGANIZATION_ID, newRecord.getOrganizationId());
+        assertEquals(patientIds, newRecord.getPatientIds());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
     }

@@ -11,6 +11,8 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
+import java.util.Set;
+
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
 @DynamoDbBean
@@ -28,6 +30,7 @@ public class Caregiver extends BaseModel {
     private String phoneNumber;
     private String imageUrl;
     private String organizationId;
+    private Set<String> patientIds;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute(CaregiverTable.ID_NAME)
@@ -70,6 +73,11 @@ public class Caregiver extends BaseModel {
     @DynamoDbAttribute(CaregiverTable.ORGANIZATION_ID_NAME)
     public String getOrganizationId() {
         return organizationId;
+    }
+
+    @DynamoDbAttribute(CaregiverTable.PATIENT_IDS_NAME)
+    public Set<String> getPatientIds() {
+        return patientIds;
     }
 
     @DynamoDbAttribute(CaregiverTable.CREATED_AT_NAME)

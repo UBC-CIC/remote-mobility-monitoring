@@ -3,7 +3,10 @@ package com.cpen491.remote_mobility_monitoring.dependency.utility;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import org.apache.commons.lang3.Validate;
+
+import java.util.Set;
 
 public class Validator {
     public static final String ID_BLANK_ERROR_MESSAGE = "id must be present";
@@ -15,9 +18,13 @@ public class Validator {
     public static final String PHONE_NUMBER_BLANK_ERROR_MESSAGE = "phone_number must be present";
     public static final String IMAGE_URL_BLANK_ERROR_MESSAGE = "image_url must be present";
     public static final String ORGANIZATION_ID_BLANK_ERROR_MESSAGE = "organization_id must be present";
+    public static final String DEVICE_ID_BLANK_ERROR_MESSAGE = "device_id must be present";
+    public static final String DATE_OF_BIRTH_BLANK_ERROR_MESSAGE = "date_of_birth must be present";
+    public static final String IDS_NULL_ERROR_MESSAGE = "IDs must not be null";
     public static final String ORGANIZATION_RECORD_NULL_ERROR_MESSAGE = "Organization record must not be null";
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
     public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
+    public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
 
     public static void validateId(String id) {
         Validate.notBlank(id, ID_BLANK_ERROR_MESSAGE);
@@ -55,6 +62,18 @@ public class Validator {
         Validate.notBlank(organizationId, ORGANIZATION_ID_BLANK_ERROR_MESSAGE);
     }
 
+    public static void validateDeviceId(String deviceId) {
+        Validate.notBlank(deviceId, DEVICE_ID_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validateDateOfBirth(String dateOfBirth) {
+        Validate.notBlank(dateOfBirth, DATE_OF_BIRTH_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validateIds(Set<String> ids) {
+        Validate.notNull(ids, IDS_NULL_ERROR_MESSAGE);
+    }
+
     public static void validateOrganization(Organization organization) {
         Validate.notNull(organization, ORGANIZATION_RECORD_NULL_ERROR_MESSAGE);
         validateName(organization.getName());
@@ -77,5 +96,14 @@ public class Validator {
         validatePhoneNumber(caregiver.getPhoneNumber());
         validateImageUrl(caregiver.getImageUrl());
         validateOrganizationId(caregiver.getOrganizationId());
+    }
+
+    public static void validatePatient(Patient patient) {
+        Validate.notNull(patient, PATIENT_RECORD_NULL_ERROR_MESSAGE);
+        validateDeviceId(patient.getDeviceId());
+        validateFirstName(patient.getFirstName());
+        validateLastName(patient.getLastName());
+        validateDateOfBirth(patient.getDateOfBirth());
+        validatePhoneNumber(patient.getPhoneNumber());
     }
 }

@@ -4,22 +4,29 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotE
 import com.cpen491.remote_mobility_monitoring.datastore.model.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetResultPageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
 import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
 
@@ -30,10 +37,11 @@ public class GenericDao<T extends BaseModel> {
     @NonNull
     DynamoDbTable<T> table;
     Map<String, DynamoDbIndex<T>> indexMap;
+    DynamoDbEnhancedClient enhancedClient;
 
     public void create(T newRecord) {
         newRecord.setId(UUID.randomUUID().toString());
-        String currentTime = LocalDateTime.now().toString();
+        String currentTime = LocalDateTime.now(ZoneOffset.UTC).toString();
         newRecord.setCreatedAt(currentTime);
         newRecord.setUpdatedAt(currentTime);
 
@@ -69,6 +77,20 @@ public class GenericDao<T extends BaseModel> {
                 .queryConditional(queryConditional)
                 .limit(INDEX_LIMIT)
                 .build()).iterator();
+    }
+
+    public List<T> batchFindByPartitionKey(Set<String> partitionKeys, Class<T> itemClass) {
+        ReadBatch.Builder<T> readBatchBuilder = ReadBatch.builder(itemClass).mappedTableResource(table);
+        for (String partitionKey : partitionKeys) {
+            Key key = Key.builder().partitionValue(partitionKey).build();
+            readBatchBuilder.addGetItem(key);
+        }
+
+        BatchGetItemEnhancedRequest request = BatchGetItemEnhancedRequest.builder()
+                .addReadBatch(readBatchBuilder.build())
+                .build();
+        BatchGetResultPageIterable results = enhancedClient.batchGetItem(request);
+        return results.resultsForTable(table).stream().collect(Collectors.toList());
     }
 
     public void update(T updatedRecord, Class<T> itemClass) {

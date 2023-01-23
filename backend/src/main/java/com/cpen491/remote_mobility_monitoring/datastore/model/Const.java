@@ -50,11 +50,28 @@ public final class Const {
         public static final String PHONE_NUMBER_NAME = "phone_number";
         public static final String IMAGE_URL_NAME = "image_url";
         public static final String ORGANIZATION_ID_NAME = "organization_id";
+        public static final String PATIENT_IDS_NAME = "patient_ids";
         public static final String EMAIL_INDEX_NAME = EMAIL_NAME + INDEX_NAME_SUFFIX;
         public static final String ORGANIZATION_ID_INDEX_NAME = ORGANIZATION_ID_NAME + INDEX_NAME_SUFFIX;
         public static final List<Pair<String, String>> INDEX_NAMES_AND_KEYS = Arrays.asList(
                 new ImmutablePair<>(EMAIL_INDEX_NAME, EMAIL_NAME),
                 new ImmutablePair<>(ORGANIZATION_ID_INDEX_NAME, ORGANIZATION_ID_NAME)
+        );
+    }
+
+    public static class PatientTable extends BaseTable {
+        public static final String TABLE_NAME = "patient";
+        public static final String DEVICE_ID_NAME = "device_id";
+        public static final String FIRST_NAME_NAME = "first_name";
+        public static final String LAST_NAME_NAME = "last_name";
+        public static final String DATE_OF_BIRTH_NAME = "date_of_birth";
+        public static final String PHONE_NUMBER_NAME = "phone_number";
+        public static final String AUTH_CODE_NAME = "auth_code";
+        public static final String AUTH_CODE_TIMESTAMP_NAME = "auth_code_timestamp";
+        public static final String VERIFIED_NAME = "verified";
+        public static final String DEVICE_ID_INDEX_NAME = DEVICE_ID_NAME + INDEX_NAME_SUFFIX;
+        public static final List<Pair<String, String>> INDEX_NAMES_AND_KEYS = Arrays.asList(
+                new ImmutablePair<>(DEVICE_ID_INDEX_NAME, DEVICE_ID_NAME)
         );
     }
 }

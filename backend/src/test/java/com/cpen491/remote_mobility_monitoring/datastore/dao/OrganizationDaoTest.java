@@ -3,6 +3,7 @@ package com.cpen491.remote_mobility_monitoring.datastore.dao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,8 +44,11 @@ public class OrganizationDaoTest extends DaoTestParent {
         setupOrganizationTable();
         table = ddbEnhancedClient.table(OrganizationTable.TABLE_NAME, TableSchema.fromBean(Organization.class));
         Map<String, DynamoDbIndex<Organization>> indexMap = new HashMap<>();
-        indexMap.put(OrganizationTable.NAME_INDEX_NAME, table.index(OrganizationTable.NAME_INDEX_NAME));
-        cut = new OrganizationDao(new GenericDao<>(table, indexMap));
+        for (Pair<String, String> indexNameAndKey : OrganizationTable.INDEX_NAMES_AND_KEYS) {
+            String indexName = indexNameAndKey.getLeft();
+            indexMap.put(indexName, table.index(indexName));
+        }
+        cut = new OrganizationDao(new GenericDao<>(table, indexMap, ddbEnhancedClient));
     }
 
     @AfterEach
