@@ -100,7 +100,6 @@ public class Validator {
 
     public static void validatePatient(Patient patient) {
         Validate.notNull(patient, PATIENT_RECORD_NULL_ERROR_MESSAGE);
-        validateDeviceId(patient.getDeviceId());
         validateFirstName(patient.getFirstName());
         validateLastName(patient.getLastName());
         validateDateOfBirth(patient.getDateOfBirth());

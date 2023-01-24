@@ -23,7 +23,7 @@ public class PatientDao {
     GenericDao<Patient> genericDao;
 
     /**
-     * Creates a new Patient record. Record with the given deviceId must not already exist.
+     * Creates a new Patient record. If deviceId is provided, record with the deviceId must not already exist.
      *
      * @param newRecord The Patient record to create
      * @throws DuplicateRecordException If record with the given deviceId already exists
@@ -35,8 +35,9 @@ public class PatientDao {
         log.info("Creating new Patient record {}", newRecord);
         Validator.validatePatient(newRecord);
 
-        if (findByDeviceId(newRecord.getDeviceId()) != null) {
-            throw new DuplicateRecordException(Patient.class.getSimpleName(), newRecord.getDeviceId());
+        String deviceId = newRecord.getDeviceId();
+        if (deviceId != null && findByDeviceId(deviceId) != null) {
+            throw new DuplicateRecordException(Patient.class.getSimpleName(), deviceId);
         }
 
         newRecord.setAuthCode(UUID.randomUUID().toString().replace("-", ""));
@@ -100,8 +101,10 @@ public class PatientDao {
 
     /**
      * Updates a Patient record. Record with given id must already exist.
+     * Record with given deviceId should not already exist unless it is the same record being updated.
      *
      * @param updatedRecord The Patient record to update
+     * @throws DuplicateRecordException If record with the given deviceId already exists
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of id, deviceId, firstName, lastName,
@@ -111,6 +114,12 @@ public class PatientDao {
         log.info("Updating Patient record {}", updatedRecord);
         Validator.validatePatient(updatedRecord);
         Validator.validateId(updatedRecord.getId());
+        Validator.validateDeviceId(updatedRecord.getDeviceId());
+
+        Patient found = findByDeviceId(updatedRecord.getDeviceId());
+        if (found != null && !found.getId().equals(updatedRecord.getId())) {
+            throw new DuplicateRecordException(Patient.class.getSimpleName(), updatedRecord.getDeviceId());
+        }
 
         genericDao.update(updatedRecord, Patient.class);
     }

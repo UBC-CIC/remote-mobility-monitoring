@@ -99,6 +99,14 @@ public class PatientDaoTest extends DaoTestParent {
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
     }
 
+    @Test
+    public void testCreate_WHEN_RecordHasNoDeviceId_THEN_NoThrow() {
+        Patient newRecord = buildPatient();
+        newRecord.setDeviceId(null);
+        cut.create(newRecord);
+        cut.create(newRecord);
+    }
+
     @ParameterizedTest
     @MethodSource("invalidInputsForCreate")
     public void testCreate_WHEN_InvalidInput_THEN_ThrowInvalidInputException(Patient record, String errorMessage) {
@@ -108,8 +116,6 @@ public class PatientDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
                 Arguments.of(null, PATIENT_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildPatient(ID, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(ID, "", FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER), DEVICE_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildPatient(ID, DEVICE_ID1, null, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildPatient(ID, DEVICE_ID1, "", LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildPatient(ID, DEVICE_ID1, FIRST_NAME, null, DATE_OF_BIRTH, PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
@@ -195,14 +201,27 @@ public class PatientDaoTest extends DaoTestParent {
 
         Patient updatedRecord = cut.findById(newRecord.getId());
         assertEquals(newRecord, updatedRecord);
-        updatedRecord.setDeviceId(DEVICE_ID2);
+        updatedRecord.setVerified(true);
         cut.update(updatedRecord);
 
         Patient found = cut.findById(newRecord.getId());
         assertEquals(newRecord.getId(), found.getId());
-        assertNotEquals(newRecord.getDeviceId(), found.getDeviceId());
+        assertNotEquals(newRecord.getVerified(), found.getVerified());
         assertNotEquals(newRecord.getUpdatedAt(), found.getUpdatedAt());
         assertEquals(newRecord.getCreatedAt(), found.getCreatedAt());
+    }
+
+    @Test
+    public void testUpdate_WHEN_RecordWithDeviceIdAlreadyExists_THEN_ThrowDuplicateRecordException() {
+        Patient newRecord1 = buildPatient();
+        cut.create(newRecord1);
+        Patient newRecord2 = buildPatient();
+        newRecord2.setDeviceId(DEVICE_ID2);
+        cut.create(newRecord2);
+
+        Patient updatedRecord = cut.findById(newRecord2.getId());
+        updatedRecord.setDeviceId(DEVICE_ID1);
+        assertThatThrownBy(() -> cut.update(updatedRecord)).isInstanceOf(DuplicateRecordException.class);
     }
 
     @Test
