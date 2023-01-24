@@ -28,7 +28,7 @@ public class PatientDao {
      * @param newRecord The Patient record to create
      * @throws DuplicateRecordException If record with the given deviceId already exists
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of deviceId, firstName, lastName,
+     * @throws NullPointerException Above 2 exceptions are thrown if any of firstName, lastName,
      *                              dateOfBirth, or phoneNumber are empty
      */
     public void create(Patient newRecord) {
@@ -136,7 +136,5 @@ public class PatientDao {
         Validator.validateId(id);
 
         genericDao.delete(id);
-
-        // TODO: remove ID from any caregiver patientIds
     }
 }
