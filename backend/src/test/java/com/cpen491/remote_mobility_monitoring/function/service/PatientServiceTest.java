@@ -2,6 +2,7 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
@@ -169,6 +171,28 @@ class PatientServiceTest {
         assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isSameAs(toThrow);
     }
 
+    @Test
+    public void testVerifyPatient_WHEN_AuthCodesDoNotMatch_THEN_ThrowInvalidAuthCodeException() {
+        when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
+        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
+
+        VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
+        requestBody.setAuthCode(AUTH_CODE + "1");
+        assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isInstanceOf(InvalidAuthCodeException.class);
+    }
+
+    @Test
+    public void testVerifyPatient_WHEN_AuthCodeExpired_THEN_ThrowInvalidAuthCodeException() {
+        Patient patient = buildPatientDefault();
+        String tenMinutesAgo = getCurrentUtcTime().minusMinutes(10).toString();
+        patient.setAuthCodeTimestamp(tenMinutesAgo);
+        when(patientDao.findById(anyString())).thenReturn(patient);
+        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
+
+        VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
+        assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isInstanceOf(InvalidAuthCodeException.class);
+    }
+
     @ParameterizedTest
     @MethodSource("invalidInputsForVerifyPatient")
     public void testVerifyPatient_WHEN_InvalidInput_THEN_ThrowInvalidInputException(VerifyPatientRequestBody body, String errorMessage) {
@@ -223,7 +247,6 @@ class PatientServiceTest {
         patient.setAuthCodeTimestamp(getCurrentUtcTimeString());
         return patient;
     }
-
 
     private static Caregiver buildCaregiverDefault() {
         Caregiver caregiver = buildCaregiver(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, ORGANIZATION_ID);
