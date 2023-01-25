@@ -5,31 +5,19 @@
 //  Created by Hachi on 2023-01-09.
 //
 import SwiftUI
-import AVFoundation
 
 struct RegisterView: View {
-    // Variable to hold the scanned QR code data
-    @State var scannedQRCode: String = ""
-    @State private var captureSession: AVCaptureSession?
-    @State private var metadataOutput: AVCaptureMetadataOutput?
-
     var body: some View {
         VStack(spacing: 16) {
             Text("Register")
                 .font(.largeTitle)
-
-            // Other UI elements, such as fields for the user's name and email address, go here.
-
             Spacer()
-            
             GeometryReader { geometry in
                 HStack {
                     Spacer()
                     VStack {
                         Spacer()
                         Button(action: {
-                            // Start scanning for QR code
-                            self.startScanning()
                         }) {
                             Text("Scan QR Code")
                                 .font(.headline)
@@ -44,11 +32,9 @@ struct RegisterView: View {
                     Spacer()
                 }
             }
-
             Spacer()
-            
             Button(action: {
-                // Action for submitting the form goes here.
+                // Action for submitting after scanning QR code
             }) {
                 Text("Submit")
                     .font(.headline)
@@ -63,7 +49,7 @@ struct RegisterView: View {
     }
 }
 
-struct ContentView_Previews2: PreviewProvider {
+struct RegisterView_Previews: PreviewProvider {
     static var previews: some View {
         RegisterView()
     }

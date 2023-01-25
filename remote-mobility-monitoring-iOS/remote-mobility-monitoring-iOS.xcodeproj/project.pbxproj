@@ -7,17 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		227547B92980BD5100D12030 /* MobilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227547B82980BD5100D12030 /* MobilityView.swift */; };
 		228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */; };
-		228B49C6296CB64C0046DFD4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49C5296CB64C0046DFD4 /* ContentView.swift */; };
 		228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49C7296CB6510046DFD4 /* Assets.xcassets */; };
 		228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */; };
 		228B49D2296CB79A0046DFD4 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49D1296CB79A0046DFD4 /* RegisterView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		227547B82980BD5100D12030 /* MobilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilityView.swift; sourceTree = "<group>"; };
 		228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "remote-mobility-monitoring-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remote_mobility_monitoring_iOSApp.swift; sourceTree = "<group>"; };
-		228B49C5296CB64C0046DFD4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		228B49C7296CB6510046DFD4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		228B49D1296CB79A0046DFD4 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
@@ -54,7 +54,7 @@
 			isa = PBXGroup;
 			children = (
 				228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */,
-				228B49C5296CB64C0046DFD4 /* ContentView.swift */,
+				227547B82980BD5100D12030 /* MobilityView.swift */,
 				228B49D1296CB79A0046DFD4 /* RegisterView.swift */,
 				228B49C7296CB6510046DFD4 /* Assets.xcassets */,
 				228B49C9296CB6510046DFD4 /* Preview Content */,
@@ -141,7 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				228B49D2296CB79A0046DFD4 /* RegisterView.swift in Sources */,
-				228B49C6296CB64C0046DFD4 /* ContentView.swift in Sources */,
+				227547B92980BD5100D12030 /* MobilityView.swift in Sources */,
 				228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -11,7 +11,8 @@ import SwiftUI
 struct remote_mobility_monitoring_iOSApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MobilityView()
+            RegisterView()
         }
     }
 }
