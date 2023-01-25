@@ -1,4 +1,4 @@
-package com.cpen491.remote_mobility_monitoring.function.schema;
+package com.cpen491.remote_mobility_monitoring.function.schema.patient;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

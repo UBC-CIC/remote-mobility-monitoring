@@ -4,8 +4,9 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
-import com.cpen491.remote_mobility_monitoring.function.schema.CreatePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Set;
@@ -30,6 +31,7 @@ public class Validator {
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
     public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
+    public static final String CREATE_CAREGIVER_NULL_ERROR_MESSAGE = "Create caregiver request body must not be null";
     public static final String CREATE_PATIENT_NULL_ERROR_MESSAGE = "Create patient request body must not be null";
     public static final String VERIFY_PATIENT_NULL_ERROR_MESSAGE = "Verify patient request body must not be null";
 
@@ -123,6 +125,16 @@ public class Validator {
         validateLastName(patient.getLastName());
         validateDateOfBirth(patient.getDateOfBirth());
         validatePhoneNumber(patient.getPhoneNumber());
+    }
+
+    public static void validateCreateCaregiverRequestBody(CreateCaregiverRequestBody body) {
+        Validate.notNull(body, CREATE_CAREGIVER_NULL_ERROR_MESSAGE);
+        validateEmail(body.getEmail());
+        validateFirstName(body.getFirstName());
+        validateLastName(body.getLastName());
+        validateTitle(body.getTitle());
+        validatePhoneNumber(body.getPhoneNumber());
+        validateOrganizationId(body.getOrganizationId());
     }
 
     public static void validateCreatePatientRequestBody(CreatePatientRequestBody body) {

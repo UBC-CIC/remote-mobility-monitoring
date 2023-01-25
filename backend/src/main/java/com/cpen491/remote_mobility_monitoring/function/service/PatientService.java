@@ -7,10 +7,10 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotE
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
-import com.cpen491.remote_mobility_monitoring.function.schema.CreatePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.CreatePatientResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -68,7 +68,11 @@ public class PatientService {
         patient.setCaregiverIds(Set.of(body.getCaregiverId()));
         patientDao.update(patient);
 
-        caregiver.getPatientIds().add(body.getPatientId());
+        if (caregiver.getPatientIds() == null) {
+            caregiver.setPatientIds(Set.of(body.getPatientId()));
+        } else {
+            caregiver.getPatientIds().add(body.getPatientId());
+        }
         caregiverDao.update(caregiver);
 
         return VerifyPatientResponseBody.builder()

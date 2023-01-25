@@ -6,10 +6,10 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCod
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
-import com.cpen491.remote_mobility_monitoring.function.schema.CreatePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.CreatePatientResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashSet;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
@@ -250,7 +249,6 @@ class PatientServiceTest {
 
     private static Caregiver buildCaregiverDefault() {
         Caregiver caregiver = buildCaregiver(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, ORGANIZATION_ID);
-        caregiver.setPatientIds(new HashSet<>());
         return caregiver;
     }
 }

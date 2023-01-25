@@ -1,4 +1,4 @@
-package com.cpen491.remote_mobility_monitoring.function.schema;
+package com.cpen491.remote_mobility_monitoring.function.schema.caregiver;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatePatientResponseBody {
-    private String patientId;
-    private String authCode;
+public class CreateCaregiverResponseBody {
+    private String message;
 }
