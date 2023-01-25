@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_RECORD_NULL_ERROR_MESSAGE;
@@ -94,7 +96,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_HappyCase() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         Set<String> patientIds = Set.of(PATIENT_ID1, PATIENT_ID2);
         newRecord.setPatientIds(patientIds);
         cut.create(newRecord);
@@ -114,14 +116,14 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_WHEN_OrganizationDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         newRecord.setOrganizationId(NOT_EXISTS_ORGANIZATION_ID);
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
     public void testCreate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         cut.create(newRecord);
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
     }
@@ -168,7 +170,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testFindById_HappyCase() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         table.putItem(newRecord);
 
         Caregiver record = cut.findById(ID);
@@ -189,7 +191,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testFindByEmail_HappyCase() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         table.putItem(newRecord);
 
         Caregiver record = cut.findByEmail(EMAIL1);
@@ -210,9 +212,9 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testFindAllInOrganization_HappyCase() {
-        Caregiver newRecord1 = buildCaregiver();
+        Caregiver newRecord1 = buildCaregiverDefault();
         cut.create(newRecord1);
-        Caregiver newRecord2 = buildCaregiver();
+        Caregiver newRecord2 = buildCaregiverDefault();
         newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2);
 
@@ -239,9 +241,9 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testBatchFindById_HappyCase() {
-        Caregiver newRecord1 = buildCaregiver();
+        Caregiver newRecord1 = buildCaregiverDefault();
         cut.create(newRecord1);
-        Caregiver newRecord2 = buildCaregiver();
+        Caregiver newRecord2 = buildCaregiverDefault();
         newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2);
 
@@ -264,7 +266,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_HappyCase() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         cut.create(newRecord);
 
         Caregiver updatedRecord = cut.findById(newRecord.getId());
@@ -281,7 +283,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         assertThatThrownBy(() -> cut.update(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
@@ -331,7 +333,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testDelete_HappyCase() {
-        Caregiver newRecord = buildCaregiver();
+        Caregiver newRecord = buildCaregiverDefault();
         table.putItem(newRecord);
         Caregiver found = table.getItem(newRecord);
         assertNotNull(found);
@@ -352,21 +354,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         assertInvalidInputExceptionThrown(() -> cut.delete(id), ID_BLANK_ERROR_MESSAGE);
     }
 
-    private static Caregiver buildCaregiver() {
+    private static Caregiver buildCaregiverDefault() {
         return buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID);
-    }
-
-    private static Caregiver buildCaregiver(String id, String email, String firstName, String lastName,
-                                            String title, String phoneNumber, String imageUrl, String organizationId) {
-        return Caregiver.builder()
-                .id(id)
-                .email(email)
-                .firstName(firstName)
-                .lastName(lastName)
-                .title(title)
-                .phoneNumber(phoneNumber)
-                .imageUrl(imageUrl)
-                .organizationId(organizationId)
-                .build();
     }
 }

@@ -1,7 +1,6 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.assertj.core.api.ThrowableAssert;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -143,11 +142,5 @@ public class DaoTestParent {
                 .build();
         DynamoDbWaiter ddbWaiter = ddbClient.waiter();
         ddbWaiter.waitUntilTableNotExists(tableRequest);
-    }
-
-    static void assertInvalidInputExceptionThrown(ThrowableAssert.ThrowingCallable shouldRaiseThrowable, String errorMessage) {
-        assertThatThrownBy(shouldRaiseThrowable)
-                .isInstanceOfAny(IllegalArgumentException.class, NullPointerException.class)
-                .hasMessage(errorMessage);
     }
 }

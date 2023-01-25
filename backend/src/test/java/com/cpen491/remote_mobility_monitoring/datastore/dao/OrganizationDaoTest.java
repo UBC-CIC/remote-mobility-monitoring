@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_RECORD_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.NAME_BLANK_ERROR_MESSAGE;
@@ -58,7 +60,7 @@ public class OrganizationDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_HappyCase() {
-        Organization newRecord = buildOrganization();
+        Organization newRecord = buildOrganizationDefault();
         cut.create(newRecord);
 
         assertNotEquals(ID, newRecord.getId());
@@ -69,7 +71,7 @@ public class OrganizationDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_WHEN_RecordWithNameAlreadyExists_THEN_ThrowDuplicateRecordException() {
-        Organization newRecord = buildOrganization();
+        Organization newRecord = buildOrganizationDefault();
         cut.create(newRecord);
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
     }
@@ -90,7 +92,7 @@ public class OrganizationDaoTest extends DaoTestParent {
 
     @Test
     public void testFindById_HappyCase() {
-        Organization newRecord = buildOrganization();
+        Organization newRecord = buildOrganizationDefault();
         table.putItem(newRecord);
 
         Organization found = cut.findById(ID);
@@ -111,7 +113,7 @@ public class OrganizationDaoTest extends DaoTestParent {
 
     @Test
     public void testFindByName_HappyCase() {
-        Organization newRecord = buildOrganization();
+        Organization newRecord = buildOrganizationDefault();
         table.putItem(newRecord);
 
         Organization found = cut.findByName(NAME1);
@@ -132,7 +134,7 @@ public class OrganizationDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_HappyCase() {
-        Organization newRecord = buildOrganization();
+        Organization newRecord = buildOrganizationDefault();
         cut.create(newRecord);
 
         Organization updatedRecord = cut.findById(newRecord.getId());
@@ -149,7 +151,7 @@ public class OrganizationDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Organization newRecord = buildOrganization();
+        Organization newRecord = buildOrganizationDefault();
         assertThatThrownBy(() -> cut.update(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
@@ -171,7 +173,7 @@ public class OrganizationDaoTest extends DaoTestParent {
 
     @Test
     public void testDelete_HappyCase() {
-        Organization newRecord = buildOrganization();
+        Organization newRecord = buildOrganizationDefault();
         table.putItem(newRecord);
         Organization found = table.getItem(newRecord);
         assertNotNull(found);
@@ -192,14 +194,8 @@ public class OrganizationDaoTest extends DaoTestParent {
         assertInvalidInputExceptionThrown(() -> cut.delete(id), ID_BLANK_ERROR_MESSAGE);
     }
 
-    private static Organization buildOrganization() {
+    private static Organization buildOrganizationDefault() {
         return buildOrganization(ID, NAME1);
     }
 
-    private static Organization buildOrganization(String id, String name) {
-        return Organization.builder()
-                .id(id)
-                .name(name)
-                .build();
-    }
 }

@@ -5,16 +5,16 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.cpen491.remote_mobility_monitoring.function.Config;
-import com.cpen491.remote_mobility_monitoring.function.schema.CreatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
 
-// TODO: decide which logger to use
-public class CreatePatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class VerifyPatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final PatientService patientService;
     private final Gson gson;
 
-    public CreatePatientHandler() {
+    public VerifyPatientHandler() {
         Config config = Config.instance();
         this.patientService = config.patientService();
         this.gson = config.gson();
@@ -23,8 +23,8 @@ public class CreatePatientHandler implements RequestHandler<APIGatewayProxyReque
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
         try {
-            CreatePatientRequestBody body = gson.fromJson(request.getBody(), CreatePatientRequestBody.class);
-            patientService.createPatient(body);
+            VerifyPatientRequestBody body = gson.fromJson(request.getBody(), VerifyPatientRequestBody.class);
+            patientService.verifyPatient(body);
         } catch (Exception e) {
             // TODO: catch more granular exception
             e.printStackTrace();

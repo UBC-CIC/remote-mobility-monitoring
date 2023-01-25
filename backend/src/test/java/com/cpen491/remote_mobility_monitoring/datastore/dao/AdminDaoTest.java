@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_RECORD_NULL_ERROR_MESSAGE;
@@ -84,7 +86,7 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_HappyCase() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         cut.create(newRecord);
 
         assertNotEquals(ID, newRecord.getId());
@@ -98,14 +100,14 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_WHEN_OrganizationDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         newRecord.setOrganizationId(NOT_EXISTS_ORGANIZATION_ID);
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
     public void testCreate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         cut.create(newRecord);
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
     }
@@ -132,7 +134,7 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testFindById_HappyCase() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         table.putItem(newRecord);
 
         Admin record = cut.findById(ID);
@@ -153,7 +155,7 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testFindByEmail_HappyCase() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         table.putItem(newRecord);
 
         Admin record = cut.findByEmail(EMAIL1);
@@ -174,9 +176,9 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testFindAllInOrganization_HappyCase() {
-        Admin newRecord1 = buildAdmin();
+        Admin newRecord1 = buildAdminDefault();
         cut.create(newRecord1);
-        Admin newRecord2 = buildAdmin();
+        Admin newRecord2 = buildAdminDefault();
         newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2);
 
@@ -203,7 +205,7 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_HappyCase() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         cut.create(newRecord);
 
         Admin updatedRecord = cut.findById(newRecord.getId());
@@ -220,7 +222,7 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         assertThatThrownBy(() -> cut.update(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
@@ -248,7 +250,7 @@ class AdminDaoTest extends DaoTestParent {
 
     @Test
     public void testDelete_HappyCase() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         table.putItem(newRecord);
         Admin found = table.getItem(newRecord);
         assertNotNull(found);
@@ -269,17 +271,7 @@ class AdminDaoTest extends DaoTestParent {
         assertInvalidInputExceptionThrown(() -> cut.delete(id), ID_BLANK_ERROR_MESSAGE);
     }
 
-    private static Admin buildAdmin() {
+    private static Admin buildAdminDefault() {
         return buildAdmin(ID, EMAIL1, FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID);
-    }
-
-    private static Admin buildAdmin(String id, String email, String firstName, String lastName, String organizationId) {
-        return Admin.builder()
-                .id(id)
-                .email(email)
-                .firstName(firstName)
-                .lastName(lastName)
-                .organizationId(organizationId)
-                .build();
     }
 }

@@ -8,13 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 
 @Slf4j
 @AllArgsConstructor
@@ -41,7 +40,7 @@ public class PatientDao {
         }
 
         newRecord.setAuthCode(UUID.randomUUID().toString().replace("-", ""));
-        String currentTime = LocalDateTime.now(ZoneOffset.UTC).toString();
+        String currentTime = getCurrentUtcTimeString();
         newRecord.setAuthCodeTimestamp(currentTime);
         newRecord.setVerified(false);
         genericDao.create(newRecord);

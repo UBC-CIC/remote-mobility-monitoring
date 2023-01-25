@@ -4,6 +4,8 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.function.schema.CreatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.VerifyPatientRequestBody;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Set;
@@ -20,11 +22,16 @@ public class Validator {
     public static final String ORGANIZATION_ID_BLANK_ERROR_MESSAGE = "organization_id must be present";
     public static final String DEVICE_ID_BLANK_ERROR_MESSAGE = "device_id must be present";
     public static final String DATE_OF_BIRTH_BLANK_ERROR_MESSAGE = "date_of_birth must be present";
+    public static final String CAREGIVER_ID_BLANK_ERROR_MESSAGE = "caregiver_id must be present";
+    public static final String PATIENT_ID_BLANK_ERROR_MESSAGE = "patient_id must be present";
+    public static final String AUTH_CODE_BLANK_ERROR_MESSAGE = "auth_code must be present";
     public static final String IDS_NULL_ERROR_MESSAGE = "IDs must not be null";
     public static final String ORGANIZATION_RECORD_NULL_ERROR_MESSAGE = "Organization record must not be null";
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
     public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
+    public static final String CREATE_PATIENT_NULL_ERROR_MESSAGE = "Create patient request body must not be null";
+    public static final String VERIFY_PATIENT_NULL_ERROR_MESSAGE = "Verify patient request body must not be null";
 
     public static void validateId(String id) {
         Validate.notBlank(id, ID_BLANK_ERROR_MESSAGE);
@@ -70,6 +77,18 @@ public class Validator {
         Validate.notBlank(dateOfBirth, DATE_OF_BIRTH_BLANK_ERROR_MESSAGE);
     }
 
+    public static void validateCaregiverId(String caregiverId) {
+        Validate.notBlank(caregiverId, CAREGIVER_ID_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validatePatientId(String patientId) {
+        Validate.notBlank(patientId, PATIENT_ID_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validateAuthCode(String authCode) {
+        Validate.notBlank(authCode, AUTH_CODE_BLANK_ERROR_MESSAGE);
+    }
+
     public static void validateIds(Set<String> ids) {
         Validate.notNull(ids, IDS_NULL_ERROR_MESSAGE);
     }
@@ -104,5 +123,21 @@ public class Validator {
         validateLastName(patient.getLastName());
         validateDateOfBirth(patient.getDateOfBirth());
         validatePhoneNumber(patient.getPhoneNumber());
+    }
+
+    public static void validateCreatePatientRequestBody(CreatePatientRequestBody body) {
+        Validate.notNull(body, CREATE_PATIENT_NULL_ERROR_MESSAGE);
+        validateFirstName(body.getFirstName());
+        validateLastName(body.getLastName());
+        validatePhoneNumber(body.getPhoneNumber());
+        validateDateOfBirth(body.getDateOfBirth());
+    }
+
+    public static void validateVerifyPatientRequestBody(VerifyPatientRequestBody body) {
+        Validate.notNull(body, VERIFY_PATIENT_NULL_ERROR_MESSAGE);
+        validateCaregiverId(body.getCaregiverId());
+        validatePatientId(body.getPatientId());
+        validateAuthCode(body.getAuthCode());
+        validateDeviceId(body.getDeviceId());
     }
 }

@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DATE_OF_BIRTH_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
@@ -73,7 +75,7 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_HappyCase() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         Set<String> caregiverIds = Set.of(CAREGIVER_ID1, CAREGIVER_ID2);
         newRecord.setCaregiverIds(caregiverIds);
         cut.create(newRecord);
@@ -94,14 +96,14 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testCreate_WHEN_RecordWithDeviceIdAlreadyExists_THEN_ThrowDuplicateRecordException() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         cut.create(newRecord);
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
     }
 
     @Test
     public void testCreate_WHEN_RecordHasNoDeviceId_THEN_NoThrow() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         newRecord.setDeviceId(null);
         cut.create(newRecord);
         cut.create(newRecord);
@@ -129,7 +131,7 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testFindById_HappyCase() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         table.putItem(newRecord);
 
         Patient record = cut.findById(ID);
@@ -150,7 +152,7 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testFindByDeviceId_HappyCase() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         table.putItem(newRecord);
 
         Patient record = cut.findByDeviceId(DEVICE_ID1);
@@ -171,9 +173,9 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testBatchFindById_HappyCase() {
-        Patient newRecord1 = buildPatient();
+        Patient newRecord1 = buildPatientDefault();
         cut.create(newRecord1);
-        Patient newRecord2 = buildPatient();
+        Patient newRecord2 = buildPatientDefault();
         newRecord2.setDeviceId(DEVICE_ID2);
         cut.create(newRecord2);
 
@@ -196,7 +198,7 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_HappyCase() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         cut.create(newRecord);
 
         Patient updatedRecord = cut.findById(newRecord.getId());
@@ -213,9 +215,9 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_WHEN_RecordWithDeviceIdAlreadyExists_THEN_ThrowDuplicateRecordException() {
-        Patient newRecord1 = buildPatient();
+        Patient newRecord1 = buildPatientDefault();
         cut.create(newRecord1);
-        Patient newRecord2 = buildPatient();
+        Patient newRecord2 = buildPatientDefault();
         newRecord2.setDeviceId(DEVICE_ID2);
         cut.create(newRecord2);
 
@@ -226,7 +228,7 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testUpdate_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         assertThatThrownBy(() -> cut.update(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
@@ -256,7 +258,7 @@ public class PatientDaoTest extends DaoTestParent {
 
     @Test
     public void testDelete_HappyCase() {
-        Patient newRecord = buildPatient();
+        Patient newRecord = buildPatientDefault();
         table.putItem(newRecord);
         Patient found = table.getItem(newRecord);
         assertNotNull(found);
@@ -277,19 +279,7 @@ public class PatientDaoTest extends DaoTestParent {
         assertInvalidInputExceptionThrown(() -> cut.delete(id), ID_BLANK_ERROR_MESSAGE);
     }
 
-    private static Patient buildPatient() {
+    private static Patient buildPatientDefault() {
         return buildPatient(ID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER);
-    }
-
-    private static Patient buildPatient(String id, String deviceId, String firstName, String lastName,
-                                            String dateOfBirth, String phoneNumber) {
-        return Patient.builder()
-                .id(id)
-                .deviceId(deviceId)
-                .firstName(firstName)
-                .lastName(lastName)
-                .dateOfBirth(dateOfBirth)
-                .phoneNumber(phoneNumber)
-                .build();
     }
 }

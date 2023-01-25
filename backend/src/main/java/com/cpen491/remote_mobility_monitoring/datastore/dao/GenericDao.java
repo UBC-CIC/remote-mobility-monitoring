@@ -19,8 +19,6 @@ import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 
 @AllArgsConstructor
 public class GenericDao<T extends BaseModel> {
@@ -41,7 +40,7 @@ public class GenericDao<T extends BaseModel> {
 
     public void create(T newRecord) {
         newRecord.setId(UUID.randomUUID().toString());
-        String currentTime = LocalDateTime.now(ZoneOffset.UTC).toString();
+        String currentTime = getCurrentUtcTimeString();
         newRecord.setCreatedAt(currentTime);
         newRecord.setUpdatedAt(currentTime);
 
@@ -94,7 +93,7 @@ public class GenericDao<T extends BaseModel> {
     }
 
     public void update(T updatedRecord, Class<T> itemClass) {
-        String currentTime = LocalDateTime.now().toString();
+        String currentTime = getCurrentUtcTimeString();
         updatedRecord.setUpdatedAt(currentTime);
 
         Expression expression = Expression.builder()
