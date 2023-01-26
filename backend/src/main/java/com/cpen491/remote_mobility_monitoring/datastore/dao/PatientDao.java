@@ -10,10 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 
 @Slf4j
 @AllArgsConstructor
@@ -39,10 +37,6 @@ public class PatientDao {
             throw new DuplicateRecordException(Patient.class.getSimpleName(), deviceId);
         }
 
-        newRecord.setAuthCode(UUID.randomUUID().toString().replace("-", ""));
-        String currentTime = getCurrentUtcTimeString();
-        newRecord.setAuthCodeTimestamp(currentTime);
-        newRecord.setVerified(false);
         genericDao.create(newRecord);
     }
 
@@ -107,7 +101,7 @@ public class PatientDao {
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of id, deviceId, firstName, lastName,
-     *      *                              dateOfBirth, or phoneNumber are empty
+     *                              dateOfBirth, or phoneNumber are empty
      */
     public void update(Patient updatedRecord) {
         log.info("Updating Patient record {}", updatedRecord);

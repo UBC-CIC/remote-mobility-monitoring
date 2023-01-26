@@ -134,6 +134,7 @@
                 <configuration>
                     <finalName>function</finalName>
                     <outputDirectory>./assets</outputDirectory>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
                 <executions>
                     <execution>

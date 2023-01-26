@@ -6,6 +6,7 @@ interface ApiGatewayStackProps extends cdk.StackProps {
   readonly defaultFunction: lambda.Function;
   readonly createCaregiverFunction: lambda.Function;
   readonly createPatientFunction: lambda.Function;
+  readonly updatePatientDeviceFunction: lambda.Function;
   readonly verifyPatientFunction: lambda.Function;
 }
 
@@ -19,6 +20,7 @@ export class ApiGatewayStack extends cdk.Stack {
     });
     const createCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createCaregiverFunction);
     const createPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createPatientFunction);
+    const updatePatientDeviceFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.updatePatientDeviceFunction);
     const verifyPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.verifyPatientFunction);
 
     const caregivers = api.root.addResource('caregivers');
@@ -27,6 +29,7 @@ export class ApiGatewayStack extends cdk.Stack {
     patients.addMethod('POST', createPatientFunctionIntegration);
     const patient_id = patients.addResource('{patient_id}');
     patient_id.addResource('verify').addMethod('POST', verifyPatientFunctionIntegration);
+    patient_id.addResource('device').addMethod('POST', updatePatientDeviceFunctionIntegration);
   }
 
   private static createLambdaIntegration(lambdaFunction: lambda.Function) {

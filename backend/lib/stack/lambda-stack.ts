@@ -9,6 +9,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly defaultFunction: lambda.Function;
   public readonly createCaregiverFunction: lambda.Function;
   public readonly createPatientFunction: lambda.Function;
+  public readonly updatePatientDeviceFunction: lambda.Function;
   public readonly verifyPatientFunction: lambda.Function;
 
   constructor(scope: cdk.App, id: string, dynamoDbStack: DynamoDbStack, props?: cdk.StackProps) {
@@ -29,6 +30,7 @@ export class LambdaStack extends cdk.Stack {
     });
     this.createCaregiverFunction = this.createCreateCaregiverFunction(dynamoDbStack);
     this.createPatientFunction = this.createCreatePatientFunction(dynamoDbStack);
+    this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction(dynamoDbStack);
     this.verifyPatientFunction = this.createVerifyPatientFunction(dynamoDbStack);
   }
 
@@ -66,6 +68,23 @@ export class LambdaStack extends cdk.Stack {
     // new lambda.Version(this, 'MyVersion', {
     //   lambda: lambdaFunction,
     // });
+
+    dynamoDbStack.patientTable.grantReadWriteData(lambdaFunction);
+    dynamoDbStack.caregiverTable.grantReadWriteData(lambdaFunction);
+    dynamoDbStack.organizationTable.grantReadData(lambdaFunction);
+    return lambdaFunction;
+  }
+
+  private createUpdatePatientDeviceFunction(dynamoDbStack: DynamoDbStack): lambda.Function {
+    const lambdaFunction = new lambda.Function(this, 'UpdatePatientDeviceFunction', {
+      functionName: 'UpdatePatientDeviceFunction',
+      runtime: lambda.Runtime.JAVA_11,
+      handler: LambdaStack.handlerPathPrefix + 'patient.UpdatePatientDeviceHandler',
+      code: lambda.Code.fromAsset(LambdaStack.codeAssetPath),
+      // TODO: refactor to static variable
+      timeout: cdk.Duration.seconds(300),
+      memorySize: 512,
+    });
 
     dynamoDbStack.patientTable.grantReadWriteData(lambdaFunction);
     dynamoDbStack.caregiverTable.grantReadWriteData(lambdaFunction);

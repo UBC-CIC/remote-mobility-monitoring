@@ -9,6 +9,8 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import lombok.NonNull;
@@ -16,8 +18,10 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.parseTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.secondsBetweenTimes;
 
@@ -41,11 +45,30 @@ public class PatientService {
                 .phoneNumber(body.getPhoneNumber())
                 .dateOfBirth(body.getDateOfBirth())
                 .build();
+
+        generateAuthCodeForPatient(newPatient);
+        newPatient.setVerified(false);
         patientDao.create(newPatient);
 
         return CreatePatientResponseBody.builder()
                 .patientId(newPatient.getId())
                 .authCode(newPatient.getAuthCode())
+                .build();
+    }
+
+    public UpdatePatientDeviceResponseBody updatePatientDevice(UpdatePatientDeviceRequestBody body) {
+        Validator.validateUpdatePatientDeviceRequestBody(body);
+
+        Patient patient = patientDao.findById(body.getPatientId());
+        if (patient == null) {
+            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), body.getPatientId());
+        }
+
+        generateAuthCodeForPatient(patient);
+        patientDao.update(patient);
+
+        return UpdatePatientDeviceResponseBody.builder()
+                .authCode(patient.getAuthCode())
                 .build();
     }
 
@@ -78,6 +101,12 @@ public class PatientService {
         return VerifyPatientResponseBody.builder()
                 .message("OK")
                 .build();
+    }
+
+    private static void generateAuthCodeForPatient(Patient patient) {
+        patient.setAuthCode(UUID.randomUUID().toString().replace("-", ""));
+        String currentTime = getCurrentUtcTimeString();
+        patient.setAuthCodeTimestamp(currentTime);
     }
 
     private static void verifyAuthCode(String expected, String timestamp, String actual) {
