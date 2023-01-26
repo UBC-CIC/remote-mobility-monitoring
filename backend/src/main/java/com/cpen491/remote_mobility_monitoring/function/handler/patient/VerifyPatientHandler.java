@@ -8,6 +8,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.function.Config;
+import com.cpen491.remote_mobility_monitoring.function.schema.Const;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
@@ -30,7 +31,9 @@ public class VerifyPatientHandler implements RequestHandler<APIGatewayProxyReque
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
         try {
+            String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             VerifyPatientRequestBody requestBody = gson.fromJson(request.getBody(), VerifyPatientRequestBody.class);
+            requestBody.setPatientId(patientId);
             VerifyPatientResponseBody responseBody = patientService.verifyPatient(requestBody);
             return generateResponse(StatusCode.OK, gson.toJson(responseBody));
         } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {

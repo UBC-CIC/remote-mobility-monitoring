@@ -1,5 +1,6 @@
 package com.cpen491.remote_mobility_monitoring.function.schema.patient;
 
+import com.cpen491.remote_mobility_monitoring.function.schema.Const;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,12 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VerifyPatientRequestBody {
-    @SerializedName("caregiver_id")
+    @SerializedName(Const.CAREGIVER_ID_NAME)
     private String caregiverId;
-    @SerializedName("patient_id")
+    @SerializedName(Const.PATIENT_ID_NAME)
     private String patientId;
-    @SerializedName("auth_code")
+    @SerializedName(Const.AUTH_CODE_NAME)
     private String authCode;
-    @SerializedName("device_id")
+    @SerializedName(Const.DEVICE_ID_NAME)
     private String deviceId;
 }
