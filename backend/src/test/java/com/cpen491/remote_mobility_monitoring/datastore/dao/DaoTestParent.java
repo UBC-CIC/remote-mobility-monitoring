@@ -9,10 +9,13 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.GlobalSecondaryIndex;
 import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
@@ -25,7 +28,9 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,6 +39,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseT
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
 
 public class DaoTestParent {
     private static final String PORT = "8000";
@@ -166,5 +172,18 @@ public class DaoTestParent {
                 .item(Patient.convertToMap(patient))
                 .tableName(BaseTable.TABLE_NAME)
                 .build());
+    }
+
+    GetItemResponse findByPrimaryKey(String pk, String sk) {
+        Map<String, AttributeValue> keyMap = new HashMap<>();
+        keyMap.put(BaseTable.PID_NAME, convertToAttributeValue(pk));
+        keyMap.put(BaseTable.SID_NAME, convertToAttributeValue(sk));
+
+        GetItemRequest request = GetItemRequest.builder()
+                .key(keyMap)
+                .tableName(BaseTable.TABLE_NAME)
+                .build();
+
+        return ddbClient.getItem(request);
     }
 }

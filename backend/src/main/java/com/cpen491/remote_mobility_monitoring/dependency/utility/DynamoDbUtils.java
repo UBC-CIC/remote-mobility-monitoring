@@ -1,6 +1,5 @@
 package com.cpen491.remote_mobility_monitoring.dependency.utility;
 
-import com.cpen491.remote_mobility_monitoring.datastore.model.Const;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Map;

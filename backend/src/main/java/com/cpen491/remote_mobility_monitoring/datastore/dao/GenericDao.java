@@ -6,19 +6,22 @@ import lombok.NonNull;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.BatchGetItemRequest;
-import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.BatchWriteItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.DeleteRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
+import software.amazon.awssdk.services.dynamodb.model.WriteRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
@@ -29,62 +32,66 @@ public class GenericDao {
     @NonNull
     DynamoDbClient ddbClient;
 
-    public void create(Map<String, AttributeValue> map) {
+    public void create(Map<String, AttributeValue> item) {
         PutItemRequest request = PutItemRequest.builder()
-                .item(map)
+                .item(item)
                 .tableName(BaseTable.TABLE_NAME)
                 .build();
 
         ddbClient.putItem(request);
     }
 
-    public void addAssociation(Map<String, AttributeValue> map1, Map<String, AttributeValue> map2) {
-        Map<String, AttributeValue> map = new HashMap<>();
-        map.putAll(map1);
-        map.putAll(map2);
-        String currentTime = getCurrentUtcTimeString();
-        map.put(BaseTable.PID_NAME, map1.get(BaseTable.PID_NAME));
-        map.put(BaseTable.SID_NAME, map2.get(BaseTable.PID_NAME));
-        map.put(BaseTable.CREATED_AT_NAME, convertToAttributeValue(currentTime));
-        map.put(BaseTable.UPDATED_AT_NAME, convertToAttributeValue(currentTime));
+    public void addAssociation(Map<String, AttributeValue> item1, Map<String, AttributeValue> item2) {
+        Map<String, AttributeValue> item = new HashMap<>();
+        item.putAll(item1);
+        item.putAll(item2);
+        AttributeValue currentTime = convertToAttributeValue(getCurrentUtcTimeString());
+        item.put(BaseTable.PID_NAME, item1.get(BaseTable.PID_NAME));
+        item.put(BaseTable.SID_NAME, item2.get(BaseTable.PID_NAME));
+        item.put(BaseTable.CREATED_AT_NAME, currentTime);
+        item.put(BaseTable.UPDATED_AT_NAME, currentTime);
 
         PutItemRequest request = PutItemRequest.builder()
-                .item(map)
+                .item(item)
                 .tableName(BaseTable.TABLE_NAME)
                 .build();
 
         ddbClient.putItem(request);
     }
 
-    public GetItemResponse findByPartitionKey(String key) {
-        Map<String, AttributeValue> map = new HashMap<>();
-        map.put(BaseTable.PID_NAME, convertToAttributeValue(key));
-        map.put(BaseTable.SID_NAME, convertToAttributeValue(key));
+    public GetItemResponse findByPartitionKey(String keyVal) {
+        return findByPrimaryKey(keyVal, keyVal);
+    }
+
+    public GetItemResponse findByPrimaryKey(String pid, String sid) {
+        Map<String, AttributeValue> keyMap = new HashMap<>();
+        keyMap.put(BaseTable.PID_NAME, convertToAttributeValue(pid));
+        keyMap.put(BaseTable.SID_NAME, convertToAttributeValue(sid));
 
         GetItemRequest request = GetItemRequest.builder()
-                .key(map)
+                .key(keyMap)
                 .tableName(BaseTable.TABLE_NAME)
                 .build();
 
         return ddbClient.getItem(request);
     }
 
-    public QueryResponse findAllByIndexPartitionKey(String indexName, String keyName, String keyVal) {
+    public QueryResponse findAllByPartitionKey(String keyName, String keyVal) {
+        return findAllByPartitionKey(keyName, keyVal, null, false);
+    }
+
+    public QueryResponse findAllByPartitionKeyOnIndex(String keyName, String keyVal, String indexName) {
+        return findAllByPartitionKey(keyName, keyVal, indexName, true);
+    }
+
+    private QueryResponse findAllByPartitionKey(String keyName, String keyVal, String indexName, boolean index) {
         String expression = "#pid = :pidValue";
         Map<String, String> attributeNames = new HashMap<>();
         attributeNames.put("#pid", keyName);
         Map<String, AttributeValue> attributeValues = new HashMap<>();
         attributeValues.put(":pidValue", convertToAttributeValue(keyVal));
 
-        QueryRequest request = QueryRequest.builder()
-                .keyConditionExpression(expression)
-                .expressionAttributeNames(attributeNames)
-                .expressionAttributeValues(attributeValues)
-                .tableName(BaseTable.TABLE_NAME)
-                .indexName(indexName)
-                .build();
-
-        return ddbClient.query(request);
+        return runQuery(expression, attributeNames, attributeValues, indexName, index);
     }
 
     public QueryResponse findAllAssociations(String pid, String sidPrefix) {
@@ -109,6 +116,11 @@ public class GenericDao {
         attributeValues.put(":pidValue", convertToAttributeValue(pid));
         attributeValues.put(":sidValue", convertToAttributeValue(sidPrefix));
 
+        return runQuery(expression, attributeNames, attributeValues, indexName, index);
+    }
+
+    private QueryResponse runQuery(String expression, Map<String, String> attributeNames,
+                                   Map<String, AttributeValue> attributeValues, String indexName, boolean index) {
         QueryRequest.Builder requestBuilder = QueryRequest.builder()
                 .keyConditionExpression(expression)
                 .expressionAttributeNames(attributeNames)
@@ -119,17 +131,18 @@ public class GenericDao {
         return ddbClient.query(request);
     }
 
-    public List<Map<String, AttributeValue>> batchFindByPartitionKey(List<String> partitionKeys) {
-        List<Map<String, AttributeValue>> mapList = new ArrayList<>();
-        for (String key : partitionKeys) {
+    public List<Map<String, AttributeValue>> batchFindByPartitionKey(List<String> keyValues) {
+        List<Map<String, AttributeValue>> keyMaps = new ArrayList<>();
+        for (String keyVal : keyValues) {
             Map<String, AttributeValue> map = new HashMap<>();
-            map.put(BaseTable.PID_NAME, convertToAttributeValue(key));
-            map.put(BaseTable.SID_NAME, convertToAttributeValue(key));
-            mapList.add(map);
+            AttributeValue key = convertToAttributeValue(keyVal);
+            map.put(BaseTable.PID_NAME, key);
+            map.put(BaseTable.SID_NAME, key);
+            keyMaps.add(map);
         }
 
         KeysAndAttributes keysAndAttributes = KeysAndAttributes.builder()
-                .keys(mapList)
+                .keys(keyMaps)
                 .build();
         Map<String, KeysAndAttributes> requestItems = new HashMap<>();
         requestItems.put(BaseTable.TABLE_NAME, keysAndAttributes);
@@ -141,9 +154,9 @@ public class GenericDao {
         return ddbClient.batchGetItem(request).responses().get(BaseTable.TABLE_NAME);
     }
 
-    public void update(Map<String, AttributeValue> map) {
+    public void update(Map<String, AttributeValue> item) {
         String currentTime = getCurrentUtcTimeString();
-        map.put(BaseTable.UPDATED_AT_NAME, convertToAttributeValue(currentTime));
+        item.put(BaseTable.UPDATED_AT_NAME, convertToAttributeValue(currentTime));
 
         String expression = "attribute_exists(#pid)";
         Map<String, String> attributesNames = new HashMap<>();
@@ -152,27 +165,50 @@ public class GenericDao {
         PutItemRequest request = PutItemRequest.builder()
                 .conditionExpression(expression)
                 .expressionAttributeNames(attributesNames)
-                .item(map)
+                .item(item)
                 .tableName(BaseTable.TABLE_NAME)
                 .build();
 
         ddbClient.putItem(request);
     }
 
-    public void delete(String partitionKey) {
-        Map<String, AttributeValue> map = new HashMap<>();
-        map.put(BaseTable.PID_NAME, convertToAttributeValue(partitionKey));
-        map.put(BaseTable.SID_NAME, convertToAttributeValue(partitionKey));
+    public void delete(String keyVal) {
+        List<Map<String, AttributeValue>> keyMaps = new ArrayList<>();
 
-        DeleteItemRequest request = DeleteItemRequest.builder()
-                .key(map)
-                .tableName(BaseTable.TABLE_NAME)
+        Map<String, AttributeValue> keyMap = new HashMap<>();
+        AttributeValue key = convertToAttributeValue(keyVal);
+        keyMap.put(BaseTable.PID_NAME, key);
+        keyMap.put(BaseTable.SID_NAME, key);
+
+        List<Map<String, AttributeValue>> pidItems = findAllByPartitionKey(BaseTable.PID_NAME, keyVal).items();
+        List<Map<String, AttributeValue>> sidItems = findAllByPartitionKeyOnIndex(BaseTable.SID_NAME, keyVal, BaseTable.SID_INDEX_NAME).items();
+
+        keyMaps.addAll(pidItems);
+        keyMaps.addAll(sidItems);
+        List<WriteRequest> writeRequests = keyMaps.stream().filter(item -> {
+            String pid = item.get(BaseTable.PID_NAME).s();
+            String sid = item.get(BaseTable.SID_NAME).s();
+            return !pid.equals(sid);
+        }).map(item -> {
+            Map<String, AttributeValue> newMap = new HashMap<>();
+            newMap.put(BaseTable.PID_NAME, item.get(BaseTable.PID_NAME));
+            newMap.put(BaseTable.SID_NAME, item.get(BaseTable.SID_NAME));
+            DeleteRequest deleteRequest = DeleteRequest.builder().key(newMap).build();
+            return WriteRequest.builder().deleteRequest(deleteRequest).build();
+        }).collect(Collectors.toCollection(ArrayList::new));
+        writeRequests.add(WriteRequest.builder().deleteRequest(DeleteRequest.builder().key(keyMap).build()).build());
+
+        Map<String, List<WriteRequest>> requestItems = new HashMap<>();
+        requestItems.put(BaseTable.TABLE_NAME, writeRequests);
+
+        BatchWriteItemRequest request = BatchWriteItemRequest.builder()
+                .requestItems(requestItems)
                 .build();
 
-        ddbClient.deleteItem(request);
+        ddbClient.batchWriteItem(request);
     }
 
-    public static void setId(BaseModel model, String idPrefix) {
+    public void setAutoGeneratedAttributes(BaseModel model, String idPrefix) {
         String id = UUID.randomUUID().toString();
         model.setPid(idPrefix + id);
         model.setSid(idPrefix + id);

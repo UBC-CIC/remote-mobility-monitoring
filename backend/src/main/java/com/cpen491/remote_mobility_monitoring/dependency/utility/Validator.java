@@ -57,15 +57,9 @@ public class Validator {
     public static final String SHARE_PATIENT_NULL_ERROR_MESSAGE = "Share patient request body must not be null";
     public static final String DELETE_PATIENT_NULL_ERROR_MESSAGE = "Delete patient request body must not be null";
 
-    public static void validatePid(String pid) {
-        Validate.notBlank(pid, PID_BLANK_ERROR_MESSAGE);
-    }
-
-    public static void validateSid(String sid) {
-        Validate.notBlank(sid, SID_BLANK_ERROR_MESSAGE);
-    }
-
     public static void validatePidEqualsSid(String pid, String sid) {
+        Validate.notBlank(pid, PID_BLANK_ERROR_MESSAGE);
+        Validate.notBlank(sid, SID_BLANK_ERROR_MESSAGE);
         if (!pid.equals(sid)) {
             throw new IllegalArgumentException(PID_NOT_EQUAL_SID_ERROR_MESSAGE);
         }
