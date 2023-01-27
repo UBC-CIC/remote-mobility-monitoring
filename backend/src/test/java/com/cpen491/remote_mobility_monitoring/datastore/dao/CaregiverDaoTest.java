@@ -4,7 +4,6 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,104 +11,78 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
-import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
-import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_RECORD_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IDS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ID_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IMAGE_URL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_NOT_EQUAL_SID_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.SID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.TITLE_BLANK_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CaregiverDaoTest extends DaoTestParent {
-    private static final String ID = "caregiver-id-123";
+    private static final String PID = "car-1";
+    private static final String SID = PID;
     private static final String EMAIL1 = "janedoe@email.com";
     private static final String EMAIL2 = "janedoeiscool@email.com";
     private static final String FIRST_NAME = "Jane";
     private static final String LAST_NAME = "Doe";
     private static final String TITLE = "caregiver";
     private static final String PHONE_NUMBER = "1234567890";
-    private static final String IMAGE_URL = "image.png";
-    private static final String EXISTS_ORGANIZATION_ID = "org-id-abc";
-    private static final String NOT_EXISTS_ORGANIZATION_ID = "org-id-not";
-    private static final String PATIENT_ID1 = "patient-id-1";
-    private static final String PATIENT_ID2 = "patient-id-2";
+    private static final String EXISTS_ORGANIZATION_ID = "org-1";
+    private static final String NOT_EXISTS_ORGANIZATION_ID = "org-2";
+    private static final String ORGANIZATION_NAME = "ORG1";
+    private static final String PATIENT_ID1 = "pat-1";
+    private static final String PATIENT_ID2 = "pat-2";
 
-    DynamoDbTable<Organization> organizationTable;
-    DynamoDbTable<Caregiver> table;
     CaregiverDao cut;
 
     @BeforeEach
     public void setup() {
-        setupOrganizationTable();
-        setupCaregiverTable();
+        setupTable();
+        GenericDao genericDao = new GenericDao(ddbClient);
+        OrganizationDao organizationDao = new OrganizationDao(genericDao);
+        cut = new CaregiverDao(genericDao, organizationDao);
 
-        organizationTable = ddbEnhancedClient.table(OrganizationTable.TABLE_NAME, TableSchema.fromBean(Organization.class));
-        Map<String, DynamoDbIndex<Organization>> organizationIndexMap = new HashMap<>();
-        organizationIndexMap.put(OrganizationTable.NAME_INDEX_NAME, organizationTable.index(OrganizationTable.NAME_INDEX_NAME));
-        OrganizationDao organizationDao = new OrganizationDao(new GenericDao<>(organizationTable, organizationIndexMap, ddbEnhancedClient));
-
-        table = ddbEnhancedClient.table(CaregiverTable.TABLE_NAME, TableSchema.fromBean(Caregiver.class));
-        Map<String, DynamoDbIndex<Caregiver>> caregiverIndexMap = new HashMap<>();
-        for (Pair<String, String> indexNameAndKey : CaregiverTable.INDEX_NAMES_AND_KEYS) {
-            String indexName = indexNameAndKey.getLeft();
-            caregiverIndexMap.put(indexName, table.index(indexName));
-        }
-        cut = new CaregiverDao(new GenericDao<>(table, caregiverIndexMap, ddbEnhancedClient), organizationDao);
-
-        Organization organization = Organization.builder().id(EXISTS_ORGANIZATION_ID).build();
-        organizationTable.putItem(organization);
+        Organization organization = buildOrganization(EXISTS_ORGANIZATION_ID, EXISTS_ORGANIZATION_ID, ORGANIZATION_NAME);
+        createOrganization(organization);
     }
 
     @AfterEach
     public void teardown() {
-        teardownOrganizationTable();
-        teardownCaregiverTable();
+        teardownTable();
     }
 
     @Test
     public void testCreate_HappyCase() {
         Caregiver newRecord = buildCaregiverDefault();
-        Set<String> patientIds = Set.of(PATIENT_ID1, PATIENT_ID2);
-        newRecord.setPatientIds(patientIds);
-        cut.create(newRecord);
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
 
-        assertNotEquals(ID, newRecord.getId());
+        assertNotEquals(PID, newRecord.getPid());
+        assertNotEquals(SID, newRecord.getSid());
         assertEquals(EMAIL1, newRecord.getEmail());
         assertEquals(FIRST_NAME, newRecord.getFirstName());
         assertEquals(LAST_NAME, newRecord.getLastName());
         assertEquals(TITLE, newRecord.getTitle());
         assertEquals(PHONE_NUMBER, newRecord.getPhoneNumber());
-        assertEquals(IMAGE_URL, newRecord.getImageUrl());
-        assertEquals(EXISTS_ORGANIZATION_ID, newRecord.getOrganizationId());
-        assertEquals(patientIds, newRecord.getPatientIds());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
     }
@@ -117,70 +90,50 @@ public class CaregiverDaoTest extends DaoTestParent {
     @Test
     public void testCreate_WHEN_OrganizationDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
         Caregiver newRecord = buildCaregiverDefault();
-        newRecord.setOrganizationId(NOT_EXISTS_ORGANIZATION_ID);
-        assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
+        assertThatThrownBy(() -> cut.create(newRecord, NOT_EXISTS_ORGANIZATION_ID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
     public void testCreate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
         Caregiver newRecord = buildCaregiverDefault();
-        cut.create(newRecord);
-        assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
+        assertThatThrownBy(() -> cut.create(newRecord, EXISTS_ORGANIZATION_ID)).isInstanceOf(DuplicateRecordException.class);
     }
 
     @ParameterizedTest
     @MethodSource("invalidInputsForCreate")
     public void testCreate_WHEN_InvalidInput_THEN_ThrowInvalidInputException(Caregiver record, String errorMessage) {
-        assertInvalidInputExceptionThrown(() -> cut.create(record), errorMessage);
+        assertInvalidInputExceptionThrown(() -> cut.create(record, EXISTS_ORGANIZATION_ID), errorMessage);
     }
 
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
                 Arguments.of(null, CAREGIVER_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, null, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, "", FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, null, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, "", LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, null, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, "", TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, null, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, "", IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, null, EXISTS_ORGANIZATION_ID),
-                        IMAGE_URL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, "", EXISTS_ORGANIZATION_ID),
-                        IMAGE_URL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, null),
-                        ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, ""),
-                        ORGANIZATION_ID_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildCaregiver(PID, SID, null, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, "", FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, null, LAST_NAME, TITLE, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, "", LAST_NAME, TITLE, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, null, TITLE, PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, "", TITLE, PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER), TITLE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER), TITLE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, null), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, ""), PHONE_NUMBER_BLANK_ERROR_MESSAGE)
         );
     }
 
     @Test
     public void testFindById_HappyCase() {
         Caregiver newRecord = buildCaregiverDefault();
-        table.putItem(newRecord);
+        createCaregiver(newRecord);
 
-        Caregiver record = cut.findById(ID);
+        Caregiver record = cut.findById(newRecord.getPid());
         assertEquals(newRecord, record);
     }
 
     @Test
-    public void testFindById_WHEN_RecordDoesNotExist_THEN_ReturnNull() {
-        Caregiver record = cut.findById(ID);
-        assertNull(record);
+    public void testFindById_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        assertThatThrownBy(() -> cut.findById(PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @ParameterizedTest
@@ -192,7 +145,7 @@ public class CaregiverDaoTest extends DaoTestParent {
     @Test
     public void testFindByEmail_HappyCase() {
         Caregiver newRecord = buildCaregiverDefault();
-        table.putItem(newRecord);
+        createCaregiver(newRecord);
 
         Caregiver record = cut.findByEmail(EMAIL1);
         assertEquals(newRecord, record);
@@ -211,50 +164,21 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindAllInOrganization_HappyCase() {
-        Caregiver newRecord1 = buildCaregiverDefault();
-        cut.create(newRecord1);
-        Caregiver newRecord2 = buildCaregiverDefault();
-        newRecord2.setEmail(EMAIL2);
-        cut.create(newRecord2);
-
-        Iterator<Page<Caregiver>> iterator = cut.findAllInOrganization(EXISTS_ORGANIZATION_ID);
-        assertTrue(iterator.hasNext());
-        List<Caregiver> caregivers = iterator.next().items();
-        assertThat(caregivers).containsExactlyInAnyOrder(newRecord1, newRecord2);
-        assertFalse(iterator.hasNext());
-    }
-
-    @Test
-    public void testFindAllInOrganization_WHEN_RecordsDoNotExist_THEN_ReturnIteratorWithEmptyPage() {
-        Iterator<Page<Caregiver>> iterator = cut.findAllInOrganization(EXISTS_ORGANIZATION_ID);
-        assertTrue(iterator.hasNext());
-        List<Caregiver> caregivers = iterator.next().items();
-        assertThat(caregivers).isEmpty();
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    public void testFindAllInOrganization_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String organizationId) {
-        assertInvalidInputExceptionThrown(() -> cut.findAllInOrganization(organizationId), ORGANIZATION_ID_BLANK_ERROR_MESSAGE);
-    }
-
-    @Test
     public void testBatchFindById_HappyCase() {
         Caregiver newRecord1 = buildCaregiverDefault();
-        cut.create(newRecord1);
+        cut.create(newRecord1, EXISTS_ORGANIZATION_ID);
         Caregiver newRecord2 = buildCaregiverDefault();
         newRecord2.setEmail(EMAIL2);
-        cut.create(newRecord2);
+        cut.create(newRecord2, EXISTS_ORGANIZATION_ID);
 
-        Set<String> ids = Set.of(newRecord1.getId(), newRecord2.getId());
+        List<String> ids = Arrays.asList(newRecord1.getPid(), newRecord2.getPid());
         List<Caregiver> results = cut.batchFindById(ids);
         assertThat(results).containsExactlyInAnyOrder(newRecord1, newRecord2);
     }
 
     @Test
     public void testBatchFindById_WHEN_RecordsDoNotExist_THEN_ReturnEmptyList() {
-        Set<String> ids = Set.of(ID);
+        List<String> ids = Arrays.asList(PID);
         List<Caregiver> results = cut.batchFindById(ids);
         assertThat(results).isEmpty();
     }
@@ -267,18 +191,31 @@ public class CaregiverDaoTest extends DaoTestParent {
     @Test
     public void testUpdate_HappyCase() {
         Caregiver newRecord = buildCaregiverDefault();
-        cut.create(newRecord);
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
 
-        Caregiver updatedRecord = cut.findById(newRecord.getId());
+        Caregiver updatedRecord = cut.findById(newRecord.getPid());
         assertEquals(newRecord, updatedRecord);
         updatedRecord.setEmail(EMAIL2);
         cut.update(updatedRecord);
 
-        Caregiver found = cut.findById(newRecord.getId());
-        assertEquals(newRecord.getId(), found.getId());
+        Caregiver found = cut.findById(newRecord.getPid());
+        assertEquals(newRecord.getPid(), found.getPid());
         assertNotEquals(newRecord.getEmail(), found.getEmail());
         assertNotEquals(newRecord.getUpdatedAt(), found.getUpdatedAt());
         assertEquals(newRecord.getCreatedAt(), found.getCreatedAt());
+    }
+
+    @Test
+    public void testUpdate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
+        Caregiver newRecord1 = buildCaregiverDefault();
+        cut.create(newRecord1, EXISTS_ORGANIZATION_ID);
+        Caregiver newRecord2 = buildCaregiverDefault();
+        newRecord2.setEmail(EMAIL2);
+        cut.create(newRecord2, EXISTS_ORGANIZATION_ID);
+
+        Caregiver updatedRecord = cut.findById(newRecord2.getPid());
+        updatedRecord.setEmail(EMAIL1);
+        assertThatThrownBy(() -> cut.update(updatedRecord)).isInstanceOf(DuplicateRecordException.class);
     }
 
     @Test
@@ -296,56 +233,38 @@ public class CaregiverDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForUpdate() {
         return Stream.of(
                 Arguments.of(null, CAREGIVER_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(null, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver("", EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, null, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, "", FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, null, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, "", LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, null, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, "", TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, null, IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, "", IMAGE_URL, EXISTS_ORGANIZATION_ID),
-                        PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, null, EXISTS_ORGANIZATION_ID),
-                        IMAGE_URL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, "", EXISTS_ORGANIZATION_ID),
-                        IMAGE_URL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, null),
-                        ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, ""),
-                        ORGANIZATION_ID_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildCaregiver(null, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver("", SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, null, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, "", EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, null, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, "", FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, null, LAST_NAME, TITLE, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, "", LAST_NAME, TITLE, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, null, TITLE, PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, "", TITLE, PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER), TITLE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER), TITLE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, null), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, ""), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID + "1", EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
 
     @Test
     public void testDelete_HappyCase() {
         Caregiver newRecord = buildCaregiverDefault();
-        table.putItem(newRecord);
-        Caregiver found = table.getItem(newRecord);
+        createCaregiver(newRecord);
+        Caregiver found = cut.findById(newRecord.getPid());
         assertNotNull(found);
 
-        cut.delete(ID);
-        found = table.getItem(newRecord);
-        assertNull(found);
+        cut.delete(PID);
+        assertThatThrownBy(() -> cut.findById(newRecord.getPid())).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
     public void testDelete_WHEN_RecordDoesNotExist_THEN_DoNothing() {
-        assertDoesNotThrow(() -> cut.delete(ID));
+        assertDoesNotThrow(() -> cut.delete(PID));
     }
 
     @ParameterizedTest
@@ -355,6 +274,6 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     private static Caregiver buildCaregiverDefault() {
-        return buildCaregiver(ID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, EXISTS_ORGANIZATION_ID);
+        return buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER);
     }
 }

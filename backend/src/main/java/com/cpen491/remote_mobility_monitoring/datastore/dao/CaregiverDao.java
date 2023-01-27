@@ -8,11 +8,14 @@ import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
@@ -20,40 +23,43 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Careg
 @AllArgsConstructor
 public class CaregiverDao {
     @NonNull
-    GenericDao<Caregiver> genericDao;
+    GenericDao genericDao;
     @NonNull
     OrganizationDao organizationDao;
 
     /**
-     * Creates a new Caregiver record. Record with the given email must not already exist.
+     * Creates a new Caregiver record and adds it to an organization. Record with the given email must not already exist.
      *
      * @param newRecord The Caregiver record to create
+     * @param organizationId The id of the Organization record
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of email, firstName, lastName,
-     *                              title, phoneNumber, imageUrl, or organizationId are empty
+     *                              title, or phoneNumber are empty
      */
-    public void create(Caregiver newRecord) {
+    public void create(Caregiver newRecord, String organizationId) {
         log.info("Creating new Caregiver record {}", newRecord);
         Validator.validateCaregiver(newRecord);
 
-        if (organizationDao.findById(newRecord.getOrganizationId()) == null) {
-            throw new RecordDoesNotExistException(Organization.class.getSimpleName(), newRecord.getOrganizationId());
-        }
+        Organization organization = organizationDao.findById(organizationId);
 
         if (findByEmail(newRecord.getEmail()) != null) {
             throw new DuplicateRecordException(Caregiver.class.getSimpleName(), newRecord.getEmail());
         }
 
-        genericDao.create(newRecord);
+        GenericDao.setId(newRecord, CaregiverTable.ID_PREFIX);
+        Map<String, AttributeValue> caregiverMap = Caregiver.convertToMap(newRecord);
+        genericDao.create(caregiverMap);
+        genericDao.addAssociation(Organization.convertToMap(organization), caregiverMap);
     }
 
     /**
-     * Finds a Caregiver record by id. Returns null if record does not exist.
+     * Finds a Caregiver record by id.
      *
      * @param id The id of the record to find
      * @return {@link Caregiver}
+     * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if id is empty
      */
@@ -61,11 +67,12 @@ public class CaregiverDao {
         log.info("Finding Caregiver record with id [{}]", id);
         Validator.validateId(id);
 
-        Caregiver found = genericDao.findByPartitionKey(id);
-        if (found == null) {
-            log.info("Cannot find Caregiver record with id [{}]", id);
+        GetItemResponse response = genericDao.findByPartitionKey(id);
+        if (!response.hasItem()) {
+            log.error("Cannot find Caregiver record with id [{}]", id);
+            throw new RecordDoesNotExistException(Caregiver.class.getSimpleName(), id);
         }
-        return found;
+        return Caregiver.convertFromMap(response.item());
     }
 
     /**
@@ -80,26 +87,13 @@ public class CaregiverDao {
         log.info("Finding Caregiver record with email [{}]", email);
         Validator.validateEmail(email);
 
-        Caregiver found = genericDao.findOneByIndexPartitionKey(CaregiverTable.EMAIL_INDEX_NAME, email);
-        if (found == null) {
+        QueryResponse response = genericDao
+                .findAllByIndexPartitionKey(CaregiverTable.EMAIL_INDEX_NAME, CaregiverTable.EMAIL_NAME, email);
+        if (!response.hasItems() || response.items().size() == 0) {
             log.info("Cannot find Caregiver record with email [{}]", email);
+            return null;
         }
-        return found;
-    }
-
-    /**
-     * Finds all Caregiver records by organizationId. Returns a paged iterator of Caregiver records.
-     *
-     * @param organizationId The organizationId of the records to find
-     * @return {@link Iterator}
-     * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty
-     */
-    public Iterator<Page<Caregiver>> findAllInOrganization(String organizationId) {
-        log.info("Finding all Caregiver records with organizationId [{}]", organizationId);
-        Validator.validateOrganizationId(organizationId);
-
-        return genericDao.findAllByIndexPartitionKey(CaregiverTable.ORGANIZATION_ID_INDEX_NAME, organizationId);
+        return Caregiver.convertFromMap(response.items().get(0));
     }
 
     /**
@@ -109,28 +103,47 @@ public class CaregiverDao {
      * @return {@link List}
      * @throws NullPointerException If ids is null
      */
-    public List<Caregiver> batchFindById(Set<String> ids) {
+    public List<Caregiver> batchFindById(List<String> ids) {
         log.info("Batch finding caregiver records matching IDs {}", ids);
         Validator.validateIds(ids);
+        for (String id : ids) {
+            Validator.validateCaregiverId(id);
+        }
 
-        return genericDao.batchFindByPartitionKey(ids, Caregiver.class);
+        List<Map<String, AttributeValue>> result = genericDao.batchFindByPartitionKey(ids);
+        return result.stream().map(Caregiver::convertFromMap).collect(Collectors.toList());
     }
+
+    // TODO: find patient IDs
 
     /**
      * Updates a Caregiver record. Record with given id must already exist.
+     * Record with given email should not already exist unless it is the same record being updated.
      *
      * @param updatedRecord The Caregiver record to update
+     * @throws DuplicateRecordException If record with the given email already exists
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of id, email, firstName, lastName,
-     *                              title, phoneNumber, imageUrl, or organizationId are empty
+     * @throws NullPointerException Above 2 exceptions are thrown if any of pid, sid, email, firstName, lastName,
+     *                              title, or phoneNumber are empty
      */
     public void update(Caregiver updatedRecord) {
         log.info("Updating Caregiver record {}", updatedRecord);
         Validator.validateCaregiver(updatedRecord);
-        Validator.validateId(updatedRecord.getId());
+        Validator.validatePid(updatedRecord.getPid());
+        Validator.validateSid(updatedRecord.getSid());
+        Validator.validatePidEqualsSid(updatedRecord.getPid(), updatedRecord.getSid());
 
-        genericDao.update(updatedRecord, Caregiver.class);
+        Caregiver found = findByEmail(updatedRecord.getEmail());
+        if (found != null && !found.getPid().equals(updatedRecord.getPid())) {
+            throw new DuplicateRecordException(Caregiver.class.getSimpleName(), updatedRecord.getEmail());
+        }
+
+        try {
+            genericDao.update(Caregiver.convertToMap(updatedRecord));
+        } catch (ConditionalCheckFailedException e) {
+            throw new RecordDoesNotExistException(Caregiver.class.getSimpleName(), updatedRecord.getPid());
+        }
     }
 
     /**
@@ -145,5 +158,7 @@ public class CaregiverDao {
         Validator.validateId(id);
 
         genericDao.delete(id);
+
+        // TODO: delete caregiver associations
     }
 }

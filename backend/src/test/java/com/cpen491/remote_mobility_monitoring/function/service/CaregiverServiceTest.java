@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
+import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -46,13 +48,15 @@ public class CaregiverServiceTest {
 
     CaregiverService cut;
     @Mock
+    PatientDao patientDao;
+    @Mock
     CaregiverDao caregiverDao;
     ArgumentCaptor<Caregiver> caregiverCaptor;
 
     @BeforeEach
     public void setup() {
         caregiverCaptor = ArgumentCaptor.forClass(Caregiver.class);
-        cut = new CaregiverService(caregiverDao);
+        cut = new CaregiverService(patientDao, caregiverDao);
     }
 
     @Test
@@ -60,20 +64,19 @@ public class CaregiverServiceTest {
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
         CreateCaregiverResponseBody responseBody = cut.createCaregiver(requestBody);
 
-        verify(caregiverDao, times(1)).create(caregiverCaptor.capture());
+        verify(caregiverDao, times(1)).create(caregiverCaptor.capture(), anyString());
         assertEquals(EMAIL, caregiverCaptor.getValue().getEmail());
         assertEquals(FIRST_NAME, caregiverCaptor.getValue().getFirstName());
         assertEquals(LAST_NAME, caregiverCaptor.getValue().getLastName());
         assertEquals(TITLE, caregiverCaptor.getValue().getTitle());
         assertEquals(PHONE_NUMBER, caregiverCaptor.getValue().getPhoneNumber());
-        assertEquals(ORGANIZATION_ID, caregiverCaptor.getValue().getOrganizationId());
         assertNotNull(responseBody);
     }
 
     @Test
     public void testCreateCaregiver_WHEN_CaregiverDaoCreateThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
-        Mockito.doThrow(toThrow).when(caregiverDao).create(any(Caregiver.class));
+        Mockito.doThrow(toThrow).when(caregiverDao).create(any(Caregiver.class), anyString());
 
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
         assertThatThrownBy(() -> cut.createCaregiver(requestBody)).isSameAs(toThrow);
@@ -132,7 +135,6 @@ public class CaregiverServiceTest {
     }
 
     private static Caregiver buildCaregiverDefault() {
-        Caregiver caregiver = buildCaregiver(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, IMAGE_URL, ORGANIZATION_ID);
-        return caregiver;
+        return buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER);
     }
 }

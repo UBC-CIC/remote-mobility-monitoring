@@ -8,9 +8,12 @@ import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 
-import java.util.Iterator;
+import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 
@@ -18,39 +21,43 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Admin
 @AllArgsConstructor
 public class AdminDao {
     @NonNull
-    GenericDao<Admin> genericDao;
+    GenericDao genericDao;
     @NonNull
     OrganizationDao organizationDao;
 
     /**
-     * Creates a new Admin record. Record with the given email must not already exist.
+     * Creates a new Admin record and adds it to an organization. Record with the given email must not already exist.
      *
      * @param newRecord The Admin record to create
+     * @param organizationId The id of the Organization record
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of email, firstName, lastName, or organizationId are empty
+     * @throws NullPointerException Above 2 exceptions are thrown if any of email, firstName, or lastName are empty
      */
-    public void create(Admin newRecord) {
+    public void create(Admin newRecord, String organizationId) {
         log.info("Creating new Admin record {}", newRecord);
         Validator.validateAdmin(newRecord);
 
-        if (organizationDao.findById(newRecord.getOrganizationId()) == null) {
-            throw new RecordDoesNotExistException(Organization.class.getSimpleName(), newRecord.getOrganizationId());
-        }
+        Organization organization = organizationDao.findById(organizationId);
 
         if (findByEmail(newRecord.getEmail()) != null) {
             throw new DuplicateRecordException(Admin.class.getSimpleName(), newRecord.getEmail());
         }
 
-        genericDao.create(newRecord);
+        // TODO: test whether actually added association
+        GenericDao.setId(newRecord, AdminTable.ID_PREFIX);
+        Map<String, AttributeValue> adminMap = Admin.convertToMap(newRecord);
+        genericDao.create(adminMap);
+        genericDao.addAssociation(Organization.convertToMap(organization), adminMap);
     }
 
     /**
-     * Finds an Admin record by id. Returns null if record does not exist.
+     * Finds an Admin record by id.
      *
      * @param id The id of the record to find
      * @return {@link Admin}
+     * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if id is empty
      */
@@ -58,11 +65,12 @@ public class AdminDao {
         log.info("Finding Admin record with id [{}]", id);
         Validator.validateId(id);
 
-        Admin found = genericDao.findByPartitionKey(id);
-        if (found == null) {
-            log.info("Cannot find Admin record with id [{}]", id);
+        GetItemResponse response = genericDao.findByPartitionKey(id);
+        if (!response.hasItem()) {
+            log.error("Cannot find Admin record with id [{}]", id);
+            throw new RecordDoesNotExistException(Admin.class.getSimpleName(), id);
         }
-        return found;
+        return Admin.convertFromMap(response.item());
     }
 
     /**
@@ -77,43 +85,43 @@ public class AdminDao {
         log.info("Finding Admin record with email [{}]", email);
         Validator.validateEmail(email);
 
-        Admin found = genericDao.findOneByIndexPartitionKey(AdminTable.EMAIL_INDEX_NAME, email);
-        if (found == null) {
+        QueryResponse response = genericDao
+                .findAllByIndexPartitionKey(AdminTable.EMAIL_INDEX_NAME, AdminTable.EMAIL_NAME, email);
+        if (!response.hasItems() || response.items().size() == 0) {
             log.info("Cannot find Admin record with email [{}]", email);
+            return null;
         }
-        return found;
-    }
-
-    /**
-     * Finds all Admin records by organizationId. Returns a paged iterator of Admin records.
-     *
-     * @param organizationId The organizationId of the records to find
-     * @return {@link Iterator}
-     * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty
-     */
-    public Iterator<Page<Admin>> findAllInOrganization(String organizationId) {
-        log.info("Finding all Admin records with organizationId [{}]", organizationId);
-        Validator.validateOrganizationId(organizationId);
-
-        return genericDao.findAllByIndexPartitionKey(AdminTable.ORGANIZATION_ID_INDEX_NAME, organizationId);
+        return Admin.convertFromMap(response.items().get(0));
     }
 
     /**
      * Updates an Admin record. Record with given id must already exist.
+     * Record with given email should not already exist unless it is the same record being updated.
      *
      * @param updatedRecord The Admin record to update
+     * @throws DuplicateRecordException If record with the given email already exists
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of id, email,
-     *                              firstName, lastName, or organizationId are empty
+     * @throws NullPointerException Above 2 exceptions are thrown if any of pid, sid, email,
+     *                              firstName, or lastName are empty
      */
     public void update(Admin updatedRecord) {
         log.info("Updating Admin record {}", updatedRecord);
         Validator.validateAdmin(updatedRecord);
-        Validator.validateId(updatedRecord.getId());
+        Validator.validatePid(updatedRecord.getPid());
+        Validator.validateSid(updatedRecord.getSid());
+        Validator.validatePidEqualsSid(updatedRecord.getPid(), updatedRecord.getSid());
 
-        genericDao.update(updatedRecord, Admin.class);
+        Admin found = findByEmail(updatedRecord.getEmail());
+        if (found != null && !found.getPid().equals(updatedRecord.getPid())) {
+            throw new DuplicateRecordException(Admin.class.getSimpleName(), updatedRecord.getEmail());
+        }
+
+        try {
+            genericDao.update(Admin.convertToMap(updatedRecord));
+        } catch (ConditionalCheckFailedException e) {
+            throw new RecordDoesNotExistException(Admin.class.getSimpleName(), updatedRecord.getPid());
+        }
     }
 
     /**

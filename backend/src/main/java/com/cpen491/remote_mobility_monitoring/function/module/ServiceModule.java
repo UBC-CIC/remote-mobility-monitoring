@@ -13,8 +13,8 @@ import javax.inject.Singleton;
 public class ServiceModule {
     @Provides
     @Singleton
-    public static CaregiverService caregiverService(CaregiverDao caregiverDao) {
-        return new CaregiverService(caregiverDao);
+    public static CaregiverService caregiverService(PatientDao patientDao, CaregiverDao caregiverDao) {
+        return new CaregiverService(patientDao, caregiverDao);
     }
 
     @Provides

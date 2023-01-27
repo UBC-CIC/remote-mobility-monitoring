@@ -9,6 +9,10 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
@@ -17,7 +21,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
@@ -51,7 +56,7 @@ public class PatientService {
         patientDao.create(newPatient);
 
         return CreatePatientResponseBody.builder()
-                .patientId(newPatient.getId())
+                .patientId(newPatient.getPid())
                 .authCode(newPatient.getAuthCode())
                 .build();
     }
@@ -59,10 +64,7 @@ public class PatientService {
     public UpdatePatientDeviceResponseBody updatePatientDevice(UpdatePatientDeviceRequestBody body) {
         Validator.validateUpdatePatientDeviceRequestBody(body);
 
-        Patient patient = patientDao.findById(body.getPatientId());
-        if (patient == null) {
-            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), body.getPatientId());
-        }
+        Patient patient = findPatientById(body.getPatientId());
 
         generateAuthCodeForPatient(patient);
         patientDao.update(patient);
@@ -75,32 +77,61 @@ public class PatientService {
     public VerifyPatientResponseBody verifyPatient(VerifyPatientRequestBody body) {
         Validator.validateVerifyPatientRequestBody(body);
 
-        Patient patient = patientDao.findById(body.getPatientId());
-        if (patient == null) {
-            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), body.getPatientId());
-        }
-        Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
-        if (caregiver == null) {
-            throw new RecordDoesNotExistException(Caregiver.class.getSimpleName(), body.getCaregiverId());
-        }
+        Patient patient = findPatientById(body.getPatientId());
+        Caregiver caregiver = findCaregiverById(body.getCaregiverId());
 
         verifyAuthCode(patient.getAuthCode(), patient.getAuthCodeTimestamp(), body.getAuthCode());
 
         patient.setDeviceId(body.getDeviceId());
         patient.setVerified(true);
-        patient.setCaregiverIds(Set.of(body.getCaregiverId()));
+//        associatePatientWithCaregiver(patient, caregiver);
         patientDao.update(patient);
-
-        if (caregiver.getPatientIds() == null) {
-            caregiver.setPatientIds(Set.of(body.getPatientId()));
-        } else {
-            caregiver.getPatientIds().add(body.getPatientId());
-        }
         caregiverDao.update(caregiver);
 
         return VerifyPatientResponseBody.builder()
                 .message("OK")
                 .build();
+    }
+
+    public SharePatientResponseBody sharePatient(SharePatientRequestBody body) {
+        Validator.validateSharePatientRequestBody(body);
+
+        Patient patient = findPatientById(body.getPatientId());
+        Caregiver caregiver = findCaregiverById(body.getCaregiverId());
+
+//        associatePatientWithCaregiver(patient, caregiver);
+        patientDao.update(patient);
+        caregiverDao.update(caregiver);
+
+        return SharePatientResponseBody.builder()
+                .message("OK")
+                .build();
+    }
+
+    public DeletePatientResponseBody deletePatient(DeletePatientRequestBody body) {
+        Validator.validateDeletePatientRequestBody(body);
+
+        patientDao.delete(body.getPatientId());
+
+        return DeletePatientResponseBody.builder()
+                .message("OK")
+                .build();
+    }
+
+    private Patient findPatientById(String id) {
+        Patient patient = patientDao.findById(id);
+        if (patient == null) {
+            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), id);
+        }
+        return patient;
+    }
+
+    private Caregiver findCaregiverById(String id) {
+        Caregiver caregiver = caregiverDao.findById(id);
+        if (caregiver == null) {
+            throw new RecordDoesNotExistException(Caregiver.class.getSimpleName(), id);
+        }
+        return caregiver;
     }
 
     private static void generateAuthCodeForPatient(Patient patient) {

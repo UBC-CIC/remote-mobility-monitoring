@@ -1,119 +1,184 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
-import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetItemEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetResultPageIterable;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
-import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.BatchGetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 
 @AllArgsConstructor
-public class GenericDao<T extends BaseModel> {
-    private static final int INDEX_LIMIT = 50;
-
+public class GenericDao {
     @NonNull
-    DynamoDbTable<T> table;
-    Map<String, DynamoDbIndex<T>> indexMap;
-    DynamoDbEnhancedClient enhancedClient;
+    DynamoDbClient ddbClient;
 
-    public void create(T newRecord) {
-        newRecord.setId(UUID.randomUUID().toString());
-        String currentTime = getCurrentUtcTimeString();
-        newRecord.setCreatedAt(currentTime);
-        newRecord.setUpdatedAt(currentTime);
-
-        table.putItem(newRecord);
-    }
-
-    public T findByPartitionKey(String partitionKey) {
-        Key key = Key.builder().partitionValue(partitionKey).build();
-        return table.getItem(key);
-    }
-
-    public T findOneByIndexPartitionKey(String indexName, String indexPartitionKey) {
-        Iterator<Page<T>> results = findAllByIndexPartitionKey(indexName, indexPartitionKey);
-
-        if (results.hasNext()) {
-            List<T> items = results.next().items();
-            if (items.size() == 1) {
-                return items.get(0);
-            }
-        }
-
-        return null;
-    }
-
-    public Iterator<Page<T>> findAllByIndexPartitionKey(String indexName, String indexPartitionKey) {
-        DynamoDbIndex<T> index = indexMap.get(indexName);
-
-        AttributeValue val = AttributeValue.builder().s(indexPartitionKey).build();
-        Key key = Key.builder().partitionValue(val).build();
-        QueryConditional queryConditional = QueryConditional.keyEqualTo(key);
-
-        return index.query(QueryEnhancedRequest.builder()
-                .queryConditional(queryConditional)
-                .limit(INDEX_LIMIT)
-                .build()).iterator();
-    }
-
-    public List<T> batchFindByPartitionKey(Set<String> partitionKeys, Class<T> itemClass) {
-        ReadBatch.Builder<T> readBatchBuilder = ReadBatch.builder(itemClass).mappedTableResource(table);
-        for (String partitionKey : partitionKeys) {
-            Key key = Key.builder().partitionValue(partitionKey).build();
-            readBatchBuilder.addGetItem(key);
-        }
-
-        BatchGetItemEnhancedRequest request = BatchGetItemEnhancedRequest.builder()
-                .addReadBatch(readBatchBuilder.build())
-                .build();
-        BatchGetResultPageIterable results = enhancedClient.batchGetItem(request);
-        return results.resultsForTable(table).stream().collect(Collectors.toList());
-    }
-
-    public void update(T updatedRecord, Class<T> itemClass) {
-        String currentTime = getCurrentUtcTimeString();
-        updatedRecord.setUpdatedAt(currentTime);
-
-        Expression expression = Expression.builder()
-                .expression(String.format("attribute_exists(%s)", BaseTable.ID_NAME))
+    public void create(Map<String, AttributeValue> map) {
+        PutItemRequest request = PutItemRequest.builder()
+                .item(map)
+                .tableName(BaseTable.TABLE_NAME)
                 .build();
 
-        UpdateItemEnhancedRequest<T> request = UpdateItemEnhancedRequest.builder(itemClass)
+        ddbClient.putItem(request);
+    }
+
+    public void addAssociation(Map<String, AttributeValue> map1, Map<String, AttributeValue> map2) {
+        Map<String, AttributeValue> map = new HashMap<>();
+        map.putAll(map1);
+        map.putAll(map2);
+        String currentTime = getCurrentUtcTimeString();
+        map.put(BaseTable.PID_NAME, map1.get(BaseTable.PID_NAME));
+        map.put(BaseTable.SID_NAME, map2.get(BaseTable.PID_NAME));
+        map.put(BaseTable.CREATED_AT_NAME, convertToAttributeValue(currentTime));
+        map.put(BaseTable.UPDATED_AT_NAME, convertToAttributeValue(currentTime));
+
+        PutItemRequest request = PutItemRequest.builder()
+                .item(map)
+                .tableName(BaseTable.TABLE_NAME)
+                .build();
+
+        ddbClient.putItem(request);
+    }
+
+    public GetItemResponse findByPartitionKey(String key) {
+        Map<String, AttributeValue> map = new HashMap<>();
+        map.put(BaseTable.PID_NAME, convertToAttributeValue(key));
+        map.put(BaseTable.SID_NAME, convertToAttributeValue(key));
+
+        GetItemRequest request = GetItemRequest.builder()
+                .key(map)
+                .tableName(BaseTable.TABLE_NAME)
+                .build();
+
+        return ddbClient.getItem(request);
+    }
+
+    public QueryResponse findAllByIndexPartitionKey(String indexName, String keyName, String keyVal) {
+        String expression = "#pid = :pidValue";
+        Map<String, String> attributeNames = new HashMap<>();
+        attributeNames.put("#pid", keyName);
+        Map<String, AttributeValue> attributeValues = new HashMap<>();
+        attributeValues.put(":pidValue", convertToAttributeValue(keyVal));
+
+        QueryRequest request = QueryRequest.builder()
+                .keyConditionExpression(expression)
+                .expressionAttributeNames(attributeNames)
+                .expressionAttributeValues(attributeValues)
+                .tableName(BaseTable.TABLE_NAME)
+                .indexName(indexName)
+                .build();
+
+        return ddbClient.query(request);
+    }
+
+    public QueryResponse findAllAssociations(String pid, String sidPrefix) {
+        return findAllAssociations(pid, sidPrefix, null, false);
+    }
+
+    public QueryResponse findAllAssociationsOnIndex(String pid, String sidPrefix, String indexName) {
+        return findAllAssociations(pid, sidPrefix, indexName, true);
+    }
+
+    private QueryResponse findAllAssociations(String pid, String sidPrefix, String indexName, boolean index) {
+        String expression = "#pid = :pidValue AND begins_with(#sid, :sidValue)";
+        Map<String, String> attributeNames = new HashMap<>();
+        Map<String, AttributeValue> attributeValues = new HashMap<>();
+        if (index) {
+            attributeNames.put("#pid", BaseTable.SID_NAME);
+            attributeNames.put("#sid", BaseTable.PID_NAME);
+        } else {
+            attributeNames.put("#pid", BaseTable.PID_NAME);
+            attributeNames.put("#sid", BaseTable.SID_NAME);
+        }
+        attributeValues.put(":pidValue", convertToAttributeValue(pid));
+        attributeValues.put(":sidValue", convertToAttributeValue(sidPrefix));
+
+        QueryRequest.Builder requestBuilder = QueryRequest.builder()
+                .keyConditionExpression(expression)
+                .expressionAttributeNames(attributeNames)
+                .expressionAttributeValues(attributeValues)
+                .tableName(BaseTable.TABLE_NAME);
+
+        QueryRequest request = index ? requestBuilder.indexName(indexName).build() : requestBuilder.build();
+        return ddbClient.query(request);
+    }
+
+    public List<Map<String, AttributeValue>> batchFindByPartitionKey(List<String> partitionKeys) {
+        List<Map<String, AttributeValue>> mapList = new ArrayList<>();
+        for (String key : partitionKeys) {
+            Map<String, AttributeValue> map = new HashMap<>();
+            map.put(BaseTable.PID_NAME, convertToAttributeValue(key));
+            map.put(BaseTable.SID_NAME, convertToAttributeValue(key));
+            mapList.add(map);
+        }
+
+        KeysAndAttributes keysAndAttributes = KeysAndAttributes.builder()
+                .keys(mapList)
+                .build();
+        Map<String, KeysAndAttributes> requestItems = new HashMap<>();
+        requestItems.put(BaseTable.TABLE_NAME, keysAndAttributes);
+
+        BatchGetItemRequest request = BatchGetItemRequest.builder()
+                .requestItems(requestItems)
+                .build();
+
+        return ddbClient.batchGetItem(request).responses().get(BaseTable.TABLE_NAME);
+    }
+
+    public void update(Map<String, AttributeValue> map) {
+        String currentTime = getCurrentUtcTimeString();
+        map.put(BaseTable.UPDATED_AT_NAME, convertToAttributeValue(currentTime));
+
+        String expression = "attribute_exists(#pid)";
+        Map<String, String> attributesNames = new HashMap<>();
+        attributesNames.put("#pid", BaseTable.PID_NAME);
+
+        PutItemRequest request = PutItemRequest.builder()
                 .conditionExpression(expression)
-                .item(updatedRecord)
+                .expressionAttributeNames(attributesNames)
+                .item(map)
+                .tableName(BaseTable.TABLE_NAME)
                 .build();
 
-        try {
-            table.updateItem(request);
-        } catch (ConditionalCheckFailedException e) {
-            throw new RecordDoesNotExistException(itemClass.getSimpleName(), updatedRecord.getId());
-        }
+        ddbClient.putItem(request);
     }
 
     public void delete(String partitionKey) {
-        Key key = Key.builder().partitionValue(partitionKey).build();
-        table.deleteItem(key);
+        Map<String, AttributeValue> map = new HashMap<>();
+        map.put(BaseTable.PID_NAME, convertToAttributeValue(partitionKey));
+        map.put(BaseTable.SID_NAME, convertToAttributeValue(partitionKey));
+
+        DeleteItemRequest request = DeleteItemRequest.builder()
+                .key(map)
+                .tableName(BaseTable.TABLE_NAME)
+                .build();
+
+        ddbClient.deleteItem(request);
+    }
+
+    public static void setId(BaseModel model, String idPrefix) {
+        String id = UUID.randomUUID().toString();
+        model.setPid(idPrefix + id);
+        model.setSid(idPrefix + id);
+
+        String currentTime = getCurrentUtcTimeString();
+        model.setCreatedAt(currentTime);
+        model.setUpdatedAt(currentTime);
     }
 }

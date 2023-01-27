@@ -2,20 +2,22 @@ package com.cpen491.remote_mobility_monitoring.datastore.model;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.putInMap;
 
-@DynamoDbBean
+@Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -28,65 +30,32 @@ public class Caregiver extends BaseModel {
     private String lastName;
     private String title;
     private String phoneNumber;
-    private String imageUrl;
-    private String organizationId;
-    private Set<String> patientIds;
 
-    @DynamoDbPartitionKey
-    @DynamoDbAttribute(CaregiverTable.ID_NAME)
-    public String getId() {
-        return id;
+    public static Map<String, AttributeValue> convertToMap(Caregiver caregiver) {
+        Map<String, AttributeValue> map = new HashMap<>();
+        putInMap(map, CaregiverTable.PID_NAME, caregiver.getPid());
+        putInMap(map, CaregiverTable.SID_NAME, caregiver.getSid());
+        putInMap(map, CaregiverTable.EMAIL_NAME, caregiver.getEmail());
+        putInMap(map, CaregiverTable.FIRST_NAME_NAME, caregiver.getFirstName());
+        putInMap(map, CaregiverTable.LAST_NAME_NAME, caregiver.getLastName());
+        putInMap(map, CaregiverTable.TITLE_NAME, caregiver.getTitle());
+        putInMap(map, CaregiverTable.PHONE_NUMBER_NAME, caregiver.getPhoneNumber());
+        putInMap(map, CaregiverTable.CREATED_AT_NAME, caregiver.getCreatedAt());
+        putInMap(map, CaregiverTable.UPDATED_AT_NAME, caregiver.getUpdatedAt());
+        return map;
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = {CaregiverTable.EMAIL_INDEX_NAME})
-    @DynamoDbAttribute(CaregiverTable.EMAIL_NAME)
-    public String getEmail() {
-        return email;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.FIRST_NAME_NAME)
-    public String getFirstName() {
-        return firstName;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.LAST_NAME_NAME)
-    public String getLastName() {
-        return lastName;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.TITLE_NAME)
-    public String getTitle() {
-        return title;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.PHONE_NUMBER_NAME)
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.IMAGE_URL_NAME)
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    @DynamoDbSecondaryPartitionKey(indexNames = {CaregiverTable.ORGANIZATION_ID_INDEX_NAME})
-    @DynamoDbAttribute(CaregiverTable.ORGANIZATION_ID_NAME)
-    public String getOrganizationId() {
-        return organizationId;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.PATIENT_IDS_NAME)
-    public Set<String> getPatientIds() {
-        return patientIds;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.CREATED_AT_NAME)
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    @DynamoDbAttribute(CaregiverTable.UPDATED_AT_NAME)
-    public String getUpdatedAt() {
-        return updatedAt;
+    public static Caregiver convertFromMap(Map<String, AttributeValue> map) {
+        return Caregiver.builder()
+                .pid(getFromMap(map, CaregiverTable.PID_NAME))
+                .sid(getFromMap(map, CaregiverTable.SID_NAME))
+                .email(getFromMap(map, CaregiverTable.EMAIL_NAME))
+                .firstName(getFromMap(map, CaregiverTable.FIRST_NAME_NAME))
+                .lastName(getFromMap(map, CaregiverTable.LAST_NAME_NAME))
+                .title(getFromMap(map, CaregiverTable.TITLE_NAME))
+                .phoneNumber(getFromMap(map, CaregiverTable.PHONE_NUMBER_NAME))
+                .createdAt(getFromMap(map, CaregiverTable.CREATED_AT_NAME))
+                .updatedAt(getFromMap(map, CaregiverTable.UPDATED_AT_NAME))
+                .build();
     }
 }

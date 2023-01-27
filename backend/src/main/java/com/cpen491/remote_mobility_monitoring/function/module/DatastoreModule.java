@@ -32,7 +32,7 @@ public class DatastoreModule {
 
     @Provides
     @Singleton
-    public static PatientDao patientDao(DaoFactory daoFactory) {
-        return daoFactory.createPatientDao();
+    public static PatientDao patientDao(DaoFactory daoFactory, CaregiverDao caregiverDao) {
+        return daoFactory.createPatientDao(caregiverDao);
     }
 }

@@ -15,41 +15,42 @@ public class TestUtils {
                 .hasMessage(errorMessage);
     }
 
-    public static Organization buildOrganization(String id, String name) {
+    public static Organization buildOrganization(String pid, String sid, String name) {
         return Organization.builder()
-                .id(id)
+                .pid(pid)
+                .sid(sid)
                 .name(name)
                 .build();
     }
 
-    public static Admin buildAdmin(String id, String email, String firstName, String lastName, String organizationId) {
+    public static Admin buildAdmin(String pid, String sid, String email, String firstName, String lastName) {
         return Admin.builder()
-                .id(id)
+                .pid(pid)
+                .sid(sid)
                 .email(email)
                 .firstName(firstName)
                 .lastName(lastName)
-                .organizationId(organizationId)
                 .build();
     }
 
-    public static Caregiver buildCaregiver(String id, String email, String firstName, String lastName,
-                                           String title, String phoneNumber, String imageUrl, String organizationId) {
+    public static Caregiver buildCaregiver(String pid, String sid, String email, String firstName, String lastName,
+                                           String title, String phoneNumber) {
         return Caregiver.builder()
-                .id(id)
+                .pid(pid)
+                .sid(sid)
                 .email(email)
                 .firstName(firstName)
                 .lastName(lastName)
                 .title(title)
                 .phoneNumber(phoneNumber)
-                .imageUrl(imageUrl)
-                .organizationId(organizationId)
                 .build();
     }
 
-    public static Patient buildPatient(String id, String deviceId, String firstName, String lastName, String dateOfBirth,
+    public static Patient buildPatient(String pid, String sid, String deviceId, String firstName, String lastName, String dateOfBirth,
                                        String phoneNumber, String authCode, String authCodeTimestamp, Boolean verified) {
         return Patient.builder()
-                .id(id)
+                .pid(pid)
+                .sid(sid)
                 .deviceId(deviceId)
                 .firstName(firstName)
                 .lastName(lastName)
