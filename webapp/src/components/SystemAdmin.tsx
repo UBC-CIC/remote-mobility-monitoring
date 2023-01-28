@@ -9,7 +9,7 @@ export class SignUp extends React.Component{
         console.log(this.state) ;
     };
 
-    handleSubmit = (event : any) => {};
+    handleSubmit = (event : any) => {return;};
 
     render() {
         return (

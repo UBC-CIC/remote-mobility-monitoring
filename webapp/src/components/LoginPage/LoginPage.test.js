@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, screen } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import LoginPage from "./LoginPage";
 
 describe("LoginPage", () => {
@@ -16,9 +16,9 @@ describe("LoginPage", () => {
     });
 
     test("renders a form with a username and password input", () => {
-        const { getByLabelText } = render(<LoginPage />);
-        const usernameInput = screen.getByPlaceholderText("Username");
-        const passwordInput = screen.getByPlaceholderText("Password");
+        const {getByPlaceholderText } = render(<LoginPage />)
+        const usernameInput = getByPlaceholderText("Username");
+        const passwordInput = getByPlaceholderText("Password");
         expect(usernameInput).toBeInTheDocument();
         expect(passwordInput).toBeInTheDocument();
     });

@@ -27,7 +27,7 @@ function LoginPage() {
                     <br />
                     <input type='password' placeholder='Password'></input>
                     <div className='forgot'>Forgot password?</div>
-                    <button type='submit' onClick={handleLogin}>Login</button>
+                    <button type='submit' onClick={(e) => { handleLogin(e); }}>Login</button>
                 </div>
             </div>
         </div>
