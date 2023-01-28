@@ -29,12 +29,12 @@ public class DaoFactory {
         return new AdminDao(genericDao, organizationDao);
     }
 
-    public CaregiverDao createCaregiverDao(OrganizationDao organizationDao) {
-        return new CaregiverDao(genericDao, organizationDao);
+    public CaregiverDao createCaregiverDao(OrganizationDao organizationDao, PatientDao patientDao) {
+        return new CaregiverDao(genericDao, organizationDao, patientDao);
     }
 
-    public PatientDao createPatientDao(CaregiverDao caregiverDao) {
-        return new PatientDao(genericDao, caregiverDao);
+    public PatientDao createPatientDao() {
+        return new PatientDao(genericDao);
     }
 
     public static DynamoDbClient createDynamoDbClient() {

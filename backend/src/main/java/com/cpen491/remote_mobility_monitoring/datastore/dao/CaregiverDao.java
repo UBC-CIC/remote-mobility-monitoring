@@ -4,6 +4,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 
 @Slf4j
 @AllArgsConstructor
@@ -26,6 +28,8 @@ public class CaregiverDao {
     GenericDao genericDao;
     @NonNull
     OrganizationDao organizationDao;
+    @NonNull
+    PatientDao patientDao;
 
     /**
      * Creates a new Caregiver record and adds it to an organization. Record with the given email must not already exist.
@@ -45,6 +49,7 @@ public class CaregiverDao {
         Organization organization = organizationDao.findById(organizationId);
 
         if (findByEmail(newRecord.getEmail()) != null) {
+            log.error("Caregiver record with email [{}] already exists", newRecord.getEmail());
             throw new DuplicateRecordException(Caregiver.class.getSimpleName(), newRecord.getEmail());
         }
 
@@ -55,17 +60,46 @@ public class CaregiverDao {
     }
 
     /**
+     * Adds a Patient to a Caregiver. Patient and Caregiver must already exist.
+     *
+     * @param patientId The id of the Patient record
+     * @param caregiverId The id of the Caregiver record
+     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist
+     * @throws DuplicateRecordException If Patient/Caregiver association already exists
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
+     */
+    public void addPatient(String patientId, String caregiverId) {
+        log.info("Adding Patient [{}] to Caregiver [{}]", patientId, caregiverId);
+        Validator.validatePatientId(patientId);
+        Validator.validateCaregiverId(caregiverId);
+
+        Patient patient = patientDao.findById(patientId);
+        Caregiver caregiver = findById(caregiverId);
+
+        GetItemResponse response = genericDao.findByPrimaryKey(caregiverId, patientId);
+        if (response.hasItem()) {
+            log.error("Patient [{}] already associated with Caregiver [{}]", patientId, caregiverId);
+            throw new DuplicateRecordException("Patient/Caregiver association", patientId + ":" + caregiverId);
+        }
+
+        genericDao.addAssociation(Caregiver.convertToMap(caregiver), Patient.convertToMap(patient));
+    }
+
+    // TODO: remove patient
+
+    /**
      * Finds a Caregiver record by id.
      *
      * @param id The id of the record to find
      * @return {@link Caregiver}
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public Caregiver findById(String id) {
         log.info("Finding Caregiver record with id [{}]", id);
-        Validator.validateId(id);
+        Validator.validateCaregiverId(id);
 
         GetItemResponse response = genericDao.findByPartitionKey(id);
         if (!response.hasItem()) {
@@ -114,9 +148,28 @@ public class CaregiverDao {
         return result.stream().map(Caregiver::convertFromMap).collect(Collectors.toList());
     }
 
-    // TODO: find patient IDs
-
     // TODO: find caregivers in same org
+
+    /**
+     * Find all Patients of this Caregiver.
+     *
+     * @param caregiverId The id of the Caregiver record
+     * @return {@link List}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty or invalid
+     */
+    public List<Patient> findAllPatients(String caregiverId) {
+        log.info("Finding all Patient records of Caregiver [{}]", caregiverId);
+        Validator.validateCaregiverId(caregiverId);
+
+        List<Map<String, AttributeValue>> result = genericDao
+                .findAllAssociations(caregiverId, PatientTable.ID_PREFIX).items();
+        return result.stream().map(map -> {
+            Patient patient = Patient.convertFromMap(map);
+            patient.setPid(patient.getSid());
+            return patient;
+        }).collect(Collectors.toList());
+    }
 
     /**
      * Updates a Caregiver record. Record with given id must already exist.
@@ -133,9 +186,11 @@ public class CaregiverDao {
         log.info("Updating Caregiver record {}", updatedRecord);
         Validator.validateCaregiver(updatedRecord);
         Validator.validatePidEqualsSid(updatedRecord.getPid(), updatedRecord.getSid());
+        Validator.validateCaregiverId(updatedRecord.getPid());
 
         Caregiver found = findByEmail(updatedRecord.getEmail());
         if (found != null && !found.getPid().equals(updatedRecord.getPid())) {
+            log.error("Caregiver record with email [{}] already exists", updatedRecord.getEmail());
             throw new DuplicateRecordException(Caregiver.class.getSimpleName(), updatedRecord.getEmail());
         }
 
@@ -147,18 +202,16 @@ public class CaregiverDao {
     }
 
     /**
-     * Deletes a Caregiver record by id. Does nothing if record does not exist.
+     * Deletes a Caregiver record by id and all of its associations. Does nothing if record does not exist.
      *
      * @param id The id of the record to delete
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public void delete(String id) {
         log.info("Deleting Caregiver record with id [{}]", id);
-        Validator.validateId(id);
+        Validator.validateCaregiverId(id);
 
         genericDao.delete(id);
-
-        // TODO: delete caregiver associations
     }
 }

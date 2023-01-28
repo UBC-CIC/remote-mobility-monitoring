@@ -21,13 +21,8 @@ import java.util.stream.Stream;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
-import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
-import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
-import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DATE_OF_BIRTH_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
@@ -74,9 +69,7 @@ public class PatientDaoTest extends DaoTestParent {
     public void setup() {
         setupTable();
         GenericDao genericDao = new GenericDao(ddbClient);
-        OrganizationDao organizationDao = new OrganizationDao(genericDao);
-        CaregiverDao caregiverDao = new CaregiverDao(genericDao, organizationDao);
-        cut = new PatientDao(genericDao, caregiverDao);
+        cut = new PatientDao(genericDao);
     }
 
     @AfterEach
@@ -152,76 +145,6 @@ public class PatientDaoTest extends DaoTestParent {
                         "", VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, null), VERIFIED_NULL_ERROR_MESSAGE)
-        );
-    }
-
-    @Test
-    public void testAddCaregiver_HappyCase() {
-        Caregiver caregiver1 = buildCaregiverDefault();
-        createCaregiver(caregiver1);
-        Patient patient = buildPatientDefault();
-        createPatient(patient);
-        cut.addCaregiver(patient.getPid(), CAREGIVER_ID1);
-
-        GetItemResponse response1 = findByPrimaryKey(CAREGIVER_ID1, patient.getPid());
-        assertTrue(response1.hasItem());
-        assertEquals(CAREGIVER_ID1, response1.item().get(BaseTable.PID_NAME).s());
-        assertEquals(EMAIL1, response1.item().get(CaregiverTable.EMAIL_NAME).s());
-        assertNull(response1.item().get(CaregiverTable.FIRST_NAME_NAME));
-        assertEquals(patient.getPid(), response1.item().get(BaseTable.SID_NAME).s());
-        assertEquals(FIRST_NAME, response1.item().get(PatientTable.FIRST_NAME_NAME).s());
-
-        GetItemResponse response2 = findByPrimaryKey(CAREGIVER_ID2, patient.getPid());
-        assertFalse(response2.hasItem());
-
-        Caregiver caregiver2 = buildCaregiver(CAREGIVER_ID2, CAREGIVER_ID2, EMAIL2, null, null, null, null);
-        createCaregiver(caregiver2);
-        cut.addCaregiver(patient.getPid(), CAREGIVER_ID2);
-
-        GetItemResponse response3 = findByPrimaryKey(CAREGIVER_ID2, patient.getPid());
-        assertTrue(response3.hasItem());
-
-        GetItemResponse response4 = findByPrimaryKey(patient.getPid(), CAREGIVER_ID1);
-        assertFalse(response4.hasItem());
-    }
-
-    @Test
-    public void testAddCaregiver_WHEN_PatientRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        assertThatThrownBy(() -> cut.addCaregiver(PID, CAREGIVER_ID1)).isInstanceOf(RecordDoesNotExistException.class);
-    }
-
-    @Test
-    public void testAddCaregiver_WHEN_CaregiverRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Patient newRecord = buildPatientDefault();
-        cut.create(newRecord);
-        assertThatThrownBy(() -> cut.addCaregiver(newRecord.getPid(), CAREGIVER_ID1)).isInstanceOf(RecordDoesNotExistException.class);
-    }
-
-    @Test
-    public void testAddCaregiver_WHEN_CaregiverAlreadyAdded_THEN_ThrowDuplicateRecordException() {
-        Caregiver caregiver = buildCaregiverDefault();
-        createCaregiver(caregiver);
-        Patient patient = buildPatientDefault();
-        createPatient(patient);
-        cut.addCaregiver(patient.getPid(), CAREGIVER_ID1);
-
-        assertThatThrownBy(() -> cut.addCaregiver(patient.getPid(), CAREGIVER_ID1)).isInstanceOf(DuplicateRecordException.class);
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidInputsForAddCaregiver")
-    public void testAddCaregiver_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String patientId, String caregiverId, String errorMessage) {
-        assertInvalidInputExceptionThrown(() -> cut.addCaregiver(patientId, caregiverId), errorMessage);
-    }
-
-    private static Stream<Arguments> invalidInputsForAddCaregiver() {
-        return Stream.of(
-                Arguments.of(null, CAREGIVER_ID1, PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of("", CAREGIVER_ID1, PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(CAREGIVER_ID1, CAREGIVER_ID1, PATIENT_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(PID, null, CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(PID, "", CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(PID, PID, CAREGIVER_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -302,14 +225,15 @@ public class PatientDaoTest extends DaoTestParent {
     @Test
     public void testFindAllCaregivers_HappyCase() {
         Caregiver caregiver1 = buildCaregiverDefault();
+        caregiver1.setEmail(null);
         createCaregiver(caregiver1);
-        Caregiver caregiver2 = buildCaregiver(CAREGIVER_ID2, CAREGIVER_ID2, EMAIL2, null, null, null, null);
+        Caregiver caregiver2 = buildCaregiver(CAREGIVER_ID2, CAREGIVER_ID2, null, null, null, null, null);
         createCaregiver(caregiver2);
         Patient patient = buildPatientDefault();
         createPatient(patient);
 
-        cut.addCaregiver(patient.getPid(), CAREGIVER_ID1);
-        cut.addCaregiver(patient.getPid(), CAREGIVER_ID2);
+        putPrimaryKey(CAREGIVER_ID1, patient.getPid());
+        putPrimaryKey(CAREGIVER_ID2, patient.getPid());
         List<Caregiver> caregivers = cut.findAllCaregivers(patient.getPid()).stream().peek(caregiver -> {
             caregiver.setCreatedAt(null);
             caregiver.setUpdatedAt(null);
@@ -445,8 +369,8 @@ public class PatientDaoTest extends DaoTestParent {
 
         Patient newRecord = buildPatientDefault();
         createPatient(newRecord);
-        cut.addCaregiver(newRecord.getPid(), CAREGIVER_ID1);
-        cut.addCaregiver(newRecord.getPid(), CAREGIVER_ID2);
+        putPrimaryKey(CAREGIVER_ID1, newRecord.getPid());
+        putPrimaryKey(CAREGIVER_ID2, newRecord.getPid());
 
         Patient found = cut.findById(newRecord.getPid());
         assertNotNull(found);

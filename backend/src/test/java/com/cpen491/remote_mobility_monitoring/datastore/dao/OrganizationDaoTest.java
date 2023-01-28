@@ -2,6 +2,8 @@ package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,16 +13,22 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_RECORD_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_NOT_EQUAL_SID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.SID_BLANK_ERROR_MESSAGE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +42,8 @@ public class OrganizationDaoTest extends DaoTestParent {
     private static final String SID = PID;
     private static final String NAME1 = "ORG1";
     private static final String NAME2 = "ORG2";
-    private static final String CREATED_AT = "2020-01-01T05:00:00.000000";
+    private static final String ADMIN_ID = "adm-1";
+    private static final String CAREGIVER_ID = "car-1";
 
     OrganizationDao cut;
 
@@ -97,9 +106,17 @@ public class OrganizationDaoTest extends DaoTestParent {
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    public void testFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id) {
-        assertInvalidInputExceptionThrown(() -> cut.findById(id), ID_BLANK_ERROR_MESSAGE);
+    @MethodSource("invalidInputsForFindById")
+    public void testFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findById(id), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindById() {
+        return Stream.of(
+                Arguments.of(null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(ADMIN_ID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     @Test
@@ -121,6 +138,94 @@ public class OrganizationDaoTest extends DaoTestParent {
     @NullAndEmptySource
     public void testFindByName_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String name) {
         assertInvalidInputExceptionThrown(() -> cut.findByName(name), NAME_BLANK_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void testFindAllAdmins_HappyCase() {
+        Admin admin1 = buildAdmin(ADMIN_ID, ADMIN_ID, null, null, null);
+        createAdmin(admin1);
+        Organization organization = buildOrganizationDefault();
+        createOrganization(organization);
+
+        putPrimaryKey(PID, ADMIN_ID);
+        List<Admin> admins = cut.findAllAdmins(PID).stream().peek(admin -> {
+            admin.setCreatedAt(null);
+            admin.setUpdatedAt(null);
+        }).collect(Collectors.toList());
+        assertThat(admins).containsExactlyInAnyOrder(admin1);
+    }
+
+    @Test
+    public void testFindAllAdmins_WHEN_OrganizationRecordDoesNotExist_THEN_ReturnEmptyList() {
+        List<Admin> admins = cut.findAllAdmins(PID);
+        assertThat(admins).isEmpty();
+    }
+
+    @Test
+    public void testFindAllAdmins_WHEN_NoAdminRecordsAssociated_THEN_ReturnEmptyList() {
+        Organization organization = buildOrganizationDefault();
+        createOrganization(organization);
+
+        List<Admin> admins = cut.findAllAdmins(PID);
+        assertThat(admins).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForFindAllAdmins")
+    public void testFindAllAdmins_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String organizationId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findAllAdmins(organizationId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindAllAdmins() {
+        return Stream.of(
+                Arguments.of(null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(ADMIN_ID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testFindAllCaregivers_HappyCase() {
+        Caregiver caregiver1 = buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, null, null, null, null, null);
+        createCaregiver(caregiver1);
+        Organization organization = buildOrganizationDefault();
+        createOrganization(organization);
+
+        putPrimaryKey(PID, CAREGIVER_ID);
+        List<Caregiver> caregivers = cut.findAllCaregivers(PID).stream().peek(caregiver -> {
+            caregiver.setCreatedAt(null);
+            caregiver.setUpdatedAt(null);
+        }).collect(Collectors.toList());
+        assertThat(caregivers).containsExactlyInAnyOrder(caregiver1);
+    }
+
+    @Test
+    public void testFindAllCaregivers_WHEN_OrganizationRecordDoesNotExist_THEN_ReturnEmptyList() {
+        List<Caregiver> caregivers = cut.findAllCaregivers(PID);
+        assertThat(caregivers).isEmpty();
+    }
+
+    @Test
+    public void testFindAllCaregivers_WHEN_NoCaregiverRecordsAssociated_THEN_ReturnEmptyList() {
+        Organization organization = buildOrganizationDefault();
+        createOrganization(organization);
+
+        List<Caregiver> caregivers = cut.findAllCaregivers(PID);
+        assertThat(caregivers).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForFindAllCaregivers")
+    public void testFindAllCaregivers_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String organizationId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findAllCaregivers(organizationId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindAllCaregivers() {
+        return Stream.of(
+                Arguments.of(null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(CAREGIVER_ID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     @Test
@@ -174,6 +279,7 @@ public class OrganizationDaoTest extends DaoTestParent {
                 Arguments.of(buildOrganization(PID, "", NAME1), SID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildOrganization(PID, SID, null), NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildOrganization(PID, SID, ""), NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildOrganization(ADMIN_ID, ADMIN_ID, NAME1), ORGANIZATION_ID_INVALID_ERROR_MESSAGE),
                 Arguments.of(buildOrganization(PID, SID + "1", NAME1), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
@@ -195,9 +301,17 @@ public class OrganizationDaoTest extends DaoTestParent {
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    public void testDelete_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id) {
-        assertInvalidInputExceptionThrown(() -> cut.delete(id), ID_BLANK_ERROR_MESSAGE);
+    @MethodSource("invalidInputsForDelete")
+    public void testDelete_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.delete(id), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForDelete() {
+        return Stream.of(
+                Arguments.of(null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(ADMIN_ID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     private static Organization buildOrganizationDefault() {

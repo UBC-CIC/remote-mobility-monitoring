@@ -26,8 +26,6 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Patie
 public class PatientDao {
     @NonNull
     GenericDao genericDao;
-    @NonNull
-    CaregiverDao caregiverDao;
 
     /**
      * Creates a new Patient record. If deviceId is provided, record with the deviceId must not already exist.
@@ -53,40 +51,13 @@ public class PatientDao {
     }
 
     /**
-     * Adds a patient to a caregiver. Patient and caregiver must already exist.
-     *
-     * @param patientId The id of the Patient record
-     * @param caregiverId The id of the Caregiver record
-     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist
-     * @throws DuplicateRecordException If Patient/Caregiver association already exists
-     * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty
-     */
-    public void addCaregiver(String patientId, String caregiverId) {
-        log.info("Adding Patient [{}] to Caregiver [{}]", patientId, caregiverId);
-        Validator.validatePatientId(patientId);
-        Validator.validateCaregiverId(caregiverId);
-
-        Patient patient = findById(patientId);
-        Caregiver caregiver = caregiverDao.findById(caregiverId);
-
-        GetItemResponse response = genericDao.findByPrimaryKey(caregiverId, patientId);
-        if (response.hasItem()) {
-            log.error("Patient [{}] already associated with Caregiver [{}]", patientId, caregiverId);
-            throw new DuplicateRecordException("Patient/Caregiver association", patientId + ":" + caregiverId);
-        }
-
-        genericDao.addAssociation(Caregiver.convertToMap(caregiver), Patient.convertToMap(patient));
-    }
-
-    /**
      * Finds a Patient record by id.
      *
      * @param id The id of the record to find
      * @return {@link Patient}
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public Patient findById(String id) {
         log.info("Finding Patient record with id [{}]", id);
@@ -145,7 +116,7 @@ public class PatientDao {
      * @param patientId The id of the Patient record
      * @return {@link List}
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty or invalid
      */
     public List<Caregiver> findAllCaregivers(String patientId) {
         log.info("Finding all Caregiver records caring for Patient [{}]", patientId);
@@ -196,14 +167,12 @@ public class PatientDao {
      *
      * @param id The id of the record to delete
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public void delete(String id) {
         log.info("Deleting Patient record with id [{}]", id);
         Validator.validatePatientId(id);
 
         genericDao.delete(id);
-
-        // TODO: delete caregiver associations
     }
 }

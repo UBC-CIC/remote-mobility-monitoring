@@ -2,6 +2,8 @@ package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
@@ -17,7 +19,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
-import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 
@@ -40,6 +41,7 @@ public class OrganizationDao {
         Validator.validateOrganization(newRecord);
 
         if (findByName(newRecord.getName()) != null) {
+            log.error("Organization record with name [{}] already exists", newRecord.getName());
             throw new DuplicateRecordException(Organization.class.getSimpleName(), newRecord.getName());
         }
 
@@ -54,11 +56,11 @@ public class OrganizationDao {
      * @return {@link Organization}
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public Organization findById(String id) {
         log.info("Finding Organization record with id [{}]", id);
-        Validator.validateId(id);
+        Validator.validateOrganizationId(id);
 
         GetItemResponse response = genericDao.findByPartitionKey(id);
         if (!response.hasItem()) {
@@ -97,13 +99,17 @@ public class OrganizationDao {
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty or invalid
      */
-    public List<String> findAdminIds(String organizationId) {
-        log.info("Finding all Admin records belonging to organization [{}]", organizationId);
+    public List<Admin> findAllAdmins(String organizationId) {
+        log.info("Finding all Admin records belonging to Organization [{}]", organizationId);
         Validator.validateOrganizationId(organizationId);
 
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociations(organizationId, AdminTable.ID_PREFIX).items();
-        return result.stream().map(map -> map.get(BaseTable.SID_NAME).s()).collect(Collectors.toList());
+        return result.stream().map(map -> {
+            Admin admin = Admin.convertFromMap(map);
+            admin.setPid(admin.getSid());
+            return admin;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -114,13 +120,17 @@ public class OrganizationDao {
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty or invalid
      */
-    public List<String> findCaregiverIds(String organizationId) {
-        log.info("Finding all Caregiver records belonging to organization [{}]", organizationId);
+    public List<Caregiver> findAllCaregivers(String organizationId) {
+        log.info("Finding all Caregiver records belonging to Organization [{}]", organizationId);
         Validator.validateOrganizationId(organizationId);
 
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociations(organizationId, CaregiverTable.ID_PREFIX).items();
-        return result.stream().map(map -> map.get(BaseTable.SID_NAME).s()).collect(Collectors.toList());
+        return result.stream().map(map -> {
+            Caregiver caregiver = Caregiver.convertFromMap(map);
+            caregiver.setPid(caregiver.getSid());
+            return caregiver;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -137,9 +147,11 @@ public class OrganizationDao {
         log.info("Updating Organization record {}", updatedRecord);
         Validator.validateOrganization(updatedRecord);
         Validator.validatePidEqualsSid(updatedRecord.getPid(), updatedRecord.getSid());
+        Validator.validateOrganizationId(updatedRecord.getPid());
 
         Organization found = findByName(updatedRecord.getName());
         if (found != null && !found.getPid().equals(updatedRecord.getPid())) {
+            log.error("Organization record with name [{}] already exists", updatedRecord.getName());
             throw new DuplicateRecordException(Organization.class.getSimpleName(), updatedRecord.getName());
         }
 
@@ -151,18 +163,16 @@ public class OrganizationDao {
     }
 
     /**
-     * Deletes an Organization record by id. Does nothing if record does not exist.
+     * Deletes an Organization record by id and all of its associations. Does nothing if record does not exist.
      *
      * @param id The id of the record to delete
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if id is empty
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public void delete(String id) {
         log.info("Deleting Organization record with id [{}]", id);
-        Validator.validateId(id);
+        Validator.validateOrganizationId(id);
 
         genericDao.delete(id);
-
-        // TODO: delete all admins, caregivers, and patients
     }
 }

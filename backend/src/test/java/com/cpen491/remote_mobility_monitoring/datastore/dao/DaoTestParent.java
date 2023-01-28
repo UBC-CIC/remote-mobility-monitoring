@@ -179,11 +179,20 @@ public class DaoTestParent {
         keyMap.put(BaseTable.PID_NAME, convertToAttributeValue(pk));
         keyMap.put(BaseTable.SID_NAME, convertToAttributeValue(sk));
 
-        GetItemRequest request = GetItemRequest.builder()
+        return ddbClient.getItem(GetItemRequest.builder()
                 .key(keyMap)
                 .tableName(BaseTable.TABLE_NAME)
-                .build();
+                .build());
+    }
 
-        return ddbClient.getItem(request);
+    void putPrimaryKey(String pk, String sk) {
+        Map<String, AttributeValue> keyMap = new HashMap<>();
+        keyMap.put(BaseTable.PID_NAME, convertToAttributeValue(pk));
+        keyMap.put(BaseTable.SID_NAME, convertToAttributeValue(sk));
+
+        ddbClient.putItem(PutItemRequest.builder()
+                .item(keyMap)
+                .tableName(BaseTable.TABLE_NAME)
+                .build());
     }
 }

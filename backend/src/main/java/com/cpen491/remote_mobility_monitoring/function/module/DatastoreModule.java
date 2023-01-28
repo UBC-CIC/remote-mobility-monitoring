@@ -26,13 +26,13 @@ public class DatastoreModule {
 
     @Provides
     @Singleton
-    public static CaregiverDao caregiverDao(DaoFactory daoFactory, OrganizationDao organizationDao) {
-        return daoFactory.createCaregiverDao(organizationDao);
+    public static CaregiverDao caregiverDao(DaoFactory daoFactory, OrganizationDao organizationDao, PatientDao patientDao) {
+        return daoFactory.createCaregiverDao(organizationDao, patientDao);
     }
 
     @Provides
     @Singleton
-    public static PatientDao patientDao(DaoFactory daoFactory, CaregiverDao caregiverDao) {
-        return daoFactory.createPatientDao(caregiverDao);
+    public static PatientDao patientDao(DaoFactory daoFactory) {
+        return daoFactory.createPatientDao();
     }
 }
