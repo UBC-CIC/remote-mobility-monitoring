@@ -1,23 +1,23 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react'
 import './LoginPage.css'
 
-function LoginPage() {
-    const [loginType, setLoginType] = useState('caregiver');
-    const handleLogin = (event) => {
-        event.preventDefault();
-        console.log(loginType);
-    }
-    const toggleLoginType = () => {
-        if (loginType === 'caregiver') setLoginType('admin')
-        else setLoginType('caregiver')
-    }
+function LoginPage(): JSX.Element {
+  const [loginType, setLoginType] = useState('caregiver')
+  const handleLogin = (event: React.MouseEvent): void => {
+    event.preventDefault()
+    console.log(loginType)
+  }
+  const toggleLoginType = (): void => {
+    if (loginType === 'caregiver') setLoginType('admin')
+    else setLoginType('caregiver')
+  }
 
-    return (
+  return (
         <div className='wrapper'>
             <div className='login'>
                 <h1>Sign in to</h1>
                 <h2>Mobility Monitor</h2>
-                <p>{loginType === 'caregiver' ? "Organization administrators can": "Caregivers can"}<br /> 
+                <p>{loginType === 'caregiver' ? 'Organization administrators can' : 'Caregivers can'}<br />
                 <span className='alternate' onClick={toggleLoginType}>Login here</span></p>
             </div>
             <div className='login user'>
@@ -27,11 +27,11 @@ function LoginPage() {
                     <br />
                     <input type='password' placeholder='Password'></input>
                     <div className='forgot'>Forgot password?</div>
-                    <button type='submit' onClick={handleLogin}>Login</button>
+                    <button type='submit' onClick={(e) => { handleLogin(e) }}>Login</button>
                 </div>
             </div>
         </div>
-    );
+  )
 }
 
-export default LoginPage;
+export default LoginPage
