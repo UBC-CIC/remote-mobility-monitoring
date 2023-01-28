@@ -5,7 +5,9 @@ import { ApiGatewayStack } from './stack/apigateway-stack';
 
 const app = new App();
 const dynamoDbStack = new DynamoDbStack(app, 'RemoteMobilityMonitoringDynamoStack');
-const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', dynamoDbStack);
+const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', {
+  table: dynamoDbStack.remoteMobilityMonitoringTable,
+});
 new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
   defaultFunction: lambdaStack.defaultFunction,
   createCaregiverFunction: lambdaStack.createCaregiverFunction,

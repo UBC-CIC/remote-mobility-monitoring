@@ -1,6 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import { DynamoDbStack } from "./dynamodb-stack";
+
+interface LambdaStackProps extends cdk.StackProps {
+  readonly table: dynamodb.Table;
+}
 
 export class LambdaStack extends cdk.Stack {
   private static codeAssetPath = './assets/function.jar';
@@ -12,7 +16,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly updatePatientDeviceFunction: lambda.Function;
   public readonly verifyPatientFunction: lambda.Function;
 
-  constructor(scope: cdk.App, id: string, dynamoDbStack: DynamoDbStack, props?: cdk.StackProps) {
+  constructor(scope: cdk.App, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
     // TODO: make roles for lambdas
@@ -28,13 +32,13 @@ export class LambdaStack extends cdk.Stack {
       `),
       handler: 'index.handler',
     });
-    this.createCaregiverFunction = this.createCreateCaregiverFunction(dynamoDbStack);
-    this.createPatientFunction = this.createCreatePatientFunction(dynamoDbStack);
-    this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction(dynamoDbStack);
-    this.verifyPatientFunction = this.createVerifyPatientFunction(dynamoDbStack);
+    this.createCaregiverFunction = this.createCreateCaregiverFunction(props.table);
+    this.createPatientFunction = this.createCreatePatientFunction(props.table);
+    this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction(props.table);
+    this.verifyPatientFunction = this.createVerifyPatientFunction(props.table);
   }
 
-  private createCreateCaregiverFunction(dynamoDbStack: DynamoDbStack): lambda.Function {
+  private createCreateCaregiverFunction(table: dynamodb.Table): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'CreateCaregiverFunction', {
       functionName: 'CreateCaregiverFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -45,13 +49,11 @@ export class LambdaStack extends cdk.Stack {
       memorySize: 512,
     });
 
-    dynamoDbStack.patientTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.caregiverTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.organizationTable.grantReadData(lambdaFunction);
+    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 
-  private createCreatePatientFunction(dynamoDbStack: DynamoDbStack): lambda.Function {
+  private createCreatePatientFunction(table: dynamodb.Table): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'CreatePatientFunction', {
       functionName: 'CreatePatientFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -69,13 +71,11 @@ export class LambdaStack extends cdk.Stack {
     //   lambda: lambdaFunction,
     // });
 
-    dynamoDbStack.patientTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.caregiverTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.organizationTable.grantReadData(lambdaFunction);
+    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 
-  private createUpdatePatientDeviceFunction(dynamoDbStack: DynamoDbStack): lambda.Function {
+  private createUpdatePatientDeviceFunction(table: dynamodb.Table): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'UpdatePatientDeviceFunction', {
       functionName: 'UpdatePatientDeviceFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -86,13 +86,11 @@ export class LambdaStack extends cdk.Stack {
       memorySize: 512,
     });
 
-    dynamoDbStack.patientTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.caregiverTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.organizationTable.grantReadData(lambdaFunction);
+    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 
-  private createVerifyPatientFunction(dynamoDbStack: DynamoDbStack): lambda.Function {
+  private createVerifyPatientFunction(table: dynamodb.Table): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'VerifyPatientFunction', {
       functionName: 'VerifyPatientFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -103,9 +101,7 @@ export class LambdaStack extends cdk.Stack {
       memorySize: 512,
     });
 
-    dynamoDbStack.patientTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.caregiverTable.grantReadWriteData(lambdaFunction);
-    dynamoDbStack.organizationTable.grantReadData(lambdaFunction);
+    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 }
