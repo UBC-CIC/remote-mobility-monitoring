@@ -26,6 +26,8 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_NOT_EQUAL_SID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.SID_BLANK_ERROR_MESSAGE;
@@ -99,19 +101,22 @@ class AdminDaoTest extends DaoTestParent {
 
     @ParameterizedTest
     @MethodSource("invalidInputsForCreate")
-    public void testCreate_WHEN_InvalidInput_THEN_ThrowInvalidInputException(Admin record, String errorMessage) {
-        assertInvalidInputExceptionThrown(() -> cut.create(record, EXISTS_ORGANIZATION_ID), errorMessage);
+    public void testCreate_WHEN_InvalidInput_THEN_ThrowInvalidInputException(Admin record, String organizationId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.create(record, organizationId), errorMessage);
     }
 
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
-                Arguments.of(null, ADMIN_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(PID, SID, null, FIRST_NAME, LAST_NAME), EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(PID, SID, "", FIRST_NAME, LAST_NAME), EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(PID, SID, EMAIL1, null, LAST_NAME), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(PID, SID, EMAIL1, "", LAST_NAME), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, null), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, ""), LAST_NAME_BLANK_ERROR_MESSAGE)
+                Arguments.of(null, EXISTS_ORGANIZATION_ID, ADMIN_RECORD_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, null, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, "", FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, null, LAST_NAME), EXISTS_ORGANIZATION_ID, FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, "", LAST_NAME), EXISTS_ORGANIZATION_ID, FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, null), EXISTS_ORGANIZATION_ID, LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, ""), EXISTS_ORGANIZATION_ID, LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), "", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), PID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -233,6 +238,22 @@ class AdminDaoTest extends DaoTestParent {
         Admin updatedRecord = cut.findById(newRecord2.getPid());
         updatedRecord.setEmail(EMAIL1);
         assertThatThrownBy(() -> cut.update(updatedRecord)).isInstanceOf(DuplicateRecordException.class);
+    }
+
+    @Test
+    public void testUpdate_WHEN_RecordAlsoExistsInAssociations_THEN_UpdateAllDuplicateRecords() {
+        Admin newRecord1 = buildAdminDefault();
+        createAdmin(newRecord1);
+        Admin newRecord2 = buildAdminDefault();
+        newRecord2.setPid(EXISTS_ORGANIZATION_ID);
+        createAdmin(newRecord2);
+
+        Admin updatedRecord = cut.findById(PID);
+        updatedRecord.setEmail(EMAIL2);
+        cut.update(updatedRecord);
+
+        assertEquals(EMAIL2, findByPrimaryKey(PID, PID).item().get(AdminTable.EMAIL_NAME).s());
+        assertEquals(EMAIL2, findByPrimaryKey(EXISTS_ORGANIZATION_ID, PID).item().get(AdminTable.EMAIL_NAME).s());
     }
 
     @Test

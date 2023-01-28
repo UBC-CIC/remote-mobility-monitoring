@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -64,7 +65,7 @@ public class CaregiverServiceTest {
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
         CreateCaregiverResponseBody responseBody = cut.createCaregiver(requestBody);
 
-        verify(caregiverDao, times(1)).create(caregiverCaptor.capture(), anyString());
+        verify(caregiverDao, times(1)).create(caregiverCaptor.capture(), eq(ORGANIZATION_ID));
         assertEquals(EMAIL, caregiverCaptor.getValue().getEmail());
         assertEquals(FIRST_NAME, caregiverCaptor.getValue().getFirstName());
         assertEquals(LAST_NAME, caregiverCaptor.getValue().getLastName());
@@ -95,25 +96,25 @@ public class CaregiverServiceTest {
                         EMAIL_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreateCaregiverRequestBody("", FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
                         EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, null, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, null, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
                         FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, "", LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, "", LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
                         FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, null, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, null, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
                         LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, "", TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, "", TITLE, PHONE_NUMBER, ORGANIZATION_ID),
                         LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER, ORGANIZATION_ID),
                         TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER, ORGANIZATION_ID),
                         TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, LAST_NAME, TITLE, null, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, null, ORGANIZATION_ID),
                         PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, LAST_NAME, TITLE, "", ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, "", ORGANIZATION_ID),
                         PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, null),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, null),
                         ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL_BLANK_ERROR_MESSAGE, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ""),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ""),
                         ORGANIZATION_ID_BLANK_ERROR_MESSAGE)
         );
     }

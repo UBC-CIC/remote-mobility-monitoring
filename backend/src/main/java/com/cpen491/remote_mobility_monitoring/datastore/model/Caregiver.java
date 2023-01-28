@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.putInMap;
 

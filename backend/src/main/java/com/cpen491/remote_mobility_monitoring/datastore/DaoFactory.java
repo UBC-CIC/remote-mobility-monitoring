@@ -40,6 +40,7 @@ public class DaoFactory {
     public static DynamoDbClient createDynamoDbClient() {
         return DynamoDbClient.builder()
                 // TODO: get region from environment variable
+                // TODO: retry policy https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/using.html
                 .region(Region.US_WEST_2)
                 .build();
     }

@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 interface LambdaStackProps extends cdk.StackProps {
   readonly table: dynamodb.Table;
@@ -10,6 +11,7 @@ export class LambdaStack extends cdk.Stack {
   private static codeAssetPath = './assets/function.jar';
   private static handlerPathPrefix = 'com.cpen491.remote_mobility_monitoring.function.handler.';
 
+  public readonly lambdaRole: iam.Role
   public readonly defaultFunction: lambda.Function;
   public readonly createCaregiverFunction: lambda.Function;
   public readonly createPatientFunction: lambda.Function;
@@ -20,6 +22,33 @@ export class LambdaStack extends cdk.Stack {
     super(scope, id, props);
 
     // TODO: make roles for lambdas
+    this.lambdaRole = new iam.Role(this, 'RemoteMobilityMonitoringLambdaRole', {
+      roleName: 'RemoteMobilityMonitoringLambdaRole',
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    });
+    this.lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'dynamodb:Scan',
+        'dynamodb:GetItem',
+        'dynamodb:PutItem',
+        'dynamodb:Query',
+        'dynamodb:UpdateItem',
+        'dynamodb:DeleteItem',
+        'dynamodb:BatchWriteItem',
+        'dynamodb:BatchGetItem',
+      ],
+      resources: [
+        props.table.tableArn,
+        props.table.tableArn + '/index/*',
+      ],
+    }));
+    this.lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['logs:*'],
+      resources: ['*'],
+    }));
+
     // TODO: DLQs? Layers?
 
     this.defaultFunction = new lambda.Function(this, 'DefaultFunction', {
@@ -32,13 +61,13 @@ export class LambdaStack extends cdk.Stack {
       `),
       handler: 'index.handler',
     });
-    this.createCaregiverFunction = this.createCreateCaregiverFunction(props.table);
-    this.createPatientFunction = this.createCreatePatientFunction(props.table);
-    this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction(props.table);
-    this.verifyPatientFunction = this.createVerifyPatientFunction(props.table);
+    this.createCaregiverFunction = this.createCreateCaregiverFunction();
+    this.createPatientFunction = this.createCreatePatientFunction();
+    this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction();
+    this.verifyPatientFunction = this.createVerifyPatientFunction();
   }
 
-  private createCreateCaregiverFunction(table: dynamodb.Table): lambda.Function {
+  private createCreateCaregiverFunction(): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'CreateCaregiverFunction', {
       functionName: 'CreateCaregiverFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -47,13 +76,13 @@ export class LambdaStack extends cdk.Stack {
       // TODO: refactor to static variable
       timeout: cdk.Duration.seconds(300),
       memorySize: 512,
+      role: this.lambdaRole,
     });
 
-    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 
-  private createCreatePatientFunction(table: dynamodb.Table): lambda.Function {
+  private createCreatePatientFunction(): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'CreatePatientFunction', {
       functionName: 'CreatePatientFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -62,6 +91,7 @@ export class LambdaStack extends cdk.Stack {
       // TODO: refactor to static variable
       timeout: cdk.Duration.seconds(300),
       memorySize: 512,
+      role: this.lambdaRole,
     });
 
     // (lambdaFunction.node.defaultChild as lambda.CfnFunction).addPropertyOverride('SnapStart', {
@@ -71,11 +101,10 @@ export class LambdaStack extends cdk.Stack {
     //   lambda: lambdaFunction,
     // });
 
-    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 
-  private createUpdatePatientDeviceFunction(table: dynamodb.Table): lambda.Function {
+  private createUpdatePatientDeviceFunction(): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'UpdatePatientDeviceFunction', {
       functionName: 'UpdatePatientDeviceFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -84,13 +113,13 @@ export class LambdaStack extends cdk.Stack {
       // TODO: refactor to static variable
       timeout: cdk.Duration.seconds(300),
       memorySize: 512,
+      role: this.lambdaRole,
     });
 
-    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 
-  private createVerifyPatientFunction(table: dynamodb.Table): lambda.Function {
+  private createVerifyPatientFunction(): lambda.Function {
     const lambdaFunction = new lambda.Function(this, 'VerifyPatientFunction', {
       functionName: 'VerifyPatientFunction',
       runtime: lambda.Runtime.JAVA_11,
@@ -99,9 +128,9 @@ export class LambdaStack extends cdk.Stack {
       // TODO: refactor to static variable
       timeout: cdk.Duration.seconds(300),
       memorySize: 512,
+      role: this.lambdaRole,
     });
 
-    table.grantReadWriteData(lambdaFunction);
     return lambdaFunction;
   }
 }

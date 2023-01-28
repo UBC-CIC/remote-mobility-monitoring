@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DATE_OF_BIRTH_BLANK_ERROR_MESSAGE;
@@ -298,6 +299,22 @@ public class PatientDaoTest extends DaoTestParent {
         Patient updatedRecord = cut.findById(newRecord2.getPid());
         updatedRecord.setDeviceId(DEVICE_ID1);
         assertThatThrownBy(() -> cut.update(updatedRecord)).isInstanceOf(DuplicateRecordException.class);
+    }
+
+    @Test
+    public void testUpdate_WHEN_RecordAlsoExistsInAssociations_THEN_UpdateAllDuplicateRecords() {
+        Patient newRecord1 = buildPatientDefault();
+        createPatient(newRecord1);
+        Patient newRecord2 = buildPatientDefault();
+        newRecord2.setPid(CAREGIVER_ID1);
+        createPatient(newRecord2);
+
+        Patient updatedRecord = cut.findById(PID);
+        updatedRecord.setDeviceId(DEVICE_ID2);
+        cut.update(updatedRecord);
+
+        assertEquals(DEVICE_ID2, findByPrimaryKey(PID, PID).item().get(PatientTable.DEVICE_ID_NAME).s());
+        assertEquals(DEVICE_ID2, findByPrimaryKey(CAREGIVER_ID1, PID).item().get(PatientTable.DEVICE_ID_NAME).s());
     }
 
     @Test

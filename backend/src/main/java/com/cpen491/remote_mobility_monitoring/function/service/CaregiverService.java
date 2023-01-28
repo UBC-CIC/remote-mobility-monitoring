@@ -2,6 +2,7 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
@@ -24,6 +25,17 @@ public class CaregiverService {
     @NonNull
     private CaregiverDao caregiverDao;
 
+    /**
+     * Creates a Caregiver and adds it to an Organization.
+     *
+     * @param body The request body
+     * @return {@link CreateCaregiverResponseBody}
+     * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
+     * @throws DuplicateRecordException If record with the given email already exists
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of email, firstName, lastName,
+     *                              title, phoneNumber, or organizationId are empty
+     */
     public CreateCaregiverResponseBody createCaregiver(CreateCaregiverRequestBody body) {
         Validator.validateCreateCaregiverRequestBody(body);
 

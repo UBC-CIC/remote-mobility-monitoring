@@ -2,17 +2,15 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
-import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
@@ -21,8 +19,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.UUID;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
@@ -41,6 +37,16 @@ public class PatientService {
     @NonNull
     private CaregiverDao caregiverDao;
 
+    /**
+     * Creates a Patient. Generates an authCode which will expire after a short time and returns it.
+     * Patient must verify using this authCode to get verified.
+     *
+     * @param body The request body
+     * @return {@link CreatePatientResponseBody}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of firstName, lastName,
+     *                              dateOfBirth, or phoneNumber are empty
+     */
     public CreatePatientResponseBody createPatient(CreatePatientRequestBody body) {
         Validator.validateCreatePatientRequestBody(body);
 
@@ -61,10 +67,20 @@ public class PatientService {
                 .build();
     }
 
+    /**
+     * Initiates an update device request. Generates an authCode which will expire after a short time and returns it.
+     * Patient must verify using this authCode to update their device ID.
+     *
+     * @param body The request body
+     * @return {@link UpdatePatientDeviceResponseBody}
+     * @throws RecordDoesNotExistException If Patient record with the given id does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
+     */
     public UpdatePatientDeviceResponseBody updatePatientDevice(UpdatePatientDeviceRequestBody body) {
         Validator.validateUpdatePatientDeviceRequestBody(body);
 
-        Patient patient = findPatientById(body.getPatientId());
+        Patient patient = patientDao.findById(body.getPatientId());
 
         generateAuthCodeForPatient(patient);
         patientDao.update(patient);
@@ -74,36 +90,36 @@ public class PatientService {
                 .build();
     }
 
+    /**
+     * Verifies a patient to mark them as verified or update their device ID.
+     *
+     * @param body The request body
+     * @return {@link VerifyPatientResponseBody}
+     * @throws RecordDoesNotExistException If Patient or Caregiver record with the given ids do not exist
+     * @throws InvalidAuthCodeException If the existing authCode does not match the provided authCode or is expired
+     * @throws DuplicateRecordException If Patient record with the given deviceId already exists
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if caregiverId, patientId, authCode,
+     *                              or deviceId are empty or invalid
+     */
     public VerifyPatientResponseBody verifyPatient(VerifyPatientRequestBody body) {
         Validator.validateVerifyPatientRequestBody(body);
 
-        Patient patient = findPatientById(body.getPatientId());
-        Caregiver caregiver = findCaregiverById(body.getCaregiverId());
+        Patient patient = patientDao.findById(body.getPatientId());
+        caregiverDao.findById(body.getCaregiverId());
 
         verifyAuthCode(patient.getAuthCode(), patient.getAuthCodeTimestamp(), body.getAuthCode());
 
         patient.setDeviceId(body.getDeviceId());
         patient.setVerified(true);
-//        associatePatientWithCaregiver(patient, caregiver);
         patientDao.update(patient);
-        caregiverDao.update(caregiver);
+        try {
+            caregiverDao.addPatient(body.getPatientId(), body.getCaregiverId());
+        } catch (DuplicateRecordException e) {
+            // log.info("Patient [{}] already associated with Caregiver [{}]", patientId, caregiverId);
+        }
 
         return VerifyPatientResponseBody.builder()
-                .message("OK")
-                .build();
-    }
-
-    public SharePatientResponseBody sharePatient(SharePatientRequestBody body) {
-        Validator.validateSharePatientRequestBody(body);
-
-        Patient patient = findPatientById(body.getPatientId());
-        Caregiver caregiver = findCaregiverById(body.getCaregiverId());
-
-//        associatePatientWithCaregiver(patient, caregiver);
-        patientDao.update(patient);
-        caregiverDao.update(caregiver);
-
-        return SharePatientResponseBody.builder()
                 .message("OK")
                 .build();
     }
@@ -116,22 +132,6 @@ public class PatientService {
         return DeletePatientResponseBody.builder()
                 .message("OK")
                 .build();
-    }
-
-    private Patient findPatientById(String id) {
-        Patient patient = patientDao.findById(id);
-        if (patient == null) {
-            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), id);
-        }
-        return patient;
-    }
-
-    private Caregiver findCaregiverById(String id) {
-        Caregiver caregiver = caregiverDao.findById(id);
-        if (caregiver == null) {
-            throw new RecordDoesNotExistException(Caregiver.class.getSimpleName(), id);
-        }
-        return caregiver;
     }
 
     private static void generateAuthCodeForPatient(Patient patient) {

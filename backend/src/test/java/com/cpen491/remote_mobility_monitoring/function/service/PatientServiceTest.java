@@ -2,16 +2,14 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
-import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
@@ -27,8 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
@@ -45,17 +41,16 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.SHARE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.VERIFY_PATIENT_NULL_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -66,16 +61,14 @@ import static org.mockito.Mockito.when;
 class PatientServiceTest {
     private static final String EMAIL = "jackjackson@email.com";
     private static final String TITLE = "caregiver";
-    private static final String IMAGE_URL = "image.png";
-    private static final String ORGANIZATION_ID = "org-id-abc";
     private static final String FIRST_NAME = "Jack";
     private static final String LAST_NAME = "Jackson";
     private static final String DATE_OF_BIRTH = "2000-12-31";
     private static final String PHONE_NUMBER = "1234567890";
-    private static final String PATIENT_ID1 = "patient-id-1";
-    private static final String PATIENT_ID2 = "patient-id-2";
-    private static final String CAREGIVER_ID1 = "caregiver-id-1";
-    private static final String CAREGIVER_ID2 = "caregiver-id-2";
+    private static final String PATIENT_ID1 = "pat-1";
+    private static final String PATIENT_ID2 = "pat-2";
+    private static final String CAREGIVER_ID1 = "car-1";
+    private static final String CAREGIVER_ID2 = "car-2";
     private static final String AUTH_CODE = "auth_code-123";
     private static final String AUTH_CODE_TIMESTAMP = getCurrentUtcTimeString();
     private static final String DEVICE_ID = "device-id-1";
@@ -155,10 +148,12 @@ class PatientServiceTest {
     }
 
     @Test
-    public void testUpdatePatientDevice_WHEN_PatientDaoFindByIdReturnsNull_THENThrowRecordDoesNotExistException() {
-        when(patientDao.findById(anyString())).thenReturn(null);
+    public void testUpdatePatientDevice_WHEN_PatientDaoFindByIdThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(patientDao).findById(anyString());
+
         UpdatePatientDeviceRequestBody requestBody = buildUpdatePatientDeviceRequestBody();
-        assertThatThrownBy(() -> cut.updatePatientDevice(requestBody)).isInstanceOf(RecordDoesNotExistException.class);
+        assertThatThrownBy(() -> cut.updatePatientDevice(requestBody)).isSameAs(toThrow);
     }
 
     @Test
@@ -189,7 +184,6 @@ class PatientServiceTest {
     @Test
     public void testVerifyPatient_HappyCase() {
         when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
-        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
 
         VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
         VerifyPatientResponseBody responseBody = cut.verifyPatient(requestBody);
@@ -197,36 +191,36 @@ class PatientServiceTest {
         verify(patientDao, times(1)).update(patientCaptor.capture());
         assertTrue(patientCaptor.getValue().getVerified());
         assertEquals(DEVICE_ID, patientCaptor.getValue().getDeviceId());
-//        assertThat(patientCaptor.getValue().getCaregiverIds()).containsExactly(CAREGIVER_ID1);
 
-        verify(caregiverDao, times(1)).update(caregiverCaptor.capture());
-//        assertThat(caregiverCaptor.getValue().getPatientIds()).containsExactly(PATIENT_ID1);
+        verify(caregiverDao, times(1)).addPatient(eq(PATIENT_ID1), eq(CAREGIVER_ID1));
 
         assertNotNull(responseBody);
         assertEquals("OK", responseBody.getMessage());
     }
 
     @Test
-    public void testVerifyPatient_WHEN_PatientDaoFindByIdReturnsNull_THEN_ThrowRecordDoesNotExistException() {
-        when(patientDao.findById(anyString())).thenReturn(null);
+    public void testVerifyPatient_WHEN_PatientDaoFindByIdThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(patientDao).findById(anyString());
 
         VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
-        assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isInstanceOf(RecordDoesNotExistException.class);
+        assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isSameAs(toThrow);
     }
 
     @Test
-    public void testVerifyPatient_WHEN_CaregiverDaoFindByIdReturnsNull_THEN_ThrowRecordDoesNotExistException() {
+    public void testVerifyPatient_WHEN_CaregiverDaoFindByIdThrows_THEN_ThrowSameException() {
         when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
-        when(caregiverDao.findById(anyString())).thenReturn(null);
+
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).findById(anyString());
 
         VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
-        assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isInstanceOf(RecordDoesNotExistException.class);
+        assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isSameAs(toThrow);
     }
 
     @Test
     public void testVerifyPatient_WHEN_PatientDaoUpdateThrows_THEN_ThrowSameException() {
         when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
-        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
 
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(patientDao).update(any(Patient.class));
@@ -236,9 +230,17 @@ class PatientServiceTest {
     }
 
     @Test
+    public void testVerifyPatient_WHEN_CaregiverDaoAddPatientThrowsDuplicationRecordException_THEN_NoThrow() {
+        when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
+        Mockito.doThrow(DuplicateRecordException.class).when(caregiverDao).addPatient(anyString(), anyString());
+
+        VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
+        assertDoesNotThrow(() -> cut.verifyPatient(requestBody));
+    }
+
+    @Test
     public void testVerifyPatient_WHEN_AuthCodesDoNotMatch_THEN_ThrowInvalidAuthCodeException() {
         when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
-        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
 
         VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
         requestBody.setAuthCode(AUTH_CODE + "1");
@@ -251,7 +253,6 @@ class PatientServiceTest {
         String tenMinutesAgo = getCurrentUtcTime().minusMinutes(10).toString();
         patient.setAuthCodeTimestamp(tenMinutesAgo);
         when(patientDao.findById(anyString())).thenReturn(patient);
-        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
 
         VerifyPatientRequestBody requestBody = buildVerifyPatientRequestBody();
         assertThatThrownBy(() -> cut.verifyPatient(requestBody)).isInstanceOf(InvalidAuthCodeException.class);
@@ -274,86 +275,6 @@ class PatientServiceTest {
                 Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, "", DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, AUTH_CODE, null), DEVICE_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, AUTH_CODE, ""), DEVICE_ID_BLANK_ERROR_MESSAGE)
-        );
-    }
-
-    @Test
-    public void testSharePatient_HappyCase() {
-        Patient patient1 = buildPatientDefault();
-        Patient patient2 = buildPatientDefault();
-        patient2.setPid(PATIENT_ID2);
-        Caregiver caregiver1 = buildCaregiverDefault();
-        Caregiver caregiver2 = buildCaregiverDefault();
-        caregiver2.setPid(CAREGIVER_ID2);
-
-        when(patientDao.findById(anyString())).thenReturn(patient1);
-        when(caregiverDao.findById(anyString())).thenReturn(caregiver1);
-
-        SharePatientRequestBody requestBody = buildSharePatientRequestBody();
-        cut.sharePatient(requestBody);
-
-        when(patientDao.findById(anyString())).thenReturn(patient2);
-        when(caregiverDao.findById(anyString())).thenReturn(caregiver1);
-
-        cut.sharePatient(requestBody);
-
-        when(patientDao.findById(anyString())).thenReturn(patient1);
-        when(caregiverDao.findById(anyString())).thenReturn(caregiver2);
-
-        SharePatientResponseBody responseBody = cut.sharePatient(requestBody);
-
-        verify(patientDao, times(3)).update(patientCaptor.capture());
-//        assertThat(patientCaptor.getValue().getCaregiverIds()).containsExactly(CAREGIVER_ID1, CAREGIVER_ID2);
-
-        verify(caregiverDao, times(3)).update(caregiverCaptor.capture());
-//        assertThat(caregiverCaptor.getValue().getPatientIds()).containsExactly(PATIENT_ID1);
-
-        assertNotNull(responseBody);
-        assertEquals("OK", responseBody.getMessage());
-    }
-
-    @Test
-    public void testSharePatient_WHEN_PatientDaoFindByIdReturnsNull_THEN_ThrowRecordDoesNotExistException() {
-        when(patientDao.findById(anyString())).thenReturn(null);
-
-        SharePatientRequestBody requestBody = buildSharePatientRequestBody();
-        assertThatThrownBy(() -> cut.sharePatient(requestBody)).isInstanceOf(RecordDoesNotExistException.class);
-    }
-
-    @Test
-    public void testSharePatient_WHEN_CaregiverDaoFindByIdReturnsNull_THEN_ThrowRecordDoesNotExistException() {
-        when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
-        when(caregiverDao.findById(anyString())).thenReturn(null);
-
-        SharePatientRequestBody requestBody = buildSharePatientRequestBody();
-        assertThatThrownBy(() -> cut.sharePatient(requestBody)).isInstanceOf(RecordDoesNotExistException.class);
-    }
-
-    @Test
-    public void testSharePatient_WHEN_PatientDaoUpdateThrows_THEN_ThrowSameException() {
-        when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
-        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
-
-        NullPointerException toThrow = new NullPointerException();
-        Mockito.doThrow(toThrow).when(patientDao).update(any(Patient.class));
-
-        SharePatientRequestBody requestBody = buildSharePatientRequestBody();
-        assertThatThrownBy(() -> cut.sharePatient(requestBody)).isSameAs(toThrow);
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidInputsForSharePatient")
-    public void testSharePatient_WHEN_InvalidInput_THEN_ThrowInvalidInputException(SharePatientRequestBody body, String errorMessage) {
-        assertInvalidInputExceptionThrown(() -> cut.sharePatient(body), errorMessage);
-    }
-
-    private static Stream<Arguments> invalidInputsForSharePatient() {
-        return Stream.of(
-                Arguments.of(null, SHARE_PATIENT_NULL_ERROR_MESSAGE),
-                Arguments.of(buildSharePatientRequestBody(null, PATIENT_ID1), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildSharePatientRequestBody("", PATIENT_ID1), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildSharePatientRequestBody(CAREGIVER_ID1, null), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildSharePatientRequestBody(CAREGIVER_ID1, ""), PATIENT_ID_BLANK_ERROR_MESSAGE)
         );
     }
 

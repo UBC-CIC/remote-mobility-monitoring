@@ -21,6 +21,7 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInpu
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_RECORD_NULL_ERROR_MESSAGE;
@@ -256,6 +257,26 @@ public class OrganizationDaoTest extends DaoTestParent {
         Organization updatedRecord = cut.findById(newRecord2.getPid());
         updatedRecord.setName(NAME1);
         assertThatThrownBy(() -> cut.update(updatedRecord)).isInstanceOf(DuplicateRecordException.class);
+    }
+
+    @Test
+    public void testUpdate_WHEN_RecordAlsoExistsInAssociations_THEN_UpdateAllDuplicateRecords() {
+        Organization newRecord1 = buildOrganizationDefault();
+        createOrganization(newRecord1);
+        Organization newRecord2 = buildOrganizationDefault();
+        newRecord2.setSid(ADMIN_ID);
+        createOrganization(newRecord2);
+        Organization newRecord3 = buildOrganizationDefault();
+        newRecord3.setSid(CAREGIVER_ID);
+        createOrganization(newRecord3);
+
+        Organization updatedRecord = cut.findById(PID);
+        updatedRecord.setName(NAME2);
+        cut.update(updatedRecord);
+
+        assertEquals(NAME2, findByPrimaryKey(PID, PID).item().get(OrganizationTable.NAME_NAME).s());
+        assertEquals(NAME2, findByPrimaryKey(PID, ADMIN_ID).item().get(OrganizationTable.NAME_NAME).s());
+        assertEquals(NAME2, findByPrimaryKey(PID, CAREGIVER_ID).item().get(OrganizationTable.NAME_NAME).s());
     }
 
     @Test

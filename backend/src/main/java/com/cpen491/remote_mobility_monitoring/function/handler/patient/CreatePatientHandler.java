@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.function.Config;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
@@ -32,7 +31,7 @@ public class CreatePatientHandler implements RequestHandler<APIGatewayProxyReque
             CreatePatientRequestBody requestBody = gson.fromJson(request.getBody(), CreatePatientRequestBody.class);
             CreatePatientResponseBody responseBody = patientService.createPatient(requestBody);
             return generateResponse(StatusCode.OK, gson.toJson(responseBody));
-        } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             return generateResponse(StatusCode.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             // TODO: log this
