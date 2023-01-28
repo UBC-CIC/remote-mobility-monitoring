@@ -1,12 +1,10 @@
 
-p, div {
+.login-page p, div {
    font-size: 1.08em ;
    font-family: Arial !important;
   }
 
-
-
-.wrapper {
+.login-page {
     display:grid;
     grid-template-columns: 48% 48%;
     padding: 20px;
@@ -14,23 +12,23 @@ p, div {
     gap: 4%;
 }
 
-.login {
+.login-page .login {
     padding: 5%;
     padding-left: 30%;
     padding-right: 30%;
 }
 
-.user {
+.login-page .user {
     padding-bottom: 20%;
     padding-left: 3%;
 }
 
-.login-input{
+.login-page .login-input{
     padding: 0.5%;
     width: 60%;
 }
 
-.login-input input {
+.login-page .login-input input {
     height: 30px;
     width: 93%;
     padding-left: 12px;
@@ -40,18 +38,18 @@ p, div {
     border: 1px solid rgba(255,255,255,.5);
     font-size: 0.7em ;
 }
-.login-input input::placeholder {
+.login-page .login-input input::placeholder {
     color: #A7A3FF;
 }
 
-.forgot {
+.login-page .forgot {
     margin-top: -2%;
     text-align: right;
     padding-bottom: 25px;
     font-size: 70%;
 }
 
-.login-input button {
+.login-page .login-input button {
     height: 32px;
     width: 100%;
     border-radius: 5px;
@@ -61,14 +59,14 @@ p, div {
     font-size: 0.8em ;
 }
 
-.login-input button:hover {
+.login-page .login-input button:hover {
     cursor: pointer;
 }
 
-.alternate {
+.login-page .alternate {
     color: #4D47C3;
 }
 
-.alternate:hover {
+.login-page .alternate:hover {
     cursor: pointer;
 }

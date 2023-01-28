@@ -13,7 +13,7 @@ function LoginPage() {
     };
 
     return (
-        <div className='wrapper'>
+        <div className='login-page'>
             <div className='login'>
                 <h1>Sign in to</h1>
                 <h2>Mobility Monitor</h2>
