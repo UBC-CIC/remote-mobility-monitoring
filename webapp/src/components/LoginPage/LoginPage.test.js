@@ -16,7 +16,7 @@ describe("LoginPage", () => {
     });
 
     test("renders a form with a username and password input", () => {
-        const {getByPlaceholderText } = render(<LoginPage />)
+        const {getByPlaceholderText } = render(<LoginPage />);
         const usernameInput = getByPlaceholderText("Username");
         const passwordInput = getByPlaceholderText("Password");
         expect(usernameInput).toBeInTheDocument();
