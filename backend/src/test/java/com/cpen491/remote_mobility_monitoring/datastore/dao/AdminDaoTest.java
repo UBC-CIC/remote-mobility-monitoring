@@ -11,16 +11,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_RECORD_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_NOT_EQUAL_SID_ERROR_MESSAGE;
@@ -31,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdminDaoTest extends DaoTestParent {
     private static final String PID = "adm-1";
@@ -73,6 +78,10 @@ class AdminDaoTest extends DaoTestParent {
         assertEquals(LAST_NAME, newRecord.getLastName());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
+        GetItemResponse response = findByPrimaryKey(EXISTS_ORGANIZATION_ID, newRecord.getPid());
+        assertTrue(response.hasItem());
+        assertEquals(ORGANIZATION_NAME, response.item().get(OrganizationTable.NAME_NAME).s());
+        assertEquals(EMAIL1, response.item().get(AdminTable.EMAIL_NAME).s());
     }
 
     @Test
@@ -121,9 +130,17 @@ class AdminDaoTest extends DaoTestParent {
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    public void testFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id) {
-        assertInvalidInputExceptionThrown(() -> cut.findById(id), ID_BLANK_ERROR_MESSAGE);
+    @MethodSource("invalidInputsForFindById")
+    public void testFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findById(id), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindById() {
+        return Stream.of(
+                Arguments.of(null, ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(EXISTS_ORGANIZATION_ID, ADMIN_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     @Test
@@ -145,6 +162,47 @@ class AdminDaoTest extends DaoTestParent {
     @NullAndEmptySource
     public void testFindByEmail_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String email) {
         assertInvalidInputExceptionThrown(() -> cut.findByEmail(email), EMAIL_BLANK_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void testFindOrganization_HappyCase() {
+        Admin newRecord = buildAdminDefault();
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
+
+        Organization organization = cut.findOrganization(newRecord.getPid());
+        assertNotNull(organization);
+        assertEquals(EXISTS_ORGANIZATION_ID, organization.getPid());
+        assertEquals(EXISTS_ORGANIZATION_ID, organization.getSid());
+        assertEquals(ORGANIZATION_NAME, organization.getName());
+    }
+
+    @Test
+    public void testFindOrganization_WHEN_AdminRecordDoesNotExist_THEN_ReturnNull() {
+        Organization organization = cut.findOrganization(PID);
+        assertNull(organization);
+    }
+
+    @Test
+    public void testFindOrganization_WHEN_NoOrganizationRecordAssociated_THEN_ReturnNull() {
+        Admin newRecord = buildAdminDefault();
+        createAdmin(newRecord);
+
+        Organization organization = cut.findOrganization(PID);
+        assertNull(organization);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForFindOrganization")
+    public void testFindOrganization_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String adminId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findOrganization(adminId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindOrganization() {
+        return Stream.of(
+                Arguments.of(null, ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(EXISTS_ORGANIZATION_ID, ADMIN_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     @Test
@@ -202,6 +260,8 @@ class AdminDaoTest extends DaoTestParent {
                 Arguments.of(buildAdmin(PID, SID, EMAIL1, "", LAST_NAME), FIRST_NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, null), LAST_NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, ""), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(EXISTS_ORGANIZATION_ID, EXISTS_ORGANIZATION_ID, EMAIL1, FIRST_NAME, LAST_NAME),
+                        ADMIN_ID_INVALID_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID + "1", EMAIL1, FIRST_NAME, LAST_NAME), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
@@ -223,9 +283,17 @@ class AdminDaoTest extends DaoTestParent {
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    public void testDelete_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id) {
-        assertInvalidInputExceptionThrown(() -> cut.delete(id), ID_BLANK_ERROR_MESSAGE);
+    @MethodSource("invalidInputsForDelete")
+    public void testDelete_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.delete(id), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForDelete() {
+        return Stream.of(
+                Arguments.of(null, ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(EXISTS_ORGANIZATION_ID, ADMIN_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     private static Admin buildAdminDefault() {

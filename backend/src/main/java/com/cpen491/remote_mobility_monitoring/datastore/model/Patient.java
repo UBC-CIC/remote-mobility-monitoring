@@ -34,7 +34,6 @@ public class Patient extends BaseModel {
     private Boolean verified;
 
     public static Map<String, AttributeValue> convertToMap(Patient patient) {
-        // TODO: take care of null value
         Map<String, AttributeValue> map = new HashMap<>();
         putInMap(map, PatientTable.PID_NAME, patient.getPid());
         putInMap(map, PatientTable.SID_NAME, patient.getSid());

@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 
 @Slf4j
@@ -86,7 +88,21 @@ public class CaregiverDao {
         genericDao.addAssociation(Caregiver.convertToMap(caregiver), Patient.convertToMap(patient));
     }
 
-    // TODO: remove patient
+    /**
+     * Removes a Patient from a Caregiver. Patient and Caregiver must already exist.
+     *
+     * @param patientId The id of the Patient record
+     * @param caregiverId The id of the Caregiver record
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
+     */
+    public void removePatient(String patientId, String caregiverId) {
+        log.info("Removing Patient [{}] from Caregiver [{}]", patientId, caregiverId);
+        Validator.validatePatientId(patientId);
+        Validator.validateCaregiverId(caregiverId);
+
+        genericDao.deleteByPrimaryKey(caregiverId, patientId);
+    }
 
     /**
      * Finds a Caregiver record by id.
@@ -148,7 +164,28 @@ public class CaregiverDao {
         return result.stream().map(Caregiver::convertFromMap).collect(Collectors.toList());
     }
 
-    // TODO: find caregivers in same org
+    /**
+     * Find the Organization this Caregiver belongs to.
+     *
+     * @param caregiverId The id of the Caregiver record
+     * @return {@link Organization}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty or invalid
+     */
+    public Organization findOrganization(String caregiverId) {
+        log.info("Finding Organization of Caregiver [{}]", caregiverId);
+        Validator.validateCaregiverId(caregiverId);
+
+        QueryResponse response = genericDao
+                .findAllAssociationsOnIndex(caregiverId, OrganizationTable.ID_PREFIX, BaseTable.SID_INDEX_NAME);
+        if (!response.hasItems() || response.items().size() == 0) {
+            log.info("Cannot find Organization of Caregiver [{}]", caregiverId);
+            return null;
+        }
+        Organization organization = Organization.convertFromMap(response.items().get(0));
+        organization.setSid(organization.getPid());
+        return organization;
+    }
 
     /**
      * Find all Patients of this Caregiver.

@@ -175,6 +175,8 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testAddPatient_WHEN_PatientRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
         assertThatThrownBy(() -> cut.addPatient(PATIENT_ID1, PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
@@ -203,6 +205,45 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     private static Stream<Arguments> invalidInputsForAddPatient() {
+        return Stream.of(
+                Arguments.of(null, PID, PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", PID, PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PID, PID, PATIENT_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(PATIENT_ID1, null, CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PATIENT_ID1, "", CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PATIENT_ID1, PATIENT_ID1, CAREGIVER_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testRemovePatient_HappyCase() {
+        Patient patient = buildPatientDefault();
+        createPatient(patient);
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
+        cut.addPatient(PATIENT_ID1, PID);
+
+        GetItemResponse response1 = findByPrimaryKey(PID, PATIENT_ID1);
+        assertTrue(response1.hasItem());
+
+        cut.removePatient(PATIENT_ID1, PID);
+
+        GetItemResponse response2 = findByPrimaryKey(PID, PATIENT_ID1);
+        assertFalse(response2.hasItem());
+    }
+
+    @Test
+    public void testRemovePatient_WHEN_RecordsDoNotExist_THEN_DoNothing() {
+        cut.removePatient(PATIENT_ID1, PID);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForRemovePatient")
+    public void testRemovePatient_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String patientId, String caregiverId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.removePatient(patientId, caregiverId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForRemovePatient() {
         return Stream.of(
                 Arguments.of(null, PID, PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of("", PID, PATIENT_ID_BLANK_ERROR_MESSAGE),
@@ -285,6 +326,47 @@ public class CaregiverDaoTest extends DaoTestParent {
     @Test
     public void testBatchFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException() {
         assertInvalidInputExceptionThrown(() -> cut.batchFindById(null), IDS_NULL_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void testFindOrganization_HappyCase() {
+        Caregiver newRecord = buildCaregiverDefault();
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
+
+        Organization organization = cut.findOrganization(newRecord.getPid());
+        assertNotNull(organization);
+        assertEquals(EXISTS_ORGANIZATION_ID, organization.getPid());
+        assertEquals(EXISTS_ORGANIZATION_ID, organization.getSid());
+        assertEquals(ORGANIZATION_NAME, organization.getName());
+    }
+
+    @Test
+    public void testFindOrganization_WHEN_CaregiverRecordDoesNotExist_THEN_ReturnNull() {
+        Organization organization = cut.findOrganization(PID);
+        assertNull(organization);
+    }
+
+    @Test
+    public void testFindOrganization_WHEN_NoOrganizationRecordAssociated_THEN_ReturnNull() {
+        Caregiver newRecord = buildCaregiverDefault();
+        createCaregiver(newRecord);
+
+        Organization organization = cut.findOrganization(PID);
+        assertNull(organization);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForFindOrganization")
+    public void testFindOrganization_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String caregiverId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findOrganization(caregiverId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindOrganization() {
+        return Stream.of(
+                Arguments.of(null, CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PATIENT_ID1, CAREGIVER_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     @Test
