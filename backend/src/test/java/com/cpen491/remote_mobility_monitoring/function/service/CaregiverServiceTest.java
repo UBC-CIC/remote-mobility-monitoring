@@ -160,6 +160,7 @@ public class CaregiverServiceTest {
         assertEquals(LAST_NAME, responseBody.getLastName());
         assertEquals(TITLE, responseBody.getTitle());
         assertEquals(PHONE_NUMBER, responseBody.getPhoneNumber());
+        assertEquals(ORGANIZATION_ID, responseBody.getOrganizationId());
         assertEquals(ORGANIZATION_NAME, responseBody.getOrganizationName());
         assertEquals(CREATED_AT, responseBody.getCreatedAt());
     }

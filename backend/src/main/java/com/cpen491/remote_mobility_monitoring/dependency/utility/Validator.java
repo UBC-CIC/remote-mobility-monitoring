@@ -8,6 +8,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
@@ -52,6 +53,7 @@ public class Validator {
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
     public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
+    public static final String GET_ORGANIZATION_NULL_ERROR_MESSAGE = "Get organization request body must not be null";
     public static final String CREATE_CAREGIVER_NULL_ERROR_MESSAGE = "Create caregiver request body must not be null";
     public static final String GET_CAREGIVER_NULL_ERROR_MESSAGE = "Get caregiver request body must not be null";
     public static final String GET_ALL_PATIENTS_NULL_ERROR_MESSAGE =
@@ -182,6 +184,11 @@ public class Validator {
         validateAuthCode(patient.getAuthCode());
         validateAuthCodeTimestamp(patient.getAuthCodeTimestamp());
         validateVerified(patient.getVerified());
+    }
+
+    public static void validateGetOrganizationRequestBody(GetOrganizationRequestBody body) {
+        Validate.notNull(body, GET_ORGANIZATION_NULL_ERROR_MESSAGE);
+        validateOrganizationId(body.getOrganizationId());
     }
 
     public static void validateCreateCaregiverRequestBody(CreateCaregiverRequestBody body) {

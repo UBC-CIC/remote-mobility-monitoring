@@ -76,6 +76,7 @@ public class CaregiverService {
                 .lastName(caregiver.getLastName())
                 .title(caregiver.getTitle())
                 .phoneNumber(caregiver.getPhoneNumber())
+                .organizationId(organization.getPid())
                 .organizationName(organization.getName())
                 .createdAt(caregiver.getCreatedAt())
                 .build();

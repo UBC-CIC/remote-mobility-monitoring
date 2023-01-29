@@ -4,6 +4,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
 interface ApiGatewayStackProps extends cdk.StackProps {
   readonly defaultFunction: lambda.Function;
+  readonly getOrganizationFunction: lambda.Function;
   readonly createCaregiverFunction: lambda.Function;
   readonly getCaregiverFunction: lambda.Function;
   readonly getAllPatientsFunction: lambda.Function;
@@ -23,6 +24,7 @@ export class ApiGatewayStack extends cdk.Stack {
       handler: props.defaultFunction,
       proxy: false,
     });
+    const getOrganizationFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getOrganizationFunction);
     const createCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createCaregiverFunction);
     const getCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getCaregiverFunction);
     const getAllPatientsFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getAllPatientsFunction);
@@ -32,6 +34,10 @@ export class ApiGatewayStack extends cdk.Stack {
     const verifyPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.verifyPatientFunction);
     const getPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getPatientFunction);
     const deletePatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.deletePatientFunction);
+
+    const organizations = api.root.addResource('organizations');
+    const organization_id = organizations.addResource('{organization_id}');
+    organization_id.addMethod('GET', getOrganizationFunctionIntegration);
 
     const caregivers = api.root.addResource('caregivers');
     caregivers.addMethod('POST', createCaregiverFunctionIntegration);

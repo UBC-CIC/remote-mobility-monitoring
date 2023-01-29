@@ -22,6 +22,8 @@ public class GetCaregiverResponseBody {
     private String title;
     @SerializedName(Const.PHONE_NUMBER_NAME)
     private String phoneNumber;
+    @SerializedName(Const.ORGANIZATION_ID_NAME)
+    private String organizationId;
     @SerializedName(Const.ORGANIZATION_NAME_NAME)
     private String organizationName;
     @SerializedName(Const.CREATED_AT_NAME)
