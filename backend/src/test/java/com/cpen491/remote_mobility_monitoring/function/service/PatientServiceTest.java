@@ -12,7 +12,6 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
@@ -404,17 +403,6 @@ class PatientServiceTest {
 
     private static GetPatientRequestBody buildGetPatientRequestBody(String patientId) {
         return GetPatientRequestBody.builder()
-                .patientId(patientId)
-                .build();
-    }
-
-    private static SharePatientRequestBody buildSharePatientRequestBody() {
-        return buildSharePatientRequestBody(CAREGIVER_ID, PATIENT_ID);
-    }
-
-    private static SharePatientRequestBody buildSharePatientRequestBody(String caregiverId, String patientId) {
-        return SharePatientRequestBody.builder()
-                .caregiverId(caregiverId)
                 .patientId(patientId)
                 .build();
     }

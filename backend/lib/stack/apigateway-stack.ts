@@ -6,6 +6,8 @@ interface ApiGatewayStackProps extends cdk.StackProps {
   readonly defaultFunction: lambda.Function;
   readonly getOrganizationFunction: lambda.Function;
   readonly createCaregiverFunction: lambda.Function;
+  readonly addPatientFunction: lambda.Function;
+  readonly removePatientFunction: lambda.Function;
   readonly getCaregiverFunction: lambda.Function;
   readonly getAllPatientsFunction: lambda.Function;
   readonly deleteCaregiverFunction: lambda.Function;
@@ -24,11 +26,16 @@ export class ApiGatewayStack extends cdk.Stack {
       handler: props.defaultFunction,
       proxy: false,
     });
+
     const getOrganizationFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getOrganizationFunction);
+
     const createCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createCaregiverFunction);
+    const addPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.addPatientFunction);
+    const removePatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.removePatientFunction);
     const getCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getCaregiverFunction);
     const getAllPatientsFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getAllPatientsFunction);
     const deleteCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.deleteCaregiverFunction);
+
     const createPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createPatientFunction);
     const updatePatientDeviceFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.updatePatientDeviceFunction);
     const verifyPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.verifyPatientFunction);
@@ -44,8 +51,11 @@ export class ApiGatewayStack extends cdk.Stack {
     const caregiver_id = caregivers.addResource('{caregiver_id}');
     caregiver_id.addMethod('GET', getCaregiverFunctionIntegration);
     caregiver_id.addMethod('DELETE', deleteCaregiverFunctionIntegration);
-    const caregiverPatients = caregiver_id.addResource('patients');
-    caregiverPatients.addMethod('GET', getAllPatientsFunctionIntegration);
+    const caregiver_patients = caregiver_id.addResource('patients');
+    caregiver_patients.addMethod('GET', getAllPatientsFunctionIntegration);
+    const caregiver_patient_id = caregiver_patients.addResource('{patient_id}');
+    caregiver_patient_id.addMethod('POST', addPatientFunctionIntegration);
+    caregiver_patient_id.addMethod('DELETE', removePatientFunctionIntegration);
 
     const patients = api.root.addResource('patients');
     patients.addMethod('POST', createPatientFunctionIntegration);

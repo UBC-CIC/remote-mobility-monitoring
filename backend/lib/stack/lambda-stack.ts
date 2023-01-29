@@ -18,6 +18,8 @@ export class LambdaStack extends cdk.Stack {
   public readonly defaultFunction: lambda.Function;
   public readonly getOrganizationFunction: lambda.Function;
   public readonly createCaregiverFunction: lambda.Function;
+  public readonly addPatientFunction: lambda.Function;
+  public readonly removePatientFunction: lambda.Function;
   public readonly getCaregiverFunction: lambda.Function;
   public readonly getAllPatientsFunction: lambda.Function;
   public readonly deleteCaregiverFunction: lambda.Function;
@@ -70,11 +72,16 @@ export class LambdaStack extends cdk.Stack {
       `),
       handler: 'index.handler',
     });
+
     this.getOrganizationFunction = this.createGetOrganizationFunction();
+
     this.createCaregiverFunction = this.createCreateCaregiverFunction();
+    this.addPatientFunction = this.createAddPatientFunction();
+    this.removePatientFunction = this.createRemovePatientFunction();
     this.getCaregiverFunction = this.createGetCaregiverFunction();
     this.getAllPatientsFunction = this.createGetAllPatientsFunction();
     this.deleteCaregiverFunction = this.createDeleteCaregiverFunction();
+
     this.createPatientFunction = this.createCreatePatientFunction();
     this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction();
     this.verifyPatientFunction = this.createVerifyPatientFunction();
@@ -98,6 +105,26 @@ export class LambdaStack extends cdk.Stack {
       'CreateCaregiverFunction',
       LambdaStack.createLambdaFunctionProps('CreateCaregiverFunction', 'caregiver.CreateCaregiverHandler', this.lambdaRole),
     );
+
+    return lambdaFunction;
+  }
+
+  private createAddPatientFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'AddPatientFunction',
+      LambdaStack.createLambdaFunctionProps('AddPatientFunction', 'caregiver.AddPatientHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction;
+  }
+
+  private createRemovePatientFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'RemovePatientFunction',
+      LambdaStack.createLambdaFunctionProps('RemovePatientFunction', 'caregiver.RemovePatientHandler', this.lambdaRole),
+    )
 
     return lambdaFunction;
   }

@@ -23,6 +23,8 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_RECORD_NULL_ERROR_MESSAGE;
@@ -34,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -95,6 +98,37 @@ public class OrganizationDaoTest extends DaoTestParent {
                 Arguments.of(null, ORGANIZATION_RECORD_NULL_ERROR_MESSAGE),
                 Arguments.of(buildOrganization(PID, SID, null), NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildOrganization(PID, SID, ""), NAME_BLANK_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testHasCaregiver_HappyCase() {
+        putPrimaryKey(PID, CAREGIVER_ID);
+
+        boolean result = cut.hasCaregiver(CAREGIVER_ID, PID);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testHasCaregiver_WHEN_CaregiverNotAdded_THEN_ReturnFalse() {
+        boolean result = cut.hasCaregiver(CAREGIVER_ID, PID);
+        assertFalse(result);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForHasCaregiver")
+    public void testHasCaregiver_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String caregiverId, String organizationId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.hasCaregiver(caregiverId, organizationId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForHasCaregiver() {
+        return Stream.of(
+                Arguments.of(null, PID, CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", PID, CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PID, PID, CAREGIVER_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(CAREGIVER_ID, null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(CAREGIVER_ID, "", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(CAREGIVER_ID, CAREGIVER_ID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
         );
     }
 

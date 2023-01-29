@@ -4,15 +4,16 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import org.apache.commons.lang3.Validate;
@@ -55,6 +56,8 @@ public class Validator {
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
     public static final String GET_ORGANIZATION_NULL_ERROR_MESSAGE = "Get organization request body must not be null";
     public static final String CREATE_CAREGIVER_NULL_ERROR_MESSAGE = "Create caregiver request body must not be null";
+    public static final String ADD_PATIENT_NULL_ERROR_MESSAGE = "Add patient request body must not be null";
+    public static final String REMOVE_PATIENT_NULL_ERROR_MESSAGE = "Remove patient request body must not be null";
     public static final String GET_CAREGIVER_NULL_ERROR_MESSAGE = "Get caregiver request body must not be null";
     public static final String GET_ALL_PATIENTS_NULL_ERROR_MESSAGE =
             "Get all patients for caregiver request body must not be null";
@@ -63,7 +66,6 @@ public class Validator {
     public static final String UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE = "Update patient device request body must not be null";
     public static final String VERIFY_PATIENT_NULL_ERROR_MESSAGE = "Verify patient request body must not be null";
     public static final String GET_PATIENT_NULL_ERROR_MESSAGE = "Get patient request body must not be null";
-    public static final String SHARE_PATIENT_NULL_ERROR_MESSAGE = "Share patient request body must not be null";
     public static final String DELETE_PATIENT_NULL_ERROR_MESSAGE = "Delete patient request body must not be null";
 
     public static void validatePidEqualsSid(String pid, String sid) {
@@ -201,6 +203,18 @@ public class Validator {
         validateOrganizationId(body.getOrganizationId());
     }
 
+    public static void validateAddPatientRequestBody(AddPatientRequestBody body) {
+        Validate.notNull(body, ADD_PATIENT_NULL_ERROR_MESSAGE);
+        validateCaregiverId(body.getCaregiverId());
+        validatePatientId(body.getPatientId());
+    }
+
+    public static void validateRemovePatientRequestBody(RemovePatientRequestBody body) {
+        Validate.notNull(body, REMOVE_PATIENT_NULL_ERROR_MESSAGE);
+        validateCaregiverId(body.getCaregiverId());
+        validatePatientId(body.getPatientId());
+    }
+
     public static void validateGetCaregiverRequestBody(GetCaregiverRequestBody body) {
         Validate.notNull(body, GET_CAREGIVER_NULL_ERROR_MESSAGE);
         validateCaregiverId(body.getCaregiverId());
@@ -239,12 +253,6 @@ public class Validator {
 
     public static void validateGetPatientRequestBody(GetPatientRequestBody body) {
         Validate.notNull(body, GET_PATIENT_NULL_ERROR_MESSAGE);
-        validatePatientId(body.getPatientId());
-    }
-
-    public static void validateSharePatientRequestBody(SharePatientRequestBody body) {
-        Validate.notNull(body, SHARE_PATIENT_NULL_ERROR_MESSAGE);
-        validateCaregiverId(body.getCaregiverId());
         validatePatientId(body.getPatientId());
     }
 

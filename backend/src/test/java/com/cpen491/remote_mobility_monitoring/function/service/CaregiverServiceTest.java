@@ -4,6 +4,8 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
@@ -13,6 +15,8 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsResponseBody.PatientSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +38,7 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADD_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_CAREGIVER_NULL_ERROR_MESSAGE;
@@ -45,7 +50,10 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.REMOVE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.TITLE_BLANK_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -144,6 +152,78 @@ public class CaregiverServiceTest {
                         ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, CAREGIVER_ID),
                         ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testAddPatient_HappyCase() {
+        AddPatientRequestBody requestBody = buildAddPatientRequestBody();
+        AddPatientResponseBody responseBody = cut.addPatient(requestBody);
+
+        verify(caregiverDao, times(1)).addPatient(eq(PATIENT_ID1), eq(CAREGIVER_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testAddPatient_WHEN_CaregiverDaoAddPatientThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).addPatient(anyString(), anyString());
+
+        AddPatientRequestBody requestBody = buildAddPatientRequestBody();
+        assertThatThrownBy(() -> cut.addPatient(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForAddPatient")
+    public void testAddPatent_WHEN_InvalidInput_THEN_ThrowInvalidInputException(AddPatientRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.addPatient(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForAddPatient() {
+        return Stream.of(
+                Arguments.of(null, ADD_PATIENT_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientRequestBody(null, PATIENT_ID1), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientRequestBody("", PATIENT_ID1), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientRequestBody(PATIENT_ID1, PATIENT_ID1), CAREGIVER_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientRequestBody(CAREGIVER_ID, null), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientRequestBody(CAREGIVER_ID, ""), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientRequestBody(CAREGIVER_ID, CAREGIVER_ID), PATIENT_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testRemovePatient_HappyCase() {
+        RemovePatientRequestBody requestBody = buildRemovePatientRequestBody();
+        RemovePatientResponseBody responseBody = cut.removePatient(requestBody);
+
+        verify(caregiverDao, times(1)).removePatient(eq(PATIENT_ID1), eq(CAREGIVER_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testRemovePatient_WHEN_CaregiverDaoRemovePatientThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).removePatient(anyString(), anyString());
+
+        RemovePatientRequestBody requestBody = buildRemovePatientRequestBody();
+        assertThatThrownBy(() -> cut.removePatient(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForRemovePatient")
+    public void testRemovePatent_WHEN_InvalidInput_THEN_ThrowInvalidInputException(RemovePatientRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.removePatient(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForRemovePatient() {
+        return Stream.of(
+                Arguments.of(null, REMOVE_PATIENT_NULL_ERROR_MESSAGE),
+                Arguments.of(buildRemovePatientRequestBody(null, PATIENT_ID1), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildRemovePatientRequestBody("", PATIENT_ID1), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildRemovePatientRequestBody(PATIENT_ID1, PATIENT_ID1), CAREGIVER_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildRemovePatientRequestBody(CAREGIVER_ID, null), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildRemovePatientRequestBody(CAREGIVER_ID, ""), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildRemovePatientRequestBody(CAREGIVER_ID, CAREGIVER_ID), PATIENT_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -283,6 +363,28 @@ public class CaregiverServiceTest {
                 .title(title)
                 .phoneNumber(phoneNumber)
                 .organizationId(organizationId)
+                .build();
+    }
+
+    private static AddPatientRequestBody buildAddPatientRequestBody() {
+        return buildAddPatientRequestBody(CAREGIVER_ID, PATIENT_ID1);
+    }
+
+    private static AddPatientRequestBody buildAddPatientRequestBody(String caregiverId, String patientId) {
+        return AddPatientRequestBody.builder()
+                .caregiverId(caregiverId)
+                .patientId(patientId)
+                .build();
+    }
+
+    private static RemovePatientRequestBody buildRemovePatientRequestBody() {
+        return buildRemovePatientRequestBody(CAREGIVER_ID, PATIENT_ID1);
+    }
+
+    private static RemovePatientRequestBody buildRemovePatientRequestBody(String caregiverId, String patientId) {
+        return RemovePatientRequestBody.builder()
+                .caregiverId(caregiverId)
+                .patientId(patientId)
                 .build();
     }
 

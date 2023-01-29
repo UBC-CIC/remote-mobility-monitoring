@@ -49,6 +49,24 @@ public class OrganizationDao {
     }
 
     /**
+     * Checks whether Organization has Caregiver.
+     *
+     * @param caregiverId The id of the Caregiver record
+     * @param organizationId The id of the Organization record
+     * @return {@link Boolean}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if organizationId or caregiverId is empty or invalid
+     */
+    public boolean hasCaregiver(String caregiverId, String organizationId) {
+        log.info("Checking that Organization [{}] has Caregiver [{}]", organizationId, caregiverId);
+        Validator.validateOrganizationId(organizationId);
+        Validator.validateCaregiverId(caregiverId);
+
+        GetItemResponse response = genericDao.findByPrimaryKey(organizationId, caregiverId);
+        return response.hasItem();
+    }
+
+    /**
      * Finds an Organization record by id.
      *
      * @param id The id of the record to find

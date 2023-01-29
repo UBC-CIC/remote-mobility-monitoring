@@ -61,6 +61,24 @@ public class CaregiverDao {
     }
 
     /**
+     * Checks whether Caregiver has Patient.
+     *
+     * @param patientId The id of the Patient record
+     * @param caregiverId The id of the Caregiver record
+     * @return {@link Boolean}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
+     */
+    public boolean hasPatient(String patientId, String caregiverId) {
+        log.info("Checking that Caregiver [{}] has Patient [{}]", caregiverId, patientId);
+        Validator.validatePatientId(patientId);
+        Validator.validateCaregiverId(caregiverId);
+
+        GetItemResponse response = genericDao.findByPrimaryKey(caregiverId, patientId);
+        return response.hasItem();
+    }
+
+    /**
      * Adds a Patient to a Caregiver. Patient and Caregiver must already exist.
      *
      * @param patientId The id of the Patient record
@@ -78,8 +96,7 @@ public class CaregiverDao {
         Patient patient = patientDao.findById(patientId);
         Caregiver caregiver = findById(caregiverId);
 
-        GetItemResponse response = genericDao.findByPrimaryKey(caregiverId, patientId);
-        if (response.hasItem()) {
+        if (hasPatient(patientId, caregiverId)) {
             log.error("Patient [{}] already associated with Caregiver [{}]", patientId, caregiverId);
             throw new DuplicateRecordException("Patient/Caregiver association", patientId + ":" + caregiverId);
         }

@@ -164,6 +164,37 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     @Test
+    public void testHasPatient_HappyCase() {
+        putPrimaryKey(PID, PATIENT_ID1);
+
+        boolean result = cut.hasPatient(PATIENT_ID1, PID);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testHasPatient_WHEN_PatientNotAdded_THEN_ReturnFalse() {
+        boolean result = cut.hasPatient(PATIENT_ID1, PID);
+        assertFalse(result);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForHasPatient")
+    public void testHasPatient_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String patientId, String caregiverId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.hasPatient(patientId, caregiverId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForHasPatient() {
+        return Stream.of(
+                Arguments.of(null, PID, PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", PID, PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PID, PID, PATIENT_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(PATIENT_ID1, null, CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PATIENT_ID1, "", CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(PATIENT_ID1, PATIENT_ID1, CAREGIVER_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
     public void testAddPatient_HappyCase() {
         Patient patient1 = buildPatientDefault();
         createPatient(patient1);

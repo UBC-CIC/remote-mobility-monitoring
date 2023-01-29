@@ -12,6 +12,8 @@ new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
   defaultFunction: lambdaStack.defaultFunction,
   getOrganizationFunction: lambdaStack.getOrganizationFunction,
   createCaregiverFunction: lambdaStack.createCaregiverFunction,
+  addPatientFunction: lambdaStack.addPatientFunction,
+  removePatientFunction: lambdaStack.removePatientFunction,
   getCaregiverFunction: lambdaStack.getCaregiverFunction,
   getAllPatientsFunction: lambdaStack.getAllPatientsFunction,
   deleteCaregiverFunction: lambdaStack.deleteCaregiverFunction,
