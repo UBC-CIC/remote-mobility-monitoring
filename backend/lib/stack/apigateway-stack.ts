@@ -5,9 +5,11 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 interface ApiGatewayStackProps extends cdk.StackProps {
   readonly defaultFunction: lambda.Function;
   readonly createCaregiverFunction: lambda.Function;
+  readonly deleteCaregiverFunction: lambda.Function;
   readonly createPatientFunction: lambda.Function;
   readonly updatePatientDeviceFunction: lambda.Function;
   readonly verifyPatientFunction: lambda.Function;
+  readonly deletePatientFunction: lambda.Function;
 }
 
 export class ApiGatewayStack extends cdk.Stack {
@@ -19,17 +21,23 @@ export class ApiGatewayStack extends cdk.Stack {
       proxy: false,
     });
     const createCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createCaregiverFunction);
+    const deleteCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.deleteCaregiverFunction);
     const createPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createPatientFunction);
     const updatePatientDeviceFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.updatePatientDeviceFunction);
     const verifyPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.verifyPatientFunction);
+    const deletePatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.deletePatientFunction);
 
     const caregivers = api.root.addResource('caregivers');
     caregivers.addMethod('POST', createCaregiverFunctionIntegration);
+    const caregiver_id = caregivers.addResource('{caregiver_id}');
+    caregiver_id.addMethod('DELETE', deleteCaregiverFunctionIntegration);
+
     const patients = api.root.addResource('patients');
     patients.addMethod('POST', createPatientFunctionIntegration);
     const patient_id = patients.addResource('{patient_id}');
     patient_id.addResource('verify').addMethod('POST', verifyPatientFunctionIntegration);
     patient_id.addResource('device').addMethod('POST', updatePatientDeviceFunctionIntegration);
+    patient_id.addMethod('DELETE', deletePatientFunctionIntegration);
   }
 
   private static createLambdaIntegration(lambdaFunction: lambda.Function) {

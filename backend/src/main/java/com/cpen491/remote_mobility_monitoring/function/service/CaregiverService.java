@@ -5,18 +5,13 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
-import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 public class CaregiverService {
@@ -53,16 +48,18 @@ public class CaregiverService {
                 .build();
     }
 
+    /**
+     * Deletes a Caregiver.
+     *
+     * @param body The request body
+     * @return {@link DeleteCaregiverResponseBody}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty
+     */
     public DeleteCaregiverResponseBody deleteCaregiver(DeleteCaregiverRequestBody body) {
         Validator.validateDeleteCaregiverRequestBody(body);
 
-//        Caregiver caregiver = findCaregiverById(body.getCaregiverId());
-//        List<Patient> patients = patientDao.batchFindById(caregiver.getPatientIds());
-//        for (Patient patient : patients) {
-//            patient.getCaregiverIds().remove(body.getCaregiverId());
-//        }
-//
-//        caregiverDao.delete(body.getCaregiverId());
+        caregiverDao.delete(body.getCaregiverId());
 
         return DeleteCaregiverResponseBody.builder()
                 .message("OK")

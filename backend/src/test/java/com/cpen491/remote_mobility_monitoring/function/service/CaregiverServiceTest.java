@@ -5,6 +5,8 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +22,15 @@ import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_CAREGIVER_NULL_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_CAREGIVER_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.TITLE_BLANK_ERROR_MESSAGE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -38,14 +44,13 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class CaregiverServiceTest {
+    private static final String CAREGIVER_ID = "car-1";
     private static final String EMAIL = "jackjackson@email.com";
     private static final String TITLE = "caregiver";
-    private static final String IMAGE_URL = "image.png";
-    private static final String ORGANIZATION_ID = "org-id-abc";
     private static final String FIRST_NAME = "Jack";
     private static final String LAST_NAME = "Jackson";
     private static final String PHONE_NUMBER = "1234567890";
-    private static final String CAREGIVER_ID = "caregiver-id-1";
+    private static final String ORGANIZATION_ID = "org-1";
 
     CaregiverService cut;
     @Mock
@@ -84,12 +89,12 @@ public class CaregiverServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidInputsForCreatePatient")
+    @MethodSource("invalidInputsForCreateCaregiver")
     public void testCreateCaregiver_WHEN_InvalidInput_THEN_ThrowInvalidInputException(CreateCaregiverRequestBody body, String errorMessage) {
         assertInvalidInputExceptionThrown(() -> cut.createCaregiver(body), errorMessage);
     }
 
-    private static Stream<Arguments> invalidInputsForCreatePatient() {
+    private static Stream<Arguments> invalidInputsForCreateCaregiver() {
         return Stream.of(
                 Arguments.of(null, CREATE_CAREGIVER_NULL_ERROR_MESSAGE),
                 Arguments.of(buildCreateCaregiverRequestBody(null, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
@@ -115,7 +120,42 @@ public class CaregiverServiceTest {
                 Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, null),
                         ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ""),
-                        ORGANIZATION_ID_BLANK_ERROR_MESSAGE)
+                        ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, CAREGIVER_ID),
+                        ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testDeleteCaregiver_HappyCase() {
+        DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
+        DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
+
+        verify(caregiverDao, times(1)).delete(eq(CAREGIVER_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testDeleteCaregiver_WHEN_CaregiverDaoDeleteThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).delete(anyString());
+
+        DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
+        assertThatThrownBy(() -> cut.deleteCaregiver(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForDeleteCaregiver")
+    public void testDeleteCaregiver_WHEN_InvalidInput_THEN_ThrowInvalidInputException(DeleteCaregiverRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.deleteCaregiver(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForDeleteCaregiver() {
+        return Stream.of(
+                Arguments.of(null, DELETE_CAREGIVER_NULL_ERROR_MESSAGE),
+                Arguments.of(buildDeleteCaregiverRequestBody(null), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildDeleteCaregiverRequestBody(""), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildDeleteCaregiverRequestBody(ORGANIZATION_ID), CAREGIVER_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -132,6 +172,16 @@ public class CaregiverServiceTest {
                 .title(title)
                 .phoneNumber(phoneNumber)
                 .organizationId(organizationId)
+                .build();
+    }
+
+    private static DeleteCaregiverRequestBody buildDeleteCaregiverRequestBody() {
+        return buildDeleteCaregiverRequestBody(CAREGIVER_ID);
+    }
+
+    private static DeleteCaregiverRequestBody buildDeleteCaregiverRequestBody(String caregiverId) {
+        return DeleteCaregiverRequestBody.builder()
+                .caregiverId(caregiverId)
                 .build();
     }
 

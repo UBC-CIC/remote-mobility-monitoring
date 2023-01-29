@@ -9,6 +9,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.SharePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
@@ -36,10 +37,12 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DATE_OF_BIRTH_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.VERIFY_PATIENT_NULL_ERROR_MESSAGE;
@@ -65,10 +68,8 @@ class PatientServiceTest {
     private static final String LAST_NAME = "Jackson";
     private static final String DATE_OF_BIRTH = "2000-12-31";
     private static final String PHONE_NUMBER = "1234567890";
-    private static final String PATIENT_ID1 = "pat-1";
-    private static final String PATIENT_ID2 = "pat-2";
-    private static final String CAREGIVER_ID1 = "car-1";
-    private static final String CAREGIVER_ID2 = "car-2";
+    private static final String PATIENT_ID = "pat-1";
+    private static final String CAREGIVER_ID = "car-1";
     private static final String AUTH_CODE = "auth_code-123";
     private static final String AUTH_CODE_TIMESTAMP = getCurrentUtcTimeString();
     private static final String DEVICE_ID = "device-id-1";
@@ -192,7 +193,7 @@ class PatientServiceTest {
         assertTrue(patientCaptor.getValue().getVerified());
         assertEquals(DEVICE_ID, patientCaptor.getValue().getDeviceId());
 
-        verify(caregiverDao, times(1)).addPatient(eq(PATIENT_ID1), eq(CAREGIVER_ID1));
+        verify(caregiverDao, times(1)).addPatient(eq(PATIENT_ID), eq(CAREGIVER_ID));
 
         assertNotNull(responseBody);
         assertEquals("OK", responseBody.getMessage());
@@ -267,14 +268,47 @@ class PatientServiceTest {
     private static Stream<Arguments> invalidInputsForVerifyPatient() {
         return Stream.of(
                 Arguments.of(null, VERIFY_PATIENT_NULL_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(null, PATIENT_ID1, AUTH_CODE, DEVICE_ID), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody("", PATIENT_ID1, AUTH_CODE, DEVICE_ID), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, null, AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, "", AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, null, DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, "", DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, AUTH_CODE, null), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, AUTH_CODE, ""), DEVICE_ID_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildVerifyPatientRequestBody(null, PATIENT_ID, AUTH_CODE, DEVICE_ID), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody("", PATIENT_ID, AUTH_CODE, DEVICE_ID), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, null, AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, "", AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, null, DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, "", DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, AUTH_CODE, null), DEVICE_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, AUTH_CODE, ""), DEVICE_ID_BLANK_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testDeletePatient_HappyCase() {
+        DeletePatientRequestBody requestBody = buildDeletePatientRequestBody();
+        DeletePatientResponseBody responseBody = cut.deletePatient(requestBody);
+
+        verify(patientDao, times(1)).delete(eq(PATIENT_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testDeletePatient_WHEN_PatientDaoDeleteThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(patientDao).delete(anyString());
+
+        DeletePatientRequestBody requestBody = buildDeletePatientRequestBody();
+        assertThatThrownBy(() -> cut.deletePatient(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForDeletePatient")
+    public void testDeletePatient_WHEN_InvalidInput_THEN_ThrowInvalidInputException(DeletePatientRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.deletePatient(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForDeletePatient() {
+        return Stream.of(
+                Arguments.of(null, DELETE_PATIENT_NULL_ERROR_MESSAGE),
+                Arguments.of(buildDeletePatientRequestBody(null), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildDeletePatientRequestBody(""), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildDeletePatientRequestBody(CAREGIVER_ID), PATIENT_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -293,7 +327,7 @@ class PatientServiceTest {
     }
 
     private static UpdatePatientDeviceRequestBody buildUpdatePatientDeviceRequestBody() {
-        return buildUpdatePatientDeviceRequestBody(PATIENT_ID1);
+        return buildUpdatePatientDeviceRequestBody(PATIENT_ID);
     }
 
     private static UpdatePatientDeviceRequestBody buildUpdatePatientDeviceRequestBody(String patientId) {
@@ -303,7 +337,7 @@ class PatientServiceTest {
     }
 
     private static VerifyPatientRequestBody buildVerifyPatientRequestBody() {
-        return buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID1, AUTH_CODE, DEVICE_ID);
+        return buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, AUTH_CODE, DEVICE_ID);
     }
 
     private static VerifyPatientRequestBody buildVerifyPatientRequestBody(String caregiverId, String patientId,
@@ -317,7 +351,7 @@ class PatientServiceTest {
     }
 
     private static SharePatientRequestBody buildSharePatientRequestBody() {
-        return buildSharePatientRequestBody(CAREGIVER_ID1, PATIENT_ID1);
+        return buildSharePatientRequestBody(CAREGIVER_ID, PATIENT_ID);
     }
 
     private static SharePatientRequestBody buildSharePatientRequestBody(String caregiverId, String patientId) {
@@ -328,7 +362,7 @@ class PatientServiceTest {
     }
 
     private static DeletePatientRequestBody buildDeletePatientRequestBody() {
-        return buildDeletePatientRequestBody(PATIENT_ID1);
+        return buildDeletePatientRequestBody(PATIENT_ID);
     }
 
     private static DeletePatientRequestBody buildDeletePatientRequestBody(String patientId) {
@@ -338,11 +372,11 @@ class PatientServiceTest {
     }
 
     private static Patient buildPatientDefault() {
-        return buildPatient(PATIENT_ID1, PATIENT_ID1, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER,
+        return buildPatient(PATIENT_ID, PATIENT_ID, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER,
                 AUTH_CODE, AUTH_CODE_TIMESTAMP, false);
     }
 
     private static Caregiver buildCaregiverDefault() {
-        return buildCaregiver(CAREGIVER_ID1, CAREGIVER_ID1, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER);
+        return buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER);
     }
 }

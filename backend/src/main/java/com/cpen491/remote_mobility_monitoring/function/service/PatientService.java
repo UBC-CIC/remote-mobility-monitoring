@@ -124,6 +124,14 @@ public class PatientService {
                 .build();
     }
 
+    /**
+     * Deletes a Patient.
+     *
+     * @param body The request body
+     * @return {@link DeletePatientResponseBody}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
+     */
     public DeletePatientResponseBody deletePatient(DeletePatientRequestBody body) {
         Validator.validateDeletePatientRequestBody(body);
 
