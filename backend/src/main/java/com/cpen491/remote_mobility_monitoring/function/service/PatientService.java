@@ -11,6 +11,8 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
@@ -121,6 +123,30 @@ public class PatientService {
 
         return VerifyPatientResponseBody.builder()
                 .message("OK")
+                .build();
+    }
+
+    /**
+     * Gets the Patient specified by patientId.
+     *
+     * @param body The request body
+     * @return {@link GetPatientResponseBody}
+     * @throws RecordDoesNotExistException If Patient record with the given patientId does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
+     */
+    public GetPatientResponseBody getPatient(GetPatientRequestBody body) {
+        Validator.validateGetPatientRequestBody(body);
+
+        Patient patient = patientDao.findById(body.getPatientId());
+
+        return GetPatientResponseBody.builder()
+                .deviceId(patient.getDeviceId())
+                .firstName(patient.getFirstName())
+                .lastName(patient.getLastName())
+                .dateOfBirth(patient.getDateOfBirth())
+                .phoneNumber(patient.getPhoneNumber())
+                .createdAt(patient.getCreatedAt())
                 .build();
     }
 

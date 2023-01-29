@@ -11,10 +11,12 @@ const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', 
 new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
   defaultFunction: lambdaStack.defaultFunction,
   createCaregiverFunction: lambdaStack.createCaregiverFunction,
+  getCaregiverFunction: lambdaStack.getCaregiverFunction,
   deleteCaregiverFunction: lambdaStack.deleteCaregiverFunction,
   createPatientFunction: lambdaStack.createPatientFunction,
   updatePatientDeviceFunction: lambdaStack.updatePatientDeviceFunction,
   verifyPatientFunction: lambdaStack.verifyPatientFunction,
+  getPatientFunction: lambdaStack.getPatientFunction,
   deletePatientFunction: lambdaStack.deletePatientFunction,
 });
 app.synth();

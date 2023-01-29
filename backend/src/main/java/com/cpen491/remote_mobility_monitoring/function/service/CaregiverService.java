@@ -5,11 +5,14 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +48,32 @@ public class CaregiverService {
 
         return CreateCaregiverResponseBody.builder()
                 .message("OK")
+                .build();
+    }
+
+    /**
+     * Gets the Caregiver specified by caregiverId.
+     *
+     * @param body The request body
+     * @return {@link GetCaregiverResponseBody}
+     * @throws RecordDoesNotExistException If Caregiver record with the given caregiverId does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty
+     */
+    public GetCaregiverResponseBody getCaregiver(GetCaregiverRequestBody body) {
+        Validator.validateGetCaregiverRequestBody(body);
+
+        Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
+        Organization organization = caregiverDao.findOrganization(body.getCaregiverId());
+
+        return GetCaregiverResponseBody.builder()
+                .email(caregiver.getEmail())
+                .firstName(caregiver.getFirstName())
+                .lastName(caregiver.getLastName())
+                .title(caregiver.getTitle())
+                .phoneNumber(caregiver.getPhoneNumber())
+                .organizationName(organization.getName())
+                .createdAt(caregiver.getCreatedAt())
                 .build();
     }
 
