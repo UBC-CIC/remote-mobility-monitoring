@@ -18,6 +18,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly defaultFunction: lambda.Function;
   public readonly createCaregiverFunction: lambda.Function;
   public readonly getCaregiverFunction: lambda.Function;
+  public readonly getAllPatientsFunction: lambda.Function;
   public readonly deleteCaregiverFunction: lambda.Function;
   public readonly createPatientFunction: lambda.Function;
   public readonly updatePatientDeviceFunction: lambda.Function;
@@ -70,6 +71,7 @@ export class LambdaStack extends cdk.Stack {
     });
     this.createCaregiverFunction = this.createCreateCaregiverFunction();
     this.getCaregiverFunction = this.createGetCaregiverFunction();
+    this.getAllPatientsFunction = this.createGetAllPatientsFunction();
     this.deleteCaregiverFunction = this.createDeleteCaregiverFunction();
     this.createPatientFunction = this.createCreatePatientFunction();
     this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction();
@@ -93,6 +95,16 @@ export class LambdaStack extends cdk.Stack {
       this,
       'GetCaregiverFunction',
       LambdaStack.createLambdaFunctionProps('GetCaregiverFunction', 'caregiver.GetCaregiverHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction;
+  }
+
+  private createGetAllPatientsFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'GetAllPatientsFunction',
+      LambdaStack.createLambdaFunctionProps('GetAllPatientsFunction', 'caregiver.GetAllPatientsHandler', this.lambdaRole),
     )
 
     return lambdaFunction;

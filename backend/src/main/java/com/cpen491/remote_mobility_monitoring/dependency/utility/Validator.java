@@ -6,6 +6,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
@@ -53,6 +54,8 @@ public class Validator {
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
     public static final String CREATE_CAREGIVER_NULL_ERROR_MESSAGE = "Create caregiver request body must not be null";
     public static final String GET_CAREGIVER_NULL_ERROR_MESSAGE = "Get caregiver request body must not be null";
+    public static final String GET_ALL_PATIENTS_NULL_ERROR_MESSAGE =
+            "Get all patients for caregiver request body must not be null";
     public static final String DELETE_CAREGIVER_NULL_ERROR_MESSAGE = "Delete caregiver request body must not be null";
     public static final String CREATE_PATIENT_NULL_ERROR_MESSAGE = "Create patient request body must not be null";
     public static final String UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE = "Update patient device request body must not be null";
@@ -193,6 +196,11 @@ public class Validator {
 
     public static void validateGetCaregiverRequestBody(GetCaregiverRequestBody body) {
         Validate.notNull(body, GET_CAREGIVER_NULL_ERROR_MESSAGE);
+        validateCaregiverId(body.getCaregiverId());
+    }
+
+    public static void validateGetAllPatientsRequestBody(GetAllPatientsRequestBody body) {
+        Validate.notNull(body, GET_ALL_PATIENTS_NULL_ERROR_MESSAGE);
         validateCaregiverId(body.getCaregiverId());
     }
 

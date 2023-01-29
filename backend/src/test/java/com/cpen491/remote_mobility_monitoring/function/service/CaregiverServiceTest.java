@@ -1,13 +1,16 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
-import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsResponseBody.PatientSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,23 +24,30 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_CAREGIVER_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_CAREGIVER_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_ALL_PATIENTS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_CAREGIVER_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.TITLE_BLANK_ERROR_MESSAGE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,10 +69,13 @@ public class CaregiverServiceTest {
     private static final String ORGANIZATION_ID = "org-1";
     private static final String ORGANIZATION_NAME = "Organization1";
     private static final String CREATED_AT = "2023-01-01";
+    private static final String PATIENT_ID1 = "pat-1";
+    private static final String PATIENT_ID2 = "pat-2";
+    private static final String DATE_OF_BIRTH = "2000-12-31";
+    private static final String AUTH_CODE = "auth_code-123";
+    private static final String AUTH_CODE_TIMESTAMP = getCurrentUtcTimeString();
 
     CaregiverService cut;
-    @Mock
-    PatientDao patientDao;
     @Mock
     CaregiverDao caregiverDao;
     ArgumentCaptor<Caregiver> caregiverCaptor;
@@ -70,7 +83,7 @@ public class CaregiverServiceTest {
     @BeforeEach
     public void setup() {
         caregiverCaptor = ArgumentCaptor.forClass(Caregiver.class);
-        cut = new CaregiverService(patientDao, caregiverDao);
+        cut = new CaregiverService(caregiverDao);
     }
 
     @Test
@@ -185,6 +198,45 @@ public class CaregiverServiceTest {
     }
 
     @Test
+    public void testGetAllPatients_HappyCase() {
+        Patient patient1 = buildPatientDefault();
+        Patient patient2 = buildPatientDefault();
+        patient2.setPid(PATIENT_ID2);
+        patient2.setSid(PATIENT_ID2);
+        List<Patient> patients = Arrays.asList(patient1, patient2);
+        when(caregiverDao.findAllPatients(anyString())).thenReturn(patients);
+
+        GetAllPatientsRequestBody requestBody = buildGetAllPatientsRequestBody();
+        GetAllPatientsResponseBody responseBody = cut.getAllPatients(requestBody);
+
+        List<PatientSerialization> expected = patients.stream().map(PatientSerialization::fromPatient).collect(Collectors.toList());
+        assertThat(responseBody.getPatients()).hasSameElementsAs(expected);
+    }
+
+    @Test
+    public void testGetAllPatients_WHEN_CaregiverHasNoPatients_THEN_ReturnEmptyPatients() {
+        GetAllPatientsRequestBody requestBody = buildGetAllPatientsRequestBody();
+        GetAllPatientsResponseBody responseBody = cut.getAllPatients(requestBody);
+
+        assertThat(responseBody.getPatients()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForGetAllPatients")
+    public void testGetAllPatients_WHEN_InvalidInput_THEN_ThrowInvalidInputException(GetAllPatientsRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.getAllPatients(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForGetAllPatients() {
+        return Stream.of(
+                Arguments.of(null, GET_ALL_PATIENTS_NULL_ERROR_MESSAGE),
+                Arguments.of(buildGetAllPatientsRequestBody(null), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildGetAllPatientsRequestBody(""), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildGetAllPatientsRequestBody(ORGANIZATION_ID), CAREGIVER_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
     public void testDeleteCaregiver_HappyCase() {
         DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
         DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
@@ -243,6 +295,16 @@ public class CaregiverServiceTest {
                 .build();
     }
 
+    private static GetAllPatientsRequestBody buildGetAllPatientsRequestBody() {
+        return buildGetAllPatientsRequestBody(CAREGIVER_ID);
+    }
+
+    private static GetAllPatientsRequestBody buildGetAllPatientsRequestBody(String caregiverId) {
+        return GetAllPatientsRequestBody.builder()
+                .caregiverId(caregiverId)
+                .build();
+    }
+
     private static DeleteCaregiverRequestBody buildDeleteCaregiverRequestBody() {
         return buildDeleteCaregiverRequestBody(CAREGIVER_ID);
     }
@@ -261,5 +323,10 @@ public class CaregiverServiceTest {
 
     private static Organization buildOrganizationDefault() {
         return buildOrganization(ORGANIZATION_ID, ORGANIZATION_ID, ORGANIZATION_NAME);
+    }
+
+    private static Patient buildPatientDefault() {
+        return buildPatient(PATIENT_ID1, PATIENT_ID1, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER,
+                AUTH_CODE, AUTH_CODE_TIMESTAMP, false);
     }
 }

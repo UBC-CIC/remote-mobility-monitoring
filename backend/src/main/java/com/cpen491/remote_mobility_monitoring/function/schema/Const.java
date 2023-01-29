@@ -17,5 +17,7 @@ public final class Const {
     public static final String DEVICE_ID_NAME = "device_id";
     public static final String AUTH_CODE_NAME = "auth_code";
     public static final String CREATED_AT_NAME = "created_at";
+    public static final String PATIENTS_NAME = "patients";
+    public static final String CAREGIVERS_NAME = "caregivers";
     public static final String MESSAGE_NAME = "message";
 }
