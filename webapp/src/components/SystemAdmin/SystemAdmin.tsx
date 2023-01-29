@@ -1,6 +1,9 @@
 import React, {useState} from "react";
 import "./SystemAdmin.css";
 
+// only 3 fields, no password?
+// fix username div typo
+
 function SystemAdmin() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -18,8 +21,8 @@ function SystemAdmin() {
                 <div className='form-wrapper'>
                     <h2>Sign Up</h2>
                     <form onSubmit={handleSubmit} noValidate >
-                        <div className='email'>
-                            <input type='text' name='name' placeholder="Name" onChange={
+                        <div className='username'>
+                            <input type='text' name='username' placeholder="Name" onChange={
                                 (e) => setName(e.target.value)}/>
                         </div>
                         <div className='email'>
