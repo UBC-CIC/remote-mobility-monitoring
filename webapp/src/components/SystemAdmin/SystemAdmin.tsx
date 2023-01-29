@@ -1,8 +1,6 @@
 import React, {useState} from "react";
 import "./SystemAdmin.css";
 
-// only 3 fields, no password?
-// fix username div typo
 
 function SystemAdmin() {
     const [name, setName] = useState("");
