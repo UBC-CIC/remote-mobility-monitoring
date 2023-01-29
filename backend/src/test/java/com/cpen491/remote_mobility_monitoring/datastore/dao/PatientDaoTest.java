@@ -69,7 +69,6 @@ public class PatientDaoTest extends DaoTestParent {
     @BeforeEach
     public void setup() {
         setupTable();
-        GenericDao genericDao = new GenericDao(ddbClient);
         cut = new PatientDao(genericDao);
     }
 
@@ -83,6 +82,10 @@ public class PatientDaoTest extends DaoTestParent {
         Patient newRecord = buildPatientDefault();
         cut.create(newRecord);
 
+        GetItemResponse response = findByPrimaryKey(newRecord.getPid(), newRecord.getPid());
+        assertTrue(response.hasItem());
+
+        newRecord = Patient.convertFromMap(response.item());
         assertNotEquals(PID, newRecord.getPid());
         assertEquals(DEVICE_ID1, newRecord.getDeviceId());
         assertEquals(FIRST_NAME, newRecord.getFirstName());

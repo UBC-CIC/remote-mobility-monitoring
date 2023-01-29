@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrganizationDaoTest extends DaoTestParent {
     private static final String PID = "org-1";
@@ -51,7 +53,7 @@ public class OrganizationDaoTest extends DaoTestParent {
     @BeforeEach
     public void setup() {
         setupTable();
-        cut = new OrganizationDao(new GenericDao(ddbClient));
+        cut = new OrganizationDao(genericDao);
     }
 
     @AfterEach
@@ -64,6 +66,10 @@ public class OrganizationDaoTest extends DaoTestParent {
         Organization newRecord = buildOrganizationDefault();
         cut.create(newRecord);
 
+        GetItemResponse response = findByPrimaryKey(newRecord.getPid(), newRecord.getPid());
+        assertTrue(response.hasItem());
+
+        newRecord = Organization.convertFromMap(response.item());
         assertNotEquals(PID, newRecord.getPid());
         assertNotEquals(SID, newRecord.getSid());
         assertEquals(NAME1, newRecord.getName());

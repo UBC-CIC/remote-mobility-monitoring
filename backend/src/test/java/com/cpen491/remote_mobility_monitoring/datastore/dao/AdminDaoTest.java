@@ -55,7 +55,6 @@ class AdminDaoTest extends DaoTestParent {
     @BeforeEach
     public void setup() {
         setupTable();
-        GenericDao genericDao = new GenericDao(ddbClient);
         OrganizationDao organizationDao = new OrganizationDao(genericDao);
         cut = new AdminDao(genericDao, organizationDao);
 
@@ -73,6 +72,10 @@ class AdminDaoTest extends DaoTestParent {
         Admin newRecord = buildAdminDefault();
         cut.create(newRecord, EXISTS_ORGANIZATION_ID);
 
+        GetItemResponse response = findByPrimaryKey(newRecord.getPid(), newRecord.getPid());
+        assertTrue(response.hasItem());
+
+        newRecord = Admin.convertFromMap(response.item());
         assertNotEquals(PID, newRecord.getPid());
         assertNotEquals(SID, newRecord.getSid());
         assertEquals(EMAIL1, newRecord.getEmail());
@@ -80,10 +83,10 @@ class AdminDaoTest extends DaoTestParent {
         assertEquals(LAST_NAME, newRecord.getLastName());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
-        GetItemResponse response = findByPrimaryKey(EXISTS_ORGANIZATION_ID, newRecord.getPid());
-        assertTrue(response.hasItem());
-        assertEquals(ORGANIZATION_NAME, response.item().get(OrganizationTable.NAME_NAME).s());
-        assertEquals(EMAIL1, response.item().get(AdminTable.EMAIL_NAME).s());
+        GetItemResponse response2 = findByPrimaryKey(EXISTS_ORGANIZATION_ID, newRecord.getPid());
+        assertTrue(response2.hasItem());
+        assertEquals(ORGANIZATION_NAME, response2.item().get(OrganizationTable.NAME_NAME).s());
+        assertEquals(EMAIL1, response2.item().get(AdminTable.EMAIL_NAME).s());
     }
 
     @Test

@@ -45,6 +45,7 @@ public class DaoTestParent {
     private static final String PORT = "8000";
     DynamoDbClient ddbClient;
     DynamoDbEnhancedClient ddbEnhancedClient;
+    GenericDao genericDao;
 
     private void setupDynamoDbClients() {
         if (ddbClient == null || ddbEnhancedClient == null) {
@@ -56,6 +57,8 @@ public class DaoTestParent {
             ddbEnhancedClient = DynamoDbEnhancedClient.builder()
                     .dynamoDbClient(ddbClient)
                     .build();
+
+            genericDao = new GenericDao(ddbClient);
         }
     }
 

@@ -75,7 +75,6 @@ public class CaregiverDaoTest extends DaoTestParent {
     @BeforeEach
     public void setup() {
         setupTable();
-        GenericDao genericDao = new GenericDao(ddbClient);
         OrganizationDao organizationDao = new OrganizationDao(genericDao);
         PatientDao patientDao = new PatientDao(genericDao);
         cut = new CaregiverDao(genericDao, organizationDao, patientDao);
@@ -94,6 +93,10 @@ public class CaregiverDaoTest extends DaoTestParent {
         Caregiver newRecord = buildCaregiverDefault();
         cut.create(newRecord, EXISTS_ORGANIZATION_ID);
 
+        GetItemResponse response = findByPrimaryKey(newRecord.getPid(), newRecord.getPid());
+        assertTrue(response.hasItem());
+
+        newRecord = Caregiver.convertFromMap(response.item());
         assertNotEquals(PID, newRecord.getPid());
         assertNotEquals(SID, newRecord.getSid());
         assertEquals(EMAIL1, newRecord.getEmail());
@@ -103,10 +106,10 @@ public class CaregiverDaoTest extends DaoTestParent {
         assertEquals(PHONE_NUMBER, newRecord.getPhoneNumber());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
-        GetItemResponse response = findByPrimaryKey(EXISTS_ORGANIZATION_ID, newRecord.getPid());
-        assertTrue(response.hasItem());
-        assertEquals(ORGANIZATION_NAME, response.item().get(OrganizationTable.NAME_NAME).s());
-        assertEquals(EMAIL1, response.item().get(CaregiverTable.EMAIL_NAME).s());
+        GetItemResponse response2 = findByPrimaryKey(EXISTS_ORGANIZATION_ID, newRecord.getPid());
+        assertTrue(response2.hasItem());
+        assertEquals(ORGANIZATION_NAME, response2.item().get(OrganizationTable.NAME_NAME).s());
+        assertEquals(EMAIL1, response2.item().get(CaregiverTable.EMAIL_NAME).s());
     }
 
     @Test
