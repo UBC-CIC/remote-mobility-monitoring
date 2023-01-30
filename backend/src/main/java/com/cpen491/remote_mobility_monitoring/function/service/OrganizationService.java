@@ -33,6 +33,7 @@ public class OrganizationService {
 
         Organization organization = organizationDao.findById(body.getOrganizationId());
         List<Caregiver> caregivers = organizationDao.findAllCaregivers(body.getOrganizationId());
+        // TODO: get all admins as well
 
         return GetOrganizationResponseBody.builder()
                 .organizationName(organization.getName())

@@ -3,6 +3,7 @@ package com.cpen491.remote_mobility_monitoring.function;
 import com.cpen491.remote_mobility_monitoring.function.module.DatastoreModule;
 import com.cpen491.remote_mobility_monitoring.function.module.ServiceModule;
 import com.cpen491.remote_mobility_monitoring.function.module.UtilityModule;
+import com.cpen491.remote_mobility_monitoring.function.service.AdminService;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.cpen491.remote_mobility_monitoring.function.service.OrganizationService;
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
@@ -19,6 +20,7 @@ import javax.inject.Singleton;
 })
 public interface Config {
     OrganizationService organizationService();
+    AdminService adminService();
     CaregiverService caregiverService();
     PatientService patientService();
     Gson gson();
