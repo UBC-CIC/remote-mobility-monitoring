@@ -121,6 +121,7 @@ public class PatientDao {
     public List<Caregiver> findAllCaregivers(String patientId) {
         log.info("Finding all Caregiver records caring for Patient [{}]", patientId);
         Validator.validatePatientId(patientId);
+        // TODO: throw record does not exist exception if Patient doesn't exist, same for other DAOs
 
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociationsOnSidIndex(patientId, CaregiverTable.ID_PREFIX).items();

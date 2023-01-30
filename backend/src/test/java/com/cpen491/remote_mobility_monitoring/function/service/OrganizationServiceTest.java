@@ -69,7 +69,7 @@ public class OrganizationServiceTest {
 
         assertEquals(ORGANIZATION_NAME, responseBody.getOrganizationName());
         List<CaregiverSerialization> expected = caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList());
-        assertThat(responseBody.getCaregivers()).hasSameElementsAs(expected);
+        assertThat(responseBody.getCaregivers()).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test

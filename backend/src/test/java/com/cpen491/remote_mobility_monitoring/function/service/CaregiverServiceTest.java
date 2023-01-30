@@ -295,7 +295,7 @@ public class CaregiverServiceTest {
         GetAllPatientsResponseBody responseBody = cut.getAllPatients(requestBody);
 
         List<PatientSerialization> expected = patients.stream().map(PatientSerialization::fromPatient).collect(Collectors.toList());
-        assertThat(responseBody.getPatients()).hasSameElementsAs(expected);
+        assertThat(responseBody.getPatients()).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
@@ -304,6 +304,15 @@ public class CaregiverServiceTest {
         GetAllPatientsResponseBody responseBody = cut.getAllPatients(requestBody);
 
         assertThat(responseBody.getPatients()).isEmpty();
+    }
+
+    @Test
+    public void testGetAllPatients_WHEN_CaregiverDaoFindAllPatientsThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).findAllPatients(anyString());
+
+        GetAllPatientsRequestBody requestBody = buildGetAllPatientsRequestBody();
+        assertThatThrownBy(() -> cut.getAllPatients(requestBody)).isSameAs(toThrow);
     }
 
     @ParameterizedTest

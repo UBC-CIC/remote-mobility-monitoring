@@ -10,6 +10,9 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversResponseBody.CaregiverSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
@@ -29,6 +32,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
@@ -44,6 +50,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_BLANK_ERROR_MESSAGE;
@@ -77,7 +84,8 @@ class PatientServiceTest {
     private static final String PHONE_NUMBER1 = "1234567890";
     private static final String PHONE_NUMBER2 = "1313131313";
     private static final String PATIENT_ID = "pat-1";
-    private static final String CAREGIVER_ID = "car-1";
+    private static final String CAREGIVER_ID1 = "car-1";
+    private static final String CAREGIVER_ID2 = "car-2";
     private static final String AUTH_CODE = "auth_code-123";
     private static final String AUTH_CODE_TIMESTAMP = getCurrentUtcTimeString();
     private static final String DEVICE_ID = "device-id-1";
@@ -188,7 +196,7 @@ class PatientServiceTest {
                 Arguments.of(null, UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE),
                 Arguments.of(buildUpdatePatientDeviceRequestBody(null), PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildUpdatePatientDeviceRequestBody(""), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdatePatientDeviceRequestBody(CAREGIVER_ID), PATIENT_ID_INVALID_ERROR_MESSAGE)
+                Arguments.of(buildUpdatePatientDeviceRequestBody(CAREGIVER_ID1), PATIENT_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -203,7 +211,7 @@ class PatientServiceTest {
         assertTrue(patientCaptor.getValue().getVerified());
         assertEquals(DEVICE_ID, patientCaptor.getValue().getDeviceId());
 
-        verify(caregiverDao, times(1)).addPatient(eq(PATIENT_ID), eq(CAREGIVER_ID));
+        verify(caregiverDao, times(1)).addPatient(eq(PATIENT_ID), eq(CAREGIVER_ID1));
 
         assertNotNull(responseBody);
         assertEquals("OK", responseBody.getMessage());
@@ -281,13 +289,13 @@ class PatientServiceTest {
                 Arguments.of(buildVerifyPatientRequestBody(null, PATIENT_ID, AUTH_CODE, DEVICE_ID), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildVerifyPatientRequestBody("", PATIENT_ID, AUTH_CODE, DEVICE_ID), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildVerifyPatientRequestBody(PATIENT_ID, PATIENT_ID, AUTH_CODE, DEVICE_ID), CAREGIVER_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, null, AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, "", AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, CAREGIVER_ID, AUTH_CODE, DEVICE_ID), PATIENT_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, null, DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, "", DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, AUTH_CODE, null), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, AUTH_CODE, ""), DEVICE_ID_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, null, AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, "", AUTH_CODE, DEVICE_ID), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, CAREGIVER_ID1, AUTH_CODE, DEVICE_ID), PATIENT_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID, null, DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID, "", DEVICE_ID), AUTH_CODE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID, AUTH_CODE, null), DEVICE_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID, AUTH_CODE, ""), DEVICE_ID_BLANK_ERROR_MESSAGE)
         );
     }
 
@@ -326,7 +334,47 @@ class PatientServiceTest {
                 Arguments.of(null, GET_PATIENT_NULL_ERROR_MESSAGE),
                 Arguments.of(buildGetPatientRequestBody(null), PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildGetPatientRequestBody(""), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildGetPatientRequestBody(CAREGIVER_ID), PATIENT_ID_INVALID_ERROR_MESSAGE)
+                Arguments.of(buildGetPatientRequestBody(CAREGIVER_ID1), PATIENT_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testGetAllCaregivers_HappyCase() {
+        Caregiver caregiver1 = buildCaregiverDefault();
+        Caregiver caregiver2 = buildCaregiverDefault();
+        caregiver2.setPid(CAREGIVER_ID2);
+        caregiver2.setSid(CAREGIVER_ID2);
+        List<Caregiver> caregivers = Arrays.asList(caregiver1, caregiver2);
+        when(patientDao.findAllCaregivers(anyString())).thenReturn(caregivers);
+
+        GetAllCaregiversRequestBody requestBody = buildGetAllCaregiversRequestBody();
+        GetAllCaregiversResponseBody responseBody = cut.getAllCaregivers(requestBody);
+
+        List<CaregiverSerialization> expected = caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList());
+        assertThat(responseBody.getCaregivers()).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    public void testGetAllCaregivers_WHEN_PatientDaoFindAllCaregiversThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(patientDao).findAllCaregivers(anyString());
+
+        GetAllCaregiversRequestBody requestBody = buildGetAllCaregiversRequestBody();
+        assertThatThrownBy(() -> cut.getAllCaregivers(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForGetAllCaregivers")
+    public void testGetAllCaregivers_WHEN_InvalidInput_THEN_ThrowInvalidInputException(GetAllCaregiversRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.getAllCaregivers(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForGetAllCaregivers() {
+        return Stream.of(
+                Arguments.of(null, GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE),
+                Arguments.of(buildGetAllCaregiversRequestBody(null), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildGetAllCaregiversRequestBody(""), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildGetAllCaregiversRequestBody(CAREGIVER_ID1), PATIENT_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -378,7 +426,7 @@ class PatientServiceTest {
                         PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildUpdatePatientRequestBody("", FIRST_NAME, LAST_NAME, PHONE_NUMBER1),
                         PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdatePatientRequestBody(CAREGIVER_ID, FIRST_NAME, LAST_NAME, PHONE_NUMBER1),
+                Arguments.of(buildUpdatePatientRequestBody(CAREGIVER_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER1),
                         PATIENT_ID_INVALID_ERROR_MESSAGE),
                 Arguments.of(buildUpdatePatientRequestBody(PATIENT_ID, null, LAST_NAME, PHONE_NUMBER1),
                         FIRST_NAME_BLANK_ERROR_MESSAGE),
@@ -424,7 +472,7 @@ class PatientServiceTest {
                 Arguments.of(null, DELETE_PATIENT_NULL_ERROR_MESSAGE),
                 Arguments.of(buildDeletePatientRequestBody(null), PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildDeletePatientRequestBody(""), PATIENT_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildDeletePatientRequestBody(CAREGIVER_ID), PATIENT_ID_INVALID_ERROR_MESSAGE)
+                Arguments.of(buildDeletePatientRequestBody(CAREGIVER_ID1), PATIENT_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -453,7 +501,7 @@ class PatientServiceTest {
     }
 
     private static VerifyPatientRequestBody buildVerifyPatientRequestBody() {
-        return buildVerifyPatientRequestBody(CAREGIVER_ID, PATIENT_ID, AUTH_CODE, DEVICE_ID);
+        return buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID, AUTH_CODE, DEVICE_ID);
     }
 
     private static VerifyPatientRequestBody buildVerifyPatientRequestBody(String caregiverId, String patientId,
@@ -472,6 +520,16 @@ class PatientServiceTest {
 
     private static GetPatientRequestBody buildGetPatientRequestBody(String patientId) {
         return GetPatientRequestBody.builder()
+                .patientId(patientId)
+                .build();
+    }
+
+    private static GetAllCaregiversRequestBody buildGetAllCaregiversRequestBody() {
+        return buildGetAllCaregiversRequestBody(PATIENT_ID);
+    }
+
+    private static GetAllCaregiversRequestBody buildGetAllCaregiversRequestBody(String patientId) {
+        return GetAllCaregiversRequestBody.builder()
                 .patientId(patientId)
                 .build();
     }
@@ -508,6 +566,6 @@ class PatientServiceTest {
     }
 
     private static Caregiver buildCaregiverDefault() {
-        return buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER1);
+        return buildCaregiver(CAREGIVER_ID1, CAREGIVER_ID1, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER1);
     }
 }

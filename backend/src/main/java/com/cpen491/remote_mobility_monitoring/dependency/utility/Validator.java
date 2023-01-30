@@ -14,6 +14,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCa
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
@@ -68,6 +69,7 @@ public class Validator {
     public static final String UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE = "Update patient device request body must not be null";
     public static final String VERIFY_PATIENT_NULL_ERROR_MESSAGE = "Verify patient request body must not be null";
     public static final String GET_PATIENT_NULL_ERROR_MESSAGE = "Get patient request body must not be null";
+    public static final String GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE = "Get all caregivers request body must not be null";
     public static final String UPDATE_PATIENT_NULL_ERROR_MESSAGE = "Update patient request body must not be null";
     public static final String DELETE_PATIENT_NULL_ERROR_MESSAGE = "Delete patient request body must not be null";
 
@@ -266,6 +268,11 @@ public class Validator {
 
     public static void validateGetPatientRequestBody(GetPatientRequestBody body) {
         Validate.notNull(body, GET_PATIENT_NULL_ERROR_MESSAGE);
+        validatePatientId(body.getPatientId());
+    }
+
+    public static void validateGetAllCaregiversRequestBody(GetAllCaregiversRequestBody body) {
+        Validate.notNull(body, GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE);
         validatePatientId(body.getPatientId());
     }
 

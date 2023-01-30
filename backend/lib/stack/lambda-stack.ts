@@ -28,6 +28,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly updatePatientDeviceFunction: lambda.Function;
   public readonly verifyPatientFunction: lambda.Function;
   public readonly getPatientFunction: lambda.Function;
+  public readonly getAllCaregiversFunction: lambda.Function;
   public readonly updatePatientFunction: lambda.Function;
   public readonly deletePatientFunction: lambda.Function;
 
@@ -89,6 +90,7 @@ export class LambdaStack extends cdk.Stack {
     this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction();
     this.verifyPatientFunction = this.createVerifyPatientFunction();
     this.getPatientFunction = this.createGetPatientFunction();
+    this.getAllCaregiversFunction = this.createGetAllCaregiversFunction();
     this.updatePatientFunction = this.createUpdatePatientFunction();
     this.deletePatientFunction = this.createDeletePatientFunction();
   }
@@ -218,6 +220,16 @@ export class LambdaStack extends cdk.Stack {
     )
 
     return lambdaFunction;
+  }
+
+  private createGetAllCaregiversFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'GetAllCaregiversFunction',
+      LambdaStack.createLambdaFunctionProps('GetAllCaregiversFunction', 'patient.GetAllCaregiversHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction
   }
 
   private createUpdatePatientFunction(): lambda.Function {
