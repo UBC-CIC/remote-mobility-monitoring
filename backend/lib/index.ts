@@ -1,9 +1,13 @@
 import { App } from 'aws-cdk-lib';
 import { DynamoDbStack } from './stack/dynamodb-stack';
 import { LambdaStack } from './stack/lambda-stack';
+import { CognitoStack } from './stack/cognito-stack';
+import { TimestreamStack } from './stack/timestream-stack';
 import { ApiGatewayStack } from './stack/apigateway-stack';
 
 const app = new App();
+new CognitoStack(app, 'RemoteMobilityMonitoringCognitoStack');
+new TimestreamStack(app, 'RemoteMobilityMonitoringTimestreamStack');
 const dynamoDbStack = new DynamoDbStack(app, 'RemoteMobilityMonitoringDynamoStack');
 const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', {
   table: dynamoDbStack.remoteMobilityMonitoringTable,

@@ -4,6 +4,11 @@ DynamoDb local [here](https://docs.aws.amazon.com/amazondynamodb/latest/develope
 
 ## Build
 
+Run the AWS DynamoDB docker container for local testing:
+```
+docker-compose up -d
+```
+
 Make sure you are in backend directory, then run the following:
 ```
 mvn clean package
