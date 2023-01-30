@@ -16,9 +16,6 @@ on:
     paths: [ "backend/**" ]
     branches: [ "backend" ]
 
-env:
-  AWS_REGION: "us-west-2"
-
 permissions:
   id-token: write
   contents: read
@@ -47,7 +44,7 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::356029579852:role/githubCDCI
         role-session-name: GithubCISession
-        aws-region: ${{env.AWS_REGION}}
+        aws-region: us-west-2
       
     services:
       dynamodb:
