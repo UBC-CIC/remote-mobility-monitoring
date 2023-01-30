@@ -6,7 +6,7 @@ DynamoDb local [here](https://docs.aws.amazon.com/amazondynamodb/latest/develope
 
 Run the AWS DynamoDB docker container for local testing:
 ```
-docker run -p 8000:8000 amazon/dynamodb-local
+docker-compose up -d
 ```
 
 Make sure you are in backend directory, then run the following:

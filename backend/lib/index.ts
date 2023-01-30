@@ -6,8 +6,6 @@ import { TimestreamStack } from './stack/timestream-stack';
 import { ApiGatewayStack } from './stack/apigateway-stack';
 
 const app = new App();
-new DynamoDbStack(app, 'RemoteMobilityMonitoringDynamoStack');
-new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack');
 new CognitoStack(app, 'RemoteMobilityMonitoringCognitoStack');
 new TimestreamStack(app, 'RemoteMobilityMonitoringTimeStreamStack');
 const dynamoDbStack = new DynamoDbStack(app, 'RemoteMobilityMonitoringDynamoStack');
