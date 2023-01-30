@@ -1,120 +1,313 @@
 package com.cpen491.remote_mobility_monitoring.datastore.dao;
 
-import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetItemEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetResultPageIterable;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
-import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.BatchGetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 
 @AllArgsConstructor
-public class GenericDao<T extends BaseModel> {
-    private static final int INDEX_LIMIT = 50;
-
+public class GenericDao {
     @NonNull
-    DynamoDbTable<T> table;
-    Map<String, DynamoDbIndex<T>> indexMap;
-    DynamoDbEnhancedClient enhancedClient;
+    DynamoDbClient ddbClient;
 
-    public void create(T newRecord) {
-        newRecord.setId(UUID.randomUUID().toString());
-        String currentTime = LocalDateTime.now(ZoneOffset.UTC).toString();
-        newRecord.setCreatedAt(currentTime);
-        newRecord.setUpdatedAt(currentTime);
-
-        table.putItem(newRecord);
-    }
-
-    public T findByPartitionKey(String partitionKey) {
-        Key key = Key.builder().partitionValue(partitionKey).build();
-        return table.getItem(key);
-    }
-
-    public T findOneByIndexPartitionKey(String indexName, String indexPartitionKey) {
-        Iterator<Page<T>> results = findAllByIndexPartitionKey(indexName, indexPartitionKey);
-
-        if (results.hasNext()) {
-            List<T> items = results.next().items();
-            if (items.size() == 1) {
-                return items.get(0);
-            }
-        }
-
-        return null;
-    }
-
-    public Iterator<Page<T>> findAllByIndexPartitionKey(String indexName, String indexPartitionKey) {
-        DynamoDbIndex<T> index = indexMap.get(indexName);
-
-        AttributeValue val = AttributeValue.builder().s(indexPartitionKey).build();
-        Key key = Key.builder().partitionValue(val).build();
-        QueryConditional queryConditional = QueryConditional.keyEqualTo(key);
-
-        return index.query(QueryEnhancedRequest.builder()
-                .queryConditional(queryConditional)
-                .limit(INDEX_LIMIT)
-                .build()).iterator();
-    }
-
-    public List<T> batchFindByPartitionKey(Set<String> partitionKeys, Class<T> itemClass) {
-        ReadBatch.Builder<T> readBatchBuilder = ReadBatch.builder(itemClass).mappedTableResource(table);
-        for (String partitionKey : partitionKeys) {
-            Key key = Key.builder().partitionValue(partitionKey).build();
-            readBatchBuilder.addGetItem(key);
-        }
-
-        BatchGetItemEnhancedRequest request = BatchGetItemEnhancedRequest.builder()
-                .addReadBatch(readBatchBuilder.build())
-                .build();
-        BatchGetResultPageIterable results = enhancedClient.batchGetItem(request);
-        return results.resultsForTable(table).stream().collect(Collectors.toList());
-    }
-
-    public void update(T updatedRecord, Class<T> itemClass) {
-        String currentTime = LocalDateTime.now().toString();
-        updatedRecord.setUpdatedAt(currentTime);
-
-        Expression expression = Expression.builder()
-                .expression(String.format("attribute_exists(%s)", BaseTable.ID_NAME))
+    /**
+     * Create or overwrites record.
+     *
+     * @param item The map containing attribute names and values to create or overwrite
+     */
+    public void put(Map<String, AttributeValue> item) {
+        PutItemRequest request = PutItemRequest.builder()
+                .item(item)
+                .tableName(BaseTable.TABLE_NAME)
                 .build();
 
-        UpdateItemEnhancedRequest<T> request = UpdateItemEnhancedRequest.builder(itemClass)
-                .conditionExpression(expression)
-                .item(updatedRecord)
+        ddbClient.putItem(request);
+    }
+
+    /**
+     * Associates item1 with item2. Done by creating a record with pid = item1.pid and sid = item2.pid,
+     * as well as all the attributes of item1 and item2.
+     *
+     * @param item1 The map containing attribute names and values of item1
+     * @param item2 The map containing attribute names and values of item2
+     */
+    public void addAssociation(Map<String, AttributeValue> item1, Map<String, AttributeValue> item2) {
+        Map<String, AttributeValue> item = new HashMap<>();
+        item.putAll(item1);
+        item.putAll(item2);
+        AttributeValue currentTime = convertToAttributeValue(getCurrentUtcTimeString());
+        item.put(BaseTable.PID_NAME, item1.get(BaseTable.PID_NAME));
+        item.put(BaseTable.SID_NAME, item2.get(BaseTable.PID_NAME));
+        item.put(BaseTable.CREATED_AT_NAME, currentTime);
+        item.put(BaseTable.UPDATED_AT_NAME, currentTime);
+
+        PutItemRequest request = PutItemRequest.builder()
+                .item(item)
+                .tableName(BaseTable.TABLE_NAME)
                 .build();
 
-        try {
-            table.updateItem(request);
-        } catch (ConditionalCheckFailedException e) {
-            throw new RecordDoesNotExistException(itemClass.getSimpleName(), updatedRecord.getId());
+        ddbClient.putItem(request);
+    }
+
+    /**
+     * Finds record with pid and sid both matching keyVal.
+     *
+     * @param keyVal The partition key value
+     * @return {@link GetItemResponse}
+     */
+    public GetItemResponse findByPartitionKey(String keyVal) {
+        return findByPrimaryKey(keyVal, keyVal);
+    }
+
+    /**
+     * Finds record with pid and sid matching input pid and sid.
+     *
+     * @param pid The partition key value
+     * @param sid The sort key value
+     * @return {@link GetItemResponse}
+     */
+    public GetItemResponse findByPrimaryKey(String pid, String sid) {
+        Map<String, AttributeValue> keyMap = new HashMap<>();
+        keyMap.put(BaseTable.PID_NAME, convertToAttributeValue(pid));
+        keyMap.put(BaseTable.SID_NAME, convertToAttributeValue(sid));
+
+        GetItemRequest request = GetItemRequest.builder()
+                .key(keyMap)
+                .tableName(BaseTable.TABLE_NAME)
+                .build();
+
+        return ddbClient.getItem(request);
+    }
+
+    /**
+     * Finds all records with pid matching keyVal.
+     *
+     * @param keyVal The partition key value
+     * @return {@link QueryResponse}
+     */
+    public QueryResponse findAllByPartitionKey(String keyVal) {
+        return findAllByPartitionKey(BaseTable.PID_NAME, keyVal, null, false);
+    }
+
+    /**
+     * Finds all records with keyName matching keyVal.
+     *
+     * @param keyName The GSI key name
+     * @param keyVal The GSI partition key value
+     * @param indexName The GSI name
+     * @return {@link QueryResponse}
+     */
+    public QueryResponse findAllByPartitionKeyOnIndex(String keyName, String keyVal, String indexName) {
+        return findAllByPartitionKey(keyName, keyVal, indexName, true);
+    }
+
+    private QueryResponse findAllByPartitionKey(String keyName, String keyVal, String indexName, boolean index) {
+        String expression = "#pid = :pidValue";
+        Map<String, String> attributeNames = new HashMap<>();
+        attributeNames.put("#pid", keyName);
+        Map<String, AttributeValue> attributeValues = new HashMap<>();
+        attributeValues.put(":pidValue", convertToAttributeValue(keyVal));
+
+        return runQuery(expression, attributeNames, attributeValues, indexName, index);
+    }
+
+    /**
+     * Finds all records with pid matching input pid and sid starting with sidPrefix
+     *
+     * @param pid The partition key value
+     * @param sidPrefix The sort key prefix
+     * @return {@link QueryResponse}
+     */
+    public QueryResponse findAllAssociations(String pid, String sidPrefix) {
+        return findAllAssociations(pid, sidPrefix, null, false);
+    }
+
+    /**
+     * Finds all records with sid matching input sid and sid starting with pidPrefix.
+     * Query will be executed on sid GSI.
+     *
+     * @param sid The GSI partition key value
+     * @param pidPrefix The GSI sort key prefix
+     * @return {@link QueryResponse}
+     */
+    public QueryResponse findAllAssociationsOnSidIndex(String sid, String pidPrefix) {
+        return findAllAssociations(sid, pidPrefix, BaseTable.SID_INDEX_NAME, true);
+    }
+
+    private QueryResponse findAllAssociations(String pid, String sidPrefix, String indexName, boolean index) {
+        String expression = "#pid = :pidValue AND begins_with(#sid, :sidValue)";
+        Map<String, String> attributeNames = new HashMap<>();
+        Map<String, AttributeValue> attributeValues = new HashMap<>();
+        if (index) {
+            attributeNames.put("#pid", BaseTable.SID_NAME);
+            attributeNames.put("#sid", BaseTable.PID_NAME);
+        } else {
+            attributeNames.put("#pid", BaseTable.PID_NAME);
+            attributeNames.put("#sid", BaseTable.SID_NAME);
+        }
+        attributeValues.put(":pidValue", convertToAttributeValue(pid));
+        attributeValues.put(":sidValue", convertToAttributeValue(sidPrefix));
+
+        return runQuery(expression, attributeNames, attributeValues, indexName, index);
+    }
+
+    private QueryResponse runQuery(String expression, Map<String, String> attributeNames,
+                                   Map<String, AttributeValue> attributeValues, String indexName, boolean index) {
+        QueryRequest.Builder requestBuilder = QueryRequest.builder()
+                .keyConditionExpression(expression)
+                .expressionAttributeNames(attributeNames)
+                .expressionAttributeValues(attributeValues)
+                .tableName(BaseTable.TABLE_NAME);
+
+        QueryRequest request = index ? requestBuilder.indexName(indexName).build() : requestBuilder.build();
+        return ddbClient.query(request);
+    }
+
+    /**
+     * Batch finds all records with pid and sid matching input list of keyValues.
+     *
+     * @param keyValues The list of partition key values
+     * @return {@link List}
+     */
+    public List<Map<String, AttributeValue>> batchFindByPartitionKey(List<String> keyValues) {
+        List<Map<String, AttributeValue>> keyMaps = new ArrayList<>();
+        for (String keyVal : keyValues) {
+            Map<String, AttributeValue> map = new HashMap<>();
+            AttributeValue key = convertToAttributeValue(keyVal);
+            map.put(BaseTable.PID_NAME, key);
+            map.put(BaseTable.SID_NAME, key);
+            keyMaps.add(map);
+        }
+
+        KeysAndAttributes keysAndAttributes = KeysAndAttributes.builder()
+                .keys(keyMaps)
+                .build();
+        Map<String, KeysAndAttributes> requestItems = new HashMap<>();
+        requestItems.put(BaseTable.TABLE_NAME, keysAndAttributes);
+
+        BatchGetItemRequest request = BatchGetItemRequest.builder()
+                .requestItems(requestItems)
+                .build();
+
+        return ddbClient.batchGetItem(request).responses().get(BaseTable.TABLE_NAME);
+    }
+
+    /**
+     * Updates all records with pid or sid matching item.pid.
+     *
+     * @param item The map containing attribute names and values to overwrite record with
+     */
+    public void update(Map<String, AttributeValue> item) {
+        String currentTime = getCurrentUtcTimeString();
+        item.put(BaseTable.UPDATED_AT_NAME, convertToAttributeValue(currentTime));
+
+        List<Map<String, AttributeValue>> keyMaps = findAllPrimaryKeysContainingId(getFromMap(item, BaseTable.PID_NAME));
+
+        // TODO: async?
+        for (Map<String, AttributeValue> keyMap : keyMaps) {
+            item.put(BaseTable.PID_NAME, keyMap.get(BaseTable.PID_NAME));
+            item.put(BaseTable.SID_NAME, keyMap.get(BaseTable.SID_NAME));
+            put(item);
         }
     }
 
-    public void delete(String partitionKey) {
-        Key key = Key.builder().partitionValue(partitionKey).build();
-        table.deleteItem(key);
+    /**
+     * Deletes a record with pid and sid matching input pid and sid.
+     *
+     * @param pid The partition key value
+     * @param sid The sort key value
+     */
+    public void deleteByPrimaryKey(String pid, String sid) {
+        Map<String, AttributeValue> keyMap = new HashMap<>();
+        keyMap.put(BaseTable.PID_NAME, convertToAttributeValue(pid));
+        keyMap.put(BaseTable.SID_NAME, convertToAttributeValue(sid));
+
+        DeleteItemRequest request = DeleteItemRequest.builder()
+                .key(keyMap)
+                .tableName(BaseTable.TABLE_NAME)
+                .build();
+
+        ddbClient.deleteItem(request);
+    }
+
+    /**
+     * Deletes all records with pid or sid matching item.pid.
+     *
+     * @param keyVal The partition key value
+     */
+    public void delete(String keyVal) {
+        List<Map<String, AttributeValue>> keyMaps = findAllPrimaryKeysContainingId(keyVal);
+
+        for (Map<String, AttributeValue> keyMap : keyMaps) {
+            deleteByPrimaryKey(getFromMap(keyMap, BaseTable.PID_NAME), getFromMap(keyMap, BaseTable.SID_NAME));
+        }
+    }
+
+    private List<Map<String, AttributeValue>> findAllPrimaryKeysContainingId(String keyVal) {
+        List<Map<String, AttributeValue>> keyMaps = new ArrayList<>();
+        List<Map<String, AttributeValue>> pidItems = findAllByPartitionKey(keyVal).items();
+        List<Map<String, AttributeValue>> sidItems = findAllByPartitionKeyOnIndex(BaseTable.SID_NAME, keyVal, BaseTable.SID_INDEX_NAME).items();
+
+        keyMaps.addAll(pidItems);
+        keyMaps.addAll(sidItems);
+        keyMaps = keyMaps.stream().map(item -> {
+            Map<String, AttributeValue> keyMap = new HashMap<>();
+            keyMap.put(BaseTable.PID_NAME, item.get(BaseTable.PID_NAME));
+            keyMap.put(BaseTable.SID_NAME, item.get(BaseTable.SID_NAME));
+            return keyMap;
+        }).collect(Collectors.toList());
+
+        return keyMaps;
+    }
+
+    /**
+     * Sets the pid, sid, createdAt, and updatedAt attributes of model.
+     *
+     * @param model The model to set attributes for
+     * @param idPrefix The prefix for pid and sid
+     */
+    public void setAutoGeneratedAttributes(BaseModel model, String idPrefix) {
+        String id = UUID.randomUUID().toString();
+        model.setPid(idPrefix + id);
+        model.setSid(idPrefix + id);
+
+        String currentTime = getCurrentUtcTimeString();
+        model.setCreatedAt(currentTime);
+        model.setUpdatedAt(currentTime);
+    }
+
+    /**
+     * Finds and sets the correct id on pid and sid by matching idPrefix.
+     *
+     * @param model The model to set ids for
+     * @param idPrefix The desired prefix for pid and sid
+     */
+    public void setCorrectId(BaseModel model, String idPrefix) {
+        if (model.getPid().startsWith(idPrefix)) {
+            model.setSid(model.getPid());
+        } else {
+            model.setPid(model.getSid());
+        }
     }
 }

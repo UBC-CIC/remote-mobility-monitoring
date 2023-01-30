@@ -1,3 +1,7 @@
+Java version: Amazon corretto 11
+
+DynamoDb local [here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html)
+
 ## Build
 
 Run the AWS DynamoDB docker container for local testing:

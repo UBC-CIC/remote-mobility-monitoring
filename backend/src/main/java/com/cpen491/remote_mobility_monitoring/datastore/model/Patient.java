@@ -2,20 +2,21 @@ package com.cpen491.remote_mobility_monitoring.datastore.model;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.putInMap;
 
-@DynamoDbBean
+@Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -31,67 +32,41 @@ public class Patient extends BaseModel {
     private String authCode;
     private String authCodeTimestamp;
     private Boolean verified;
-    private Set<String> caregiverIds;
 
-    @DynamoDbPartitionKey
-    @DynamoDbAttribute(PatientTable.ID_NAME)
-    public String getId() {
-        return id;
+    public static Map<String, AttributeValue> convertToMap(Patient patient) {
+        Map<String, AttributeValue> map = new HashMap<>();
+        putInMap(map, PatientTable.PID_NAME, patient.getPid());
+        putInMap(map, PatientTable.SID_NAME, patient.getSid());
+        putInMap(map, PatientTable.DEVICE_ID_NAME, patient.getDeviceId());
+        putInMap(map, PatientTable.FIRST_NAME_NAME, patient.getFirstName());
+        putInMap(map, PatientTable.LAST_NAME_NAME, patient.getLastName());
+        putInMap(map, PatientTable.DATE_OF_BIRTH_NAME, patient.getDateOfBirth());
+        putInMap(map, PatientTable.PHONE_NUMBER_NAME, patient.getPhoneNumber());
+        putInMap(map, PatientTable.AUTH_CODE_NAME, patient.getAuthCode());
+        putInMap(map, PatientTable.AUTH_CODE_TIMESTAMP_NAME, patient.getAuthCodeTimestamp());
+        putInMap(map, PatientTable.VERIFIED_NAME, patient.getVerified());
+        putInMap(map, PatientTable.CREATED_AT_NAME, patient.getCreatedAt());
+        putInMap(map, PatientTable.UPDATED_AT_NAME, patient.getUpdatedAt());
+        return map;
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = {PatientTable.DEVICE_ID_INDEX_NAME})
-    @DynamoDbAttribute(PatientTable.DEVICE_ID_NAME)
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    @DynamoDbAttribute(PatientTable.FIRST_NAME_NAME)
-    public String getFirstName() {
-        return firstName;
-    }
-
-    @DynamoDbAttribute(PatientTable.LAST_NAME_NAME)
-    public String getLastName() {
-        return lastName;
-    }
-
-    @DynamoDbAttribute(PatientTable.DATE_OF_BIRTH_NAME)
-    public String getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    @DynamoDbAttribute(PatientTable.PHONE_NUMBER_NAME)
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    @DynamoDbAttribute(PatientTable.AUTH_CODE_NAME)
-    public String getAuthCode() {
-        return authCode;
-    }
-
-    @DynamoDbAttribute(PatientTable.AUTH_CODE_TIMESTAMP_NAME)
-    public String getAuthCodeTimestamp() {
-        return authCodeTimestamp;
-    }
-
-    @DynamoDbAttribute(PatientTable.VERIFIED_NAME)
-    public Boolean getVerified() {
-        return verified;
-    }
-
-    @DynamoDbAttribute(PatientTable.CAREGIVER_IDS_NAME)
-    public Set<String> getCaregiverIds() {
-        return caregiverIds;
-    }
-
-    @DynamoDbAttribute(PatientTable.CREATED_AT_NAME)
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    @DynamoDbAttribute(PatientTable.UPDATED_AT_NAME)
-    public String getUpdatedAt() {
-        return updatedAt;
+    public static Patient convertFromMap(Map<String, AttributeValue> map) {
+        Patient patient = Patient.builder()
+                .pid(getFromMap(map, PatientTable.PID_NAME))
+                .sid(getFromMap(map, PatientTable.SID_NAME))
+                .deviceId(getFromMap(map, PatientTable.DEVICE_ID_NAME))
+                .firstName(getFromMap(map, PatientTable.FIRST_NAME_NAME))
+                .lastName(getFromMap(map, PatientTable.LAST_NAME_NAME))
+                .dateOfBirth(getFromMap(map, PatientTable.DATE_OF_BIRTH_NAME))
+                .phoneNumber(getFromMap(map, PatientTable.PHONE_NUMBER_NAME))
+                .authCode(getFromMap(map, PatientTable.AUTH_CODE_NAME))
+                .authCodeTimestamp(getFromMap(map, PatientTable.AUTH_CODE_TIMESTAMP_NAME))
+                .createdAt(getFromMap(map, PatientTable.CREATED_AT_NAME))
+                .updatedAt(getFromMap(map, PatientTable.UPDATED_AT_NAME))
+                .build();
+        AttributeValue verifiedVal = map.get(PatientTable.VERIFIED_NAME);
+        Boolean verified = verifiedVal == null ? null : verifiedVal.bool();
+        patient.setVerified(verified);
+        return patient;
     }
 }

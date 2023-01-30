@@ -2,79 +2,47 @@ import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 export class DynamoDbStack extends cdk.Stack {
-  public static ORGANIZATION_TABLE_NAME = 'organization';
-  public static ADMIN_TABLE_NAME = 'admin';
-  public static CAREGIVER_TABLE_NAME = 'caregiver';
-  public static PATIENT_TABLE_NAME = 'patient';
+  public static TABLE_NAME = 'REMOTE_MOBILITY_MONITORING';
 
-  public static ORGANIZATION_TABLE_NAME_GSI_NAME = 'name-gsi';
-  public static ADMIN_TABLE_EMAIL_GSI_NAME = 'email-gsi';
-  public static ADMIN_TABLE_ORGANIZATION_ID_GSI_NAME = 'organization_id-gsi';
-  public static CAREGIVER_TABLE_EMAIL_GSI_NAME = 'email-gsi';
-  public static CAREGIVER_TABLE_ORGANIZATION_ID_GSI_NAME = 'organization_id-gsi';
-  public static PATIENT_TABLE_DEVICE_ID_GSI_NAME = 'device_id-gsi';
+  public static PK_NAME = 'pid';
+  public static SK_NAME = 'sid';
+  public static SID_GSI_NAME = 'sid-gsi';
+  public static ORGANIZATION_NAME_GSI_NAME = 'org-name-gsi';
+  public static ADMIN_EMAIL_GSI_NAME = 'adm-email-gsi';
+  public static CAREGIVER_EMAIL_GSI_NAME = 'car-email-gsi';
+  public static PATIENT_DEVICE_ID_GSI_NAME = 'pat-device_id-gsi';
 
-  public readonly organizationTable: dynamodb.Table;
-  public readonly adminTable: dynamodb.Table;
-  public readonly caregiverTable: dynamodb.Table;
-  public readonly patientTable: dynamodb.Table;
+  public readonly remoteMobilityMonitoringTable: dynamodb.Table;
 
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    this.organizationTable = this.createOrganizationTable();
-    this.adminTable = this.createAdminTable();
-    this.caregiverTable = this.createCaregiverTable();
-    this.patientTable = this.createPatientTable();
+    this.remoteMobilityMonitoringTable = this.createRemoteMobilityMonitoringTable();
   }
 
-  private createOrganizationTable(): dynamodb.Table {
+  private createRemoteMobilityMonitoringTable(): dynamodb.Table {
     const table = new dynamodb.Table(
       this,
-      DynamoDbStack.ORGANIZATION_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.ORGANIZATION_TABLE_NAME, 'id')
+      DynamoDbStack.TABLE_NAME,
+      DynamoDbStack.createTableProps(DynamoDbStack.TABLE_NAME, DynamoDbStack.PK_NAME, DynamoDbStack.SK_NAME)
     );
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ORGANIZATION_TABLE_NAME_GSI_NAME, 'name'));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.SID_GSI_NAME, DynamoDbStack.SK_NAME, DynamoDbStack.PK_NAME));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ORGANIZATION_NAME_GSI_NAME, 'org-name'));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_EMAIL_GSI_NAME, 'adm-email'));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_EMAIL_GSI_NAME, 'car-email'));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.PATIENT_DEVICE_ID_GSI_NAME, 'pat-device_id'));
     return table;
   }
 
-  private createAdminTable(): dynamodb.Table {
-    const table = new dynamodb.Table(
-      this,
-      DynamoDbStack.ADMIN_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.ADMIN_TABLE_NAME, 'id')
-    );
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_TABLE_EMAIL_GSI_NAME, 'email'));
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_TABLE_ORGANIZATION_ID_GSI_NAME, 'organization_id'));
-    return table;
-  }
-
-  private createCaregiverTable(): dynamodb.Table {
-    const table = new dynamodb.Table(
-      this,
-      DynamoDbStack.CAREGIVER_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.CAREGIVER_TABLE_NAME, 'id')
-    );
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_EMAIL_GSI_NAME, 'email'));
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_TABLE_ORGANIZATION_ID_GSI_NAME, 'organization_id'));
-    return table;
-  }
-
-  private createPatientTable(): dynamodb.Table {
-    const table = new dynamodb.Table(
-      this,
-      DynamoDbStack.PATIENT_TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.PATIENT_TABLE_NAME, 'id')
-    );
-    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.PATIENT_TABLE_DEVICE_ID_GSI_NAME, 'device_id'));
-    return table;
-  }
-
-  private static createTableProps(tableName: string, partitionKey: string): dynamodb.TableProps {
+  private static createTableProps(tableName: string, partitionKey: string, sortKey: string): dynamodb.TableProps {
     return {
       tableName: tableName,
       partitionKey: {
         name: partitionKey,
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: sortKey,
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -82,8 +50,8 @@ export class DynamoDbStack extends cdk.Stack {
     };
   }
 
-  private static createGsiProps(gsiName: string, partitionKeyName: string): dynamodb.GlobalSecondaryIndexProps {
-    return {
+  private static createGsiProps(gsiName: string, partitionKeyName: string, sortKeyName?: string): dynamodb.GlobalSecondaryIndexProps {
+    const gsiProps = {
       indexName: gsiName,
       partitionKey: {
         name: partitionKeyName,
@@ -91,5 +59,13 @@ export class DynamoDbStack extends cdk.Stack {
       },
       projectionType: dynamodb.ProjectionType.ALL,
     };
+    if (sortKeyName) {
+      const sortKey = {
+        name: sortKeyName,
+        type: dynamodb.AttributeType.STRING,
+      }
+      return { ...gsiProps, sortKey }
+    }
+    return gsiProps
   }
 }

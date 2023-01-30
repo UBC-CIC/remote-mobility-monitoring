@@ -4,7 +4,6 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,149 +11,150 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_RECORD_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_BLANK_ERROR_MESSAGE;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ORGANIZATION_ID_INVALID_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_NOT_EQUAL_SID_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.SID_BLANK_ERROR_MESSAGE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdminDaoTest extends DaoTestParent {
-    private static final String ID = "admin-id-123";
+    private static final String PID = "adm-1";
+    private static final String SID = PID;
     private static final String EMAIL1 = "johnsmith@email.com";
     private static final String EMAIL2 = "johnsmithiscool@email.com";
     private static final String FIRST_NAME = "John";
     private static final String LAST_NAME = "Smith";
-    private static final String EXISTS_ORGANIZATION_ID = "org-id-abc";
-    private static final String NOT_EXISTS_ORGANIZATION_ID = "org-id-not";
+    private static final String EXISTS_ORGANIZATION_ID = "org-1";
+    private static final String NOT_EXISTS_ORGANIZATION_ID = "org-2";
+    private static final String ORGANIZATION_NAME = "ORG1";
 
-    DynamoDbTable<Organization> organizationTable;
-    DynamoDbTable<Admin> table;
     AdminDao cut;
 
     @BeforeEach
     public void setup() {
-        setupOrganizationTable();
-        setupAdminTable();
+        setupTable();
+        OrganizationDao organizationDao = new OrganizationDao(genericDao);
+        cut = new AdminDao(genericDao, organizationDao);
 
-        organizationTable = ddbEnhancedClient.table(OrganizationTable.TABLE_NAME, TableSchema.fromBean(Organization.class));
-        Map<String, DynamoDbIndex<Organization>> organizationIndexMap = new HashMap<>();
-        organizationIndexMap.put(OrganizationTable.NAME_INDEX_NAME, organizationTable.index(OrganizationTable.NAME_INDEX_NAME));
-        OrganizationDao organizationDao = new OrganizationDao(new GenericDao<>(organizationTable, organizationIndexMap, ddbEnhancedClient));
-
-        table = ddbEnhancedClient.table(AdminTable.TABLE_NAME, TableSchema.fromBean(Admin.class));
-        Map<String, DynamoDbIndex<Admin>> adminIndexMap = new HashMap<>();
-        for (Pair<String, String> indexNameAndKey : AdminTable.INDEX_NAMES_AND_KEYS) {
-            String indexName = indexNameAndKey.getLeft();
-            adminIndexMap.put(indexName, table.index(indexName));
-        }
-        cut = new AdminDao(new GenericDao<>(table, adminIndexMap, ddbEnhancedClient), organizationDao);
-
-        Organization organization = Organization.builder().id(EXISTS_ORGANIZATION_ID).build();
-        organizationTable.putItem(organization);
+        Organization organization = buildOrganization(EXISTS_ORGANIZATION_ID, EXISTS_ORGANIZATION_ID, ORGANIZATION_NAME);
+        createOrganization(organization);
     }
 
     @AfterEach
     public void teardown() {
-        teardownOrganizationTable();
-        teardownAdminTable();
+        teardownTable();
     }
 
     @Test
     public void testCreate_HappyCase() {
-        Admin newRecord = buildAdmin();
-        cut.create(newRecord);
+        Admin newRecord = buildAdminDefault();
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
 
-        assertNotEquals(ID, newRecord.getId());
+        GetItemResponse response = findByPrimaryKey(newRecord.getPid(), newRecord.getPid());
+        assertTrue(response.hasItem());
+
+        newRecord = Admin.convertFromMap(response.item());
+        assertNotEquals(PID, newRecord.getPid());
+        assertNotEquals(SID, newRecord.getSid());
         assertEquals(EMAIL1, newRecord.getEmail());
         assertEquals(FIRST_NAME, newRecord.getFirstName());
         assertEquals(LAST_NAME, newRecord.getLastName());
-        assertEquals(EXISTS_ORGANIZATION_ID, newRecord.getOrganizationId());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
+        GetItemResponse response2 = findByPrimaryKey(EXISTS_ORGANIZATION_ID, newRecord.getPid());
+        assertTrue(response2.hasItem());
+        assertEquals(ORGANIZATION_NAME, response2.item().get(OrganizationTable.NAME_NAME).s());
+        assertEquals(EMAIL1, response2.item().get(AdminTable.EMAIL_NAME).s());
     }
 
     @Test
     public void testCreate_WHEN_OrganizationDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Admin newRecord = buildAdmin();
-        newRecord.setOrganizationId(NOT_EXISTS_ORGANIZATION_ID);
-        assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
+        Admin newRecord = buildAdminDefault();
+        assertThatThrownBy(() -> cut.create(newRecord, NOT_EXISTS_ORGANIZATION_ID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
     public void testCreate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
-        Admin newRecord = buildAdmin();
-        cut.create(newRecord);
-        assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
+        Admin newRecord = buildAdminDefault();
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
+        assertThatThrownBy(() -> cut.create(newRecord, EXISTS_ORGANIZATION_ID)).isInstanceOf(DuplicateRecordException.class);
     }
 
     @ParameterizedTest
     @MethodSource("invalidInputsForCreate")
-    public void testCreate_WHEN_InvalidInput_THEN_ThrowInvalidInputException(Admin record, String errorMessage) {
-        assertInvalidInputExceptionThrown(() -> cut.create(record), errorMessage);
+    public void testCreate_WHEN_InvalidInput_THEN_ThrowInvalidInputException(Admin record, String organizationId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.create(record, organizationId), errorMessage);
     }
 
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
-                Arguments.of(null, ADMIN_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, null, FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID), EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, "", FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID), EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, null, LAST_NAME, EXISTS_ORGANIZATION_ID), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, "", LAST_NAME, EXISTS_ORGANIZATION_ID), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, null, EXISTS_ORGANIZATION_ID), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, "", EXISTS_ORGANIZATION_ID), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, LAST_NAME, null), ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, LAST_NAME, ""), ORGANIZATION_ID_BLANK_ERROR_MESSAGE)
+                Arguments.of(null, EXISTS_ORGANIZATION_ID, ADMIN_RECORD_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, null, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, "", FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, null, LAST_NAME), EXISTS_ORGANIZATION_ID, FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, "", LAST_NAME), EXISTS_ORGANIZATION_ID, FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, null), EXISTS_ORGANIZATION_ID, LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, ""), EXISTS_ORGANIZATION_ID, LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), "", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), PID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
     @Test
     public void testFindById_HappyCase() {
-        Admin newRecord = buildAdmin();
-        table.putItem(newRecord);
+        Admin newRecord = buildAdminDefault();
+        createAdmin(newRecord);
 
-        Admin record = cut.findById(ID);
+        Admin record = cut.findById(newRecord.getPid());
         assertEquals(newRecord, record);
     }
 
     @Test
-    public void testFindById_WHEN_RecordDoesNotExist_THEN_ReturnNull() {
-        Admin record = cut.findById(ID);
-        assertNull(record);
+    public void testFindById_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        assertThatThrownBy(() -> cut.findById(PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    public void testFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id) {
-        assertInvalidInputExceptionThrown(() -> cut.findById(id), ID_BLANK_ERROR_MESSAGE);
+    @MethodSource("invalidInputsForFindById")
+    public void testFindById_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findById(id), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindById() {
+        return Stream.of(
+                Arguments.of(null, ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(EXISTS_ORGANIZATION_ID, ADMIN_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     @Test
     public void testFindByEmail_HappyCase() {
-        Admin newRecord = buildAdmin();
-        table.putItem(newRecord);
+        Admin newRecord = buildAdminDefault();
+        createAdmin(newRecord);
 
         Admin record = cut.findByEmail(EMAIL1);
         assertEquals(newRecord, record);
@@ -173,54 +173,95 @@ class AdminDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindAllInOrganization_HappyCase() {
-        Admin newRecord1 = buildAdmin();
-        cut.create(newRecord1);
-        Admin newRecord2 = buildAdmin();
-        newRecord2.setEmail(EMAIL2);
-        cut.create(newRecord2);
+    public void testFindOrganization_HappyCase() {
+        Admin newRecord = buildAdminDefault();
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
 
-        Iterator<Page<Admin>> iterator = cut.findAllInOrganization(EXISTS_ORGANIZATION_ID);
-        assertTrue(iterator.hasNext());
-        List<Admin> admins = iterator.next().items();
-        assertThat(admins).containsExactlyInAnyOrder(newRecord1, newRecord2);
-        assertFalse(iterator.hasNext());
+        Organization organization = cut.findOrganization(newRecord.getPid());
+        assertNotNull(organization);
+        assertEquals(EXISTS_ORGANIZATION_ID, organization.getPid());
+        assertEquals(EXISTS_ORGANIZATION_ID, organization.getSid());
+        assertEquals(ORGANIZATION_NAME, organization.getName());
     }
 
     @Test
-    public void testFindAllInOrganization_WHEN_RecordsDoNotExist_THEN_ReturnIteratorWithEmptyPage() {
-        Iterator<Page<Admin>> iterator = cut.findAllInOrganization(EXISTS_ORGANIZATION_ID);
-        assertTrue(iterator.hasNext());
-        List<Admin> admins = iterator.next().items();
-        assertThat(admins).isEmpty();
+    public void testFindOrganization_WHEN_AdminRecordDoesNotExist_THEN_ReturnNull() {
+        Organization organization = cut.findOrganization(PID);
+        assertNull(organization);
+    }
+
+    @Test
+    public void testFindOrganization_WHEN_NoOrganizationRecordAssociated_THEN_ReturnNull() {
+        Admin newRecord = buildAdminDefault();
+        createAdmin(newRecord);
+
+        Organization organization = cut.findOrganization(PID);
+        assertNull(organization);
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    public void testFindAllInOrganization_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String organizationId) {
-        assertInvalidInputExceptionThrown(() -> cut.findAllInOrganization(organizationId), ORGANIZATION_ID_BLANK_ERROR_MESSAGE);
+    @MethodSource("invalidInputsForFindOrganization")
+    public void testFindOrganization_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String adminId, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.findOrganization(adminId), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForFindOrganization() {
+        return Stream.of(
+                Arguments.of(null, ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(EXISTS_ORGANIZATION_ID, ADMIN_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
     @Test
     public void testUpdate_HappyCase() {
-        Admin newRecord = buildAdmin();
-        cut.create(newRecord);
+        Admin newRecord = buildAdminDefault();
+        cut.create(newRecord, EXISTS_ORGANIZATION_ID);
 
-        Admin updatedRecord = cut.findById(newRecord.getId());
+        Admin updatedRecord = cut.findById(newRecord.getPid());
         assertEquals(newRecord, updatedRecord);
         updatedRecord.setEmail(EMAIL2);
         cut.update(updatedRecord);
 
-        Admin found = cut.findById(newRecord.getId());
-        assertEquals(newRecord.getId(), found.getId());
+        Admin found = cut.findById(newRecord.getPid());
+        assertEquals(newRecord.getPid(), found.getPid());
         assertNotEquals(newRecord.getEmail(), found.getEmail());
         assertNotEquals(newRecord.getUpdatedAt(), found.getUpdatedAt());
         assertEquals(newRecord.getCreatedAt(), found.getCreatedAt());
     }
 
     @Test
+    public void testUpdate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
+        Admin newRecord1 = buildAdminDefault();
+        cut.create(newRecord1, EXISTS_ORGANIZATION_ID);
+        Admin newRecord2 = buildAdminDefault();
+        newRecord2.setEmail(EMAIL2);
+        cut.create(newRecord2, EXISTS_ORGANIZATION_ID);
+
+        Admin updatedRecord = cut.findById(newRecord2.getPid());
+        updatedRecord.setEmail(EMAIL1);
+        assertThatThrownBy(() -> cut.update(updatedRecord)).isInstanceOf(DuplicateRecordException.class);
+    }
+
+    @Test
+    public void testUpdate_WHEN_RecordAlsoExistsInAssociations_THEN_UpdateAllDuplicateRecords() {
+        Admin newRecord1 = buildAdminDefault();
+        createAdmin(newRecord1);
+        Admin newRecord2 = buildAdminDefault();
+        newRecord2.setPid(EXISTS_ORGANIZATION_ID);
+        createAdmin(newRecord2);
+
+        Admin updatedRecord = cut.findById(PID);
+        updatedRecord.setEmail(EMAIL2);
+        cut.update(updatedRecord);
+
+        assertEquals(EMAIL2, findByPrimaryKey(PID, PID).item().get(AdminTable.EMAIL_NAME).s());
+        assertEquals(EMAIL2, findByPrimaryKey(EXISTS_ORGANIZATION_ID, PID).item().get(AdminTable.EMAIL_NAME).s());
+    }
+
+    @Test
     public void testUpdate_WHEN_RecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        Admin newRecord = buildAdmin();
+        Admin newRecord = buildAdminDefault();
         assertThatThrownBy(() -> cut.update(newRecord)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
@@ -233,53 +274,54 @@ class AdminDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForUpdate() {
         return Stream.of(
                 Arguments.of(null, ADMIN_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(null, EMAIL1, FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID), ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin("", EMAIL1, FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID), ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, null, FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID), EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, "", FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID), EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, null, LAST_NAME, EXISTS_ORGANIZATION_ID), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, "", LAST_NAME, EXISTS_ORGANIZATION_ID), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, null, EXISTS_ORGANIZATION_ID), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, "", EXISTS_ORGANIZATION_ID), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, LAST_NAME, null), ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(ID, EMAIL1, FIRST_NAME, LAST_NAME, ""), ORGANIZATION_ID_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildAdmin(null, SID, EMAIL1, FIRST_NAME, LAST_NAME), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin("", SID, EMAIL1, FIRST_NAME, LAST_NAME), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, null, EMAIL1, FIRST_NAME, LAST_NAME), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, "", EMAIL1, FIRST_NAME, LAST_NAME), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, null, FIRST_NAME, LAST_NAME), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, "", FIRST_NAME, LAST_NAME), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, null, LAST_NAME), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, "", LAST_NAME), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, null), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, ""), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(EXISTS_ORGANIZATION_ID, EXISTS_ORGANIZATION_ID, EMAIL1, FIRST_NAME, LAST_NAME),
+                        ADMIN_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID + "1", EMAIL1, FIRST_NAME, LAST_NAME), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
 
     @Test
     public void testDelete_HappyCase() {
-        Admin newRecord = buildAdmin();
-        table.putItem(newRecord);
-        Admin found = table.getItem(newRecord);
+        Admin newRecord = buildAdminDefault();
+        createAdmin(newRecord);
+        Admin found = cut.findById(newRecord.getPid());
         assertNotNull(found);
 
-        cut.delete(ID);
-        found = table.getItem(newRecord);
-        assertNull(found);
+        cut.delete(newRecord.getPid());
+        assertThatThrownBy(() -> cut.findById(newRecord.getPid())).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
     public void testDelete_WHEN_RecordDoesNotExist_THEN_DoNothing() {
-        assertDoesNotThrow(() -> cut.delete(ID));
+        assertDoesNotThrow(() -> cut.delete(PID));
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    public void testDelete_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id) {
-        assertInvalidInputExceptionThrown(() -> cut.delete(id), ID_BLANK_ERROR_MESSAGE);
+    @MethodSource("invalidInputsForDelete")
+    public void testDelete_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String id, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.delete(id), errorMessage);
     }
 
-    private static Admin buildAdmin() {
-        return buildAdmin(ID, EMAIL1, FIRST_NAME, LAST_NAME, EXISTS_ORGANIZATION_ID);
+    private static Stream<Arguments> invalidInputsForDelete() {
+        return Stream.of(
+                Arguments.of(null, ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of("", ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(EXISTS_ORGANIZATION_ID, ADMIN_ID_INVALID_ERROR_MESSAGE)
+        );
     }
 
-    private static Admin buildAdmin(String id, String email, String firstName, String lastName, String organizationId) {
-        return Admin.builder()
-                .id(id)
-                .email(email)
-                .firstName(firstName)
-                .lastName(lastName)
-                .organizationId(organizationId)
-                .build();
+    private static Admin buildAdminDefault() {
+        return buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME);
     }
+
 }

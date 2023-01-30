@@ -8,7 +8,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 public abstract class BaseModel {
-    String id;
+    String pid;
+    String sid;
     String createdAt;
     String updatedAt;
 }
