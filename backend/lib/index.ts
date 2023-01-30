@@ -7,7 +7,7 @@ import { ApiGatewayStack } from './stack/apigateway-stack';
 
 const app = new App();
 new CognitoStack(app, 'RemoteMobilityMonitoringCognitoStack');
-new TimestreamStack(app, 'RemoteMobilityMonitoringTimeStreamStack');
+new TimestreamStack(app, 'RemoteMobilityMonitoringTimestreamStack');
 const dynamoDbStack = new DynamoDbStack(app, 'RemoteMobilityMonitoringDynamoStack');
 const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', {
   table: dynamoDbStack.remoteMobilityMonitoringTable,
