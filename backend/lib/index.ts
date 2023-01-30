@@ -16,11 +16,13 @@ new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
   removePatientFunction: lambdaStack.removePatientFunction,
   getCaregiverFunction: lambdaStack.getCaregiverFunction,
   getAllPatientsFunction: lambdaStack.getAllPatientsFunction,
+  updateCaregiverFunction: lambdaStack.updateCaregiverFunction,
   deleteCaregiverFunction: lambdaStack.deleteCaregiverFunction,
   createPatientFunction: lambdaStack.createPatientFunction,
   updatePatientDeviceFunction: lambdaStack.updatePatientDeviceFunction,
   verifyPatientFunction: lambdaStack.verifyPatientFunction,
   getPatientFunction: lambdaStack.getPatientFunction,
+  updatePatientFunction: lambdaStack.updatePatientFunction,
   deletePatientFunction: lambdaStack.deletePatientFunction,
 });
 app.synth();

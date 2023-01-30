@@ -14,6 +14,8 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatient
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +50,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.VERIFY_PATIENT_NULL_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -71,7 +74,8 @@ class PatientServiceTest {
     private static final String FIRST_NAME = "Jack";
     private static final String LAST_NAME = "Jackson";
     private static final String DATE_OF_BIRTH = "2000-12-31";
-    private static final String PHONE_NUMBER = "1234567890";
+    private static final String PHONE_NUMBER1 = "1234567890";
+    private static final String PHONE_NUMBER2 = "1313131313";
     private static final String PATIENT_ID = "pat-1";
     private static final String CAREGIVER_ID = "car-1";
     private static final String AUTH_CODE = "auth_code-123";
@@ -102,7 +106,7 @@ class PatientServiceTest {
         verify(patientDao, times(1)).create(patientCaptor.capture());
         assertEquals(FIRST_NAME, patientCaptor.getValue().getFirstName());
         assertEquals(LAST_NAME, patientCaptor.getValue().getLastName());
-        assertEquals(PHONE_NUMBER, patientCaptor.getValue().getPhoneNumber());
+        assertEquals(PHONE_NUMBER1, patientCaptor.getValue().getPhoneNumber());
         assertEquals(DATE_OF_BIRTH, patientCaptor.getValue().getDateOfBirth());
         assertNotEquals(AUTH_CODE, patientCaptor.getValue().getAuthCode());
         assertNotEquals(AUTH_CODE_TIMESTAMP, patientCaptor.getValue().getAuthCodeTimestamp());
@@ -128,14 +132,14 @@ class PatientServiceTest {
     private static Stream<Arguments> invalidInputsForCreatePatient() {
         return Stream.of(
                 Arguments.of(null, CREATE_PATIENT_NULL_ERROR_MESSAGE),
-                Arguments.of(buildCreatePatientRequestBody(null, LAST_NAME, PHONE_NUMBER, DATE_OF_BIRTH), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreatePatientRequestBody("", LAST_NAME, PHONE_NUMBER, DATE_OF_BIRTH), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, null, PHONE_NUMBER, DATE_OF_BIRTH), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, "", PHONE_NUMBER, DATE_OF_BIRTH), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCreatePatientRequestBody(null, LAST_NAME, PHONE_NUMBER1, DATE_OF_BIRTH), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCreatePatientRequestBody("", LAST_NAME, PHONE_NUMBER1, DATE_OF_BIRTH), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, null, PHONE_NUMBER1, DATE_OF_BIRTH), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, "", PHONE_NUMBER1, DATE_OF_BIRTH), LAST_NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, null, DATE_OF_BIRTH), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, "", DATE_OF_BIRTH), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, PHONE_NUMBER, null), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, PHONE_NUMBER, ""), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, PHONE_NUMBER1, null), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, PHONE_NUMBER1, ""), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE)
         );
     }
 
@@ -298,7 +302,7 @@ class PatientServiceTest {
         assertEquals(FIRST_NAME, responseBody.getFirstName());
         assertEquals(LAST_NAME, responseBody.getLastName());
         assertEquals(DATE_OF_BIRTH, responseBody.getDateOfBirth());
-        assertEquals(PHONE_NUMBER, responseBody.getPhoneNumber());
+        assertEquals(PHONE_NUMBER1, responseBody.getPhoneNumber());
         assertEquals(CREATED_AT, responseBody.getCreatedAt());
     }
 
@@ -323,6 +327,71 @@ class PatientServiceTest {
                 Arguments.of(buildGetPatientRequestBody(null), PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildGetPatientRequestBody(""), PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildGetPatientRequestBody(CAREGIVER_ID), PATIENT_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testUpdatePatient_HappyCase() {
+        when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
+
+        UpdatePatientRequestBody requestBody = buildUpdatePatientRequestBody();
+        requestBody.setPhoneNumber(PHONE_NUMBER2);
+        UpdatePatientResponseBody responseBody = cut.updatePatient(requestBody);
+
+        verify(patientDao, times(1)).update(patientCaptor.capture());
+        assertEquals(FIRST_NAME, patientCaptor.getValue().getFirstName());
+        assertEquals(LAST_NAME, patientCaptor.getValue().getLastName());
+        assertEquals(PHONE_NUMBER2, patientCaptor.getValue().getPhoneNumber());
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testUpdatePatient_WHEN_PatientDaoFindByIdThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(patientDao).findById(anyString());
+
+        UpdatePatientRequestBody requestBody = buildUpdatePatientRequestBody();
+        assertThatThrownBy(() -> cut.updatePatient(requestBody)).isSameAs(toThrow);
+    }
+
+    @Test
+    public void testUpdatePatient_WHEN_PatientDaoUpdateThrows_THEN_ThrowSameException() {
+        when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
+
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(patientDao).update(any(Patient.class));
+
+        UpdatePatientRequestBody requestBody = buildUpdatePatientRequestBody();
+        assertThatThrownBy(() -> cut.updatePatient(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForUpdatePatient")
+    public void testUpdatePatient_WHEN_InvalidInput_THEN_ThrowInvalidInputException(UpdatePatientRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.updatePatient(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForUpdatePatient() {
+        return Stream.of(
+                Arguments.of(null, UPDATE_PATIENT_NULL_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(null, FIRST_NAME, LAST_NAME, PHONE_NUMBER1),
+                        PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody("", FIRST_NAME, LAST_NAME, PHONE_NUMBER1),
+                        PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(CAREGIVER_ID, FIRST_NAME, LAST_NAME, PHONE_NUMBER1),
+                        PATIENT_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(PATIENT_ID, null, LAST_NAME, PHONE_NUMBER1),
+                        FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(PATIENT_ID, "", LAST_NAME, PHONE_NUMBER1),
+                        FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(PATIENT_ID, FIRST_NAME, null, PHONE_NUMBER1),
+                        LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(PATIENT_ID, FIRST_NAME, "", PHONE_NUMBER1),
+                        LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(PATIENT_ID, FIRST_NAME, LAST_NAME, null),
+                        PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdatePatientRequestBody(PATIENT_ID, FIRST_NAME, LAST_NAME, ""),
+                        PHONE_NUMBER_BLANK_ERROR_MESSAGE)
         );
     }
 
@@ -360,7 +429,7 @@ class PatientServiceTest {
     }
 
     private static CreatePatientRequestBody buildCreatePatientRequestBody() {
-        return buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, PHONE_NUMBER, DATE_OF_BIRTH);
+        return buildCreatePatientRequestBody(FIRST_NAME, LAST_NAME, PHONE_NUMBER1, DATE_OF_BIRTH);
     }
 
     private static CreatePatientRequestBody buildCreatePatientRequestBody(String firstName, String lastName,
@@ -407,6 +476,20 @@ class PatientServiceTest {
                 .build();
     }
 
+    private static UpdatePatientRequestBody buildUpdatePatientRequestBody() {
+        return buildUpdatePatientRequestBody(PATIENT_ID, FIRST_NAME, LAST_NAME, PHONE_NUMBER1);
+    }
+
+    private static UpdatePatientRequestBody buildUpdatePatientRequestBody(String patientId, String firstName,
+                                                                          String lastName, String phoneNumber) {
+        return UpdatePatientRequestBody.builder()
+                .patientId(patientId)
+                .firstName(firstName)
+                .lastName(lastName)
+                .phoneNumber(phoneNumber)
+                .build();
+    }
+
     private static DeletePatientRequestBody buildDeletePatientRequestBody() {
         return buildDeletePatientRequestBody(PATIENT_ID);
     }
@@ -418,13 +501,13 @@ class PatientServiceTest {
     }
 
     private static Patient buildPatientDefault() {
-        Patient patient = buildPatient(PATIENT_ID, PATIENT_ID, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER,
+        Patient patient = buildPatient(PATIENT_ID, PATIENT_ID, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER1,
                 AUTH_CODE, AUTH_CODE_TIMESTAMP, false);
         patient.setCreatedAt(CREATED_AT);
         return patient;
     }
 
     private static Caregiver buildCaregiverDefault() {
-        return buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER);
+        return buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER1);
     }
 }

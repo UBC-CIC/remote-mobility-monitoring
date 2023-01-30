@@ -15,6 +15,8 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatient
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import lombok.NonNull;
@@ -147,6 +149,31 @@ public class PatientService {
                 .dateOfBirth(patient.getDateOfBirth())
                 .phoneNumber(patient.getPhoneNumber())
                 .createdAt(patient.getCreatedAt())
+                .build();
+    }
+
+    /**
+     * Updates a Patient.
+     *
+     * @param body The request body
+     * @return {@link UpdatePatientResponseBody}
+     * @throws DuplicateRecordException If record with the given deviceId already exists
+     * @throws RecordDoesNotExistException If record with the given id does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of patientId, firstName, lastName,
+     *                              or phoneNumber are empty
+     */
+    public UpdatePatientResponseBody updatePatient(UpdatePatientRequestBody body) {
+        Validator.validateUpdatePatientRequestBody(body);
+
+        Patient patient = patientDao.findById(body.getPatientId());
+        patient.setFirstName(body.getFirstName());
+        patient.setLastName(body.getLastName());
+        patient.setPhoneNumber(body.getPhoneNumber());
+        patientDao.update(patient);
+
+        return UpdatePatientResponseBody.builder()
+                .message("OK")
                 .build();
     }
 

@@ -503,9 +503,9 @@ public class CaregiverDaoTest extends DaoTestParent {
     public void testUpdate_WHEN_RecordAlsoExistsInAssociations_THEN_UpdateAllDuplicateRecords() {
         Caregiver newRecord1 = buildCaregiverDefault();
         createCaregiver(newRecord1);
-        Caregiver newRecord2 = buildCaregiverDefault();
-        newRecord2.setSid(PATIENT_ID1);
-        createCaregiver(newRecord2);
+        Patient newRecord2 = buildPatientDefault();
+        newRecord2.setPid(PID);
+        createPatient(newRecord2);
         Caregiver newRecord3 = buildCaregiverDefault();
         newRecord3.setPid(EXISTS_ORGANIZATION_ID);
         createCaregiver(newRecord3);
@@ -516,6 +516,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
         assertEquals(EMAIL2, findByPrimaryKey(PID, PID).item().get(CaregiverTable.EMAIL_NAME).s());
         assertEquals(EMAIL2, findByPrimaryKey(PID, PATIENT_ID1).item().get(CaregiverTable.EMAIL_NAME).s());
+        assertEquals(DEVICE_ID1, findByPrimaryKey(PID, PATIENT_ID1).item().get(PatientTable.DEVICE_ID_NAME).s());
         assertEquals(EMAIL2, findByPrimaryKey(EXISTS_ORGANIZATION_ID, PID).item().get(CaregiverTable.EMAIL_NAME).s());
     }
 

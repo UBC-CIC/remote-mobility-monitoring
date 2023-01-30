@@ -17,6 +17,8 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCareg
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +57,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.REMOVE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.TITLE_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_CAREGIVER_NULL_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +73,8 @@ import static org.mockito.Mockito.when;
 public class CaregiverServiceTest {
     private static final String CAREGIVER_ID = "car-1";
     private static final String EMAIL = "jackjackson@email.com";
-    private static final String TITLE = "caregiver";
+    private static final String TITLE1 = "caregiver";
+    private static final String TITLE2 = "manager";
     private static final String FIRST_NAME = "Jack";
     private static final String LAST_NAME = "Jackson";
     private static final String PHONE_NUMBER = "1234567890";
@@ -103,7 +107,7 @@ public class CaregiverServiceTest {
         assertEquals(EMAIL, caregiverCaptor.getValue().getEmail());
         assertEquals(FIRST_NAME, caregiverCaptor.getValue().getFirstName());
         assertEquals(LAST_NAME, caregiverCaptor.getValue().getLastName());
-        assertEquals(TITLE, caregiverCaptor.getValue().getTitle());
+        assertEquals(TITLE1, caregiverCaptor.getValue().getTitle());
         assertEquals(PHONE_NUMBER, caregiverCaptor.getValue().getPhoneNumber());
         assertNotNull(responseBody);
     }
@@ -126,31 +130,31 @@ public class CaregiverServiceTest {
     private static Stream<Arguments> invalidInputsForCreateCaregiver() {
         return Stream.of(
                 Arguments.of(null, CREATE_CAREGIVER_NULL_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(null, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(null, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER, ORGANIZATION_ID),
                         EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody("", FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody("", FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER, ORGANIZATION_ID),
                         EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, null, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, null, LAST_NAME, TITLE1, PHONE_NUMBER, ORGANIZATION_ID),
                         FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, "", LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, "", LAST_NAME, TITLE1, PHONE_NUMBER, ORGANIZATION_ID),
                         FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, null, TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, null, TITLE1, PHONE_NUMBER, ORGANIZATION_ID),
                         LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, "", TITLE, PHONE_NUMBER, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, "", TITLE1, PHONE_NUMBER, ORGANIZATION_ID),
                         LAST_NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER, ORGANIZATION_ID),
                         TITLE_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER, ORGANIZATION_ID),
                         TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, null, ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE1, null, ORGANIZATION_ID),
                         PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, "", ORGANIZATION_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE1, "", ORGANIZATION_ID),
                         PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, null),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER, null),
                         ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ""),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER, ""),
                         ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, CAREGIVER_ID),
+                Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER, CAREGIVER_ID),
                         ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
         );
     }
@@ -238,7 +242,7 @@ public class CaregiverServiceTest {
         assertEquals(EMAIL, responseBody.getEmail());
         assertEquals(FIRST_NAME, responseBody.getFirstName());
         assertEquals(LAST_NAME, responseBody.getLastName());
-        assertEquals(TITLE, responseBody.getTitle());
+        assertEquals(TITLE1, responseBody.getTitle());
         assertEquals(PHONE_NUMBER, responseBody.getPhoneNumber());
         assertEquals(ORGANIZATION_ID, responseBody.getOrganizationId());
         assertEquals(ORGANIZATION_NAME, responseBody.getOrganizationName());
@@ -318,6 +322,81 @@ public class CaregiverServiceTest {
     }
 
     @Test
+    public void testUpdateCaregiver_HappyCase() {
+        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
+
+        UpdateCaregiverRequestBody requestBody = buildUpdateCaregiverRequestBody();
+        requestBody.setTitle(TITLE2);
+        UpdateCaregiverResponseBody responseBody = cut.updateCaregiver(requestBody);
+
+        verify(caregiverDao, times(1)).update(caregiverCaptor.capture());
+        assertEquals(EMAIL, caregiverCaptor.getValue().getEmail());
+        assertEquals(FIRST_NAME, caregiverCaptor.getValue().getFirstName());
+        assertEquals(LAST_NAME, caregiverCaptor.getValue().getLastName());
+        assertEquals(TITLE2, caregiverCaptor.getValue().getTitle());
+        assertEquals(PHONE_NUMBER, caregiverCaptor.getValue().getPhoneNumber());
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testUpdateCaregiver_WHEN_CaregiverDaoFindByIdThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).findById(anyString());
+
+        UpdateCaregiverRequestBody requestBody = buildUpdateCaregiverRequestBody();
+        assertThatThrownBy(() -> cut.updateCaregiver(requestBody)).isSameAs(toThrow);
+    }
+
+    @Test
+    public void testUpdateCaregiver_WHEN_CaregiverDaoUpdateThrows_THEN_ThrowSameException() {
+        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
+
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).update(any(Caregiver.class));
+
+        UpdateCaregiverRequestBody requestBody = buildUpdateCaregiverRequestBody();
+        assertThatThrownBy(() -> cut.updateCaregiver(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForUpdateCaregiver")
+    public void testUpdateCaregiver_WHEN_InvalidInput_THEN_ThrowInvalidInputException(UpdateCaregiverRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.updateCaregiver(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForUpdateCaregiver() {
+        return Stream.of(
+                Arguments.of(null, UPDATE_CAREGIVER_NULL_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(null, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                        CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody("", EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                        CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(PATIENT_ID1, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                        CAREGIVER_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, null, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                        EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, "", FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                        EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, null, LAST_NAME, TITLE1, PHONE_NUMBER),
+                        FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, "", LAST_NAME, TITLE1, PHONE_NUMBER),
+                        FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, null, TITLE1, PHONE_NUMBER),
+                        LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, "", TITLE1, PHONE_NUMBER),
+                        LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER),
+                        TITLE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER),
+                        TITLE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, null),
+                        PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, ""),
+                        PHONE_NUMBER_BLANK_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
     public void testDeleteCaregiver_HappyCase() {
         DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
         DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
@@ -351,7 +430,7 @@ public class CaregiverServiceTest {
     }
 
     private static CreateCaregiverRequestBody buildCreateCaregiverRequestBody() {
-        return buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER, ORGANIZATION_ID);
+        return buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER, ORGANIZATION_ID);
     }
 
     private static CreateCaregiverRequestBody buildCreateCaregiverRequestBody(String email, String firstName, String lastName,
@@ -408,6 +487,22 @@ public class CaregiverServiceTest {
                 .build();
     }
 
+    private static UpdateCaregiverRequestBody buildUpdateCaregiverRequestBody() {
+        return buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER);
+    }
+
+    private static UpdateCaregiverRequestBody buildUpdateCaregiverRequestBody(String caregiverId, String email, String firstName,
+                                                                              String lastName, String title, String phoneNumber) {
+        return UpdateCaregiverRequestBody.builder()
+                .caregiverId(caregiverId)
+                .email(email)
+                .firstName(firstName)
+                .lastName(lastName)
+                .title(title)
+                .phoneNumber(phoneNumber)
+                .build();
+    }
+
     private static DeleteCaregiverRequestBody buildDeleteCaregiverRequestBody() {
         return buildDeleteCaregiverRequestBody(CAREGIVER_ID);
     }
@@ -419,7 +514,7 @@ public class CaregiverServiceTest {
     }
 
     private static Caregiver buildCaregiverDefault() {
-        Caregiver caregiver = buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER);
+        Caregiver caregiver = buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER);
         caregiver.setCreatedAt(CREATED_AT);
         return caregiver;
     }

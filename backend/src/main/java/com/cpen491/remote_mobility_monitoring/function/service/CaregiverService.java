@@ -20,6 +20,8 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCareg
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -139,6 +141,33 @@ public class CaregiverService {
 
         return GetAllPatientsResponseBody.builder()
                 .patients(patients.stream().map(PatientSerialization::fromPatient).collect(Collectors.toList()))
+                .build();
+    }
+
+    /**
+     * Updates a Caregiver.
+     *
+     * @param body The request body
+     * @return {@link UpdateCaregiverResponseBody}
+     * @throws DuplicateRecordException If record with the given email already exists
+     * @throws RecordDoesNotExistException If record with the given id does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of caregiverId, email, firstName, lastName,
+     *                              title, or phoneNumber are empty
+     */
+    public UpdateCaregiverResponseBody updateCaregiver(UpdateCaregiverRequestBody body) {
+        Validator.validateUpdateCaregiverRequestBody(body);
+
+        Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
+        caregiver.setEmail(body.getEmail());
+        caregiver.setFirstName(body.getFirstName());
+        caregiver.setLastName(body.getLastName());
+        caregiver.setTitle(body.getTitle());
+        caregiver.setPhoneNumber(body.getPhoneNumber());
+        caregiverDao.update(caregiver);
+
+        return UpdateCaregiverResponseBody.builder()
+                .message("OK")
                 .build();
     }
 

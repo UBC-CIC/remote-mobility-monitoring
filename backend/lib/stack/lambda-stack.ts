@@ -22,11 +22,13 @@ export class LambdaStack extends cdk.Stack {
   public readonly removePatientFunction: lambda.Function;
   public readonly getCaregiverFunction: lambda.Function;
   public readonly getAllPatientsFunction: lambda.Function;
+  public readonly updateCaregiverFunction: lambda.Function;
   public readonly deleteCaregiverFunction: lambda.Function;
   public readonly createPatientFunction: lambda.Function;
   public readonly updatePatientDeviceFunction: lambda.Function;
   public readonly verifyPatientFunction: lambda.Function;
   public readonly getPatientFunction: lambda.Function;
+  public readonly updatePatientFunction: lambda.Function;
   public readonly deletePatientFunction: lambda.Function;
 
   constructor(scope: cdk.App, id: string, props: LambdaStackProps) {
@@ -80,12 +82,14 @@ export class LambdaStack extends cdk.Stack {
     this.removePatientFunction = this.createRemovePatientFunction();
     this.getCaregiverFunction = this.createGetCaregiverFunction();
     this.getAllPatientsFunction = this.createGetAllPatientsFunction();
+    this.updateCaregiverFunction = this.createUpdateCaregiverFunction();
     this.deleteCaregiverFunction = this.createDeleteCaregiverFunction();
 
     this.createPatientFunction = this.createCreatePatientFunction();
     this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction();
     this.verifyPatientFunction = this.createVerifyPatientFunction();
     this.getPatientFunction = this.createGetPatientFunction();
+    this.updatePatientFunction = this.createUpdatePatientFunction();
     this.deletePatientFunction = this.createDeletePatientFunction();
   }
 
@@ -149,6 +153,16 @@ export class LambdaStack extends cdk.Stack {
     return lambdaFunction;
   }
 
+  private createUpdateCaregiverFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'UpdateCaregiverFunction',
+      LambdaStack.createLambdaFunctionProps('UpdateCaregiverFunction', 'caregiver.UpdateCaregiverHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction;
+  }
+
   private createDeleteCaregiverFunction(): lambda.Function {
     const lambdaFunction = new lambda.Function(
       this,
@@ -201,6 +215,16 @@ export class LambdaStack extends cdk.Stack {
       this,
       'GetPatientFunction',
       LambdaStack.createLambdaFunctionProps('GetPatientFunction', 'patient.GetPatientHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction;
+  }
+
+  private createUpdatePatientFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'UpdatePatientFunction',
+      LambdaStack.createLambdaFunctionProps('UpdatePatientFunction', 'patient.UpdatePatientHandler', this.lambdaRole),
     )
 
     return lambdaFunction;
