@@ -5,6 +5,7 @@ import { CognitoStack } from './stack/cognito-stack';
 import { TimestreamStack } from './stack/timestream-stack';
 import { ApiGatewayStack } from './stack/apigateway-stack';
 
+// TODO: create dev stage
 const app = new App();
 new CognitoStack(app, 'RemoteMobilityMonitoringCognitoStack');
 new TimestreamStack(app, 'RemoteMobilityMonitoringTimestreamStack');
@@ -15,6 +16,7 @@ const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', 
 new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
   defaultFunction: lambdaStack.defaultFunction,
   getOrganizationFunction: lambdaStack.getOrganizationFunction,
+  getAdminFunction: lambdaStack.getAdminFunction,
   createCaregiverFunction: lambdaStack.createCaregiverFunction,
   addPatientFunction: lambdaStack.addPatientFunction,
   removePatientFunction: lambdaStack.removePatientFunction,

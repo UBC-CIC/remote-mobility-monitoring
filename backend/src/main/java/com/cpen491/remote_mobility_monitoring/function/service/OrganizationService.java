@@ -2,11 +2,13 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody.AdminSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody.CaregiverSerialization;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +34,12 @@ public class OrganizationService {
         Validator.validateGetOrganizationRequestBody(body);
 
         Organization organization = organizationDao.findById(body.getOrganizationId());
+        List<Admin> admins = organizationDao.findAllAdmins(body.getOrganizationId());
         List<Caregiver> caregivers = organizationDao.findAllCaregivers(body.getOrganizationId());
-        // TODO: get all admins as well
 
         return GetOrganizationResponseBody.builder()
                 .organizationName(organization.getName())
+                .admins(admins.stream().map(AdminSerialization::fromAdmin).collect(Collectors.toList()))
                 .caregivers(caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList()))
                 .build();
     }

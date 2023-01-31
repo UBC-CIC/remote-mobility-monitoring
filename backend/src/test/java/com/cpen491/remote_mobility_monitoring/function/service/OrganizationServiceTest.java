@@ -1,10 +1,12 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody.AdminSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody.CaregiverSerialization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_ORGANIZATION_NULL_ERROR_MESSAGE;
@@ -39,6 +42,8 @@ public class OrganizationServiceTest {
     private static final String ORGANIZATION_NAME = "Organization1";
     private static final String CAREGIVER_ID1 = "car-1";
     private static final String CAREGIVER_ID2 = "car-2";
+    private static final String ADMIN_ID1 = "adm-1";
+    private static final String ADMIN_ID2 = "adm-2";
     private static final String EMAIL = "jackjackson@email.com";
     private static final String TITLE = "caregiver";
     private static final String FIRST_NAME = "Jack";
@@ -57,6 +62,12 @@ public class OrganizationServiceTest {
     @Test
     public void testGetOrganization_HappyCase() {
         when(organizationDao.findById(anyString())).thenReturn(buildOrganizationDefault());
+        Admin admin1 = buildAdminDefault();
+        Admin admin2 = buildAdminDefault();
+        admin2.setPid(ADMIN_ID2);
+        admin2.setSid(ADMIN_ID2);
+        List<Admin> admins = Arrays.asList(admin1, admin2);
+        when(organizationDao.findAllAdmins(anyString())).thenReturn(admins);
         Caregiver caregiver1 = buildCaregiverDefault();
         Caregiver caregiver2 = buildCaregiverDefault();
         caregiver2.setPid(CAREGIVER_ID2);
@@ -68,8 +79,10 @@ public class OrganizationServiceTest {
         GetOrganizationResponseBody responseBody = cut.getOrganization(requestBody);
 
         assertEquals(ORGANIZATION_NAME, responseBody.getOrganizationName());
-        List<CaregiverSerialization> expected = caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList());
-        assertThat(responseBody.getCaregivers()).containsExactlyInAnyOrderElementsOf(expected);
+        List<AdminSerialization> expectedAdmins = admins.stream().map(AdminSerialization::fromAdmin).collect(Collectors.toList());
+        assertThat(responseBody.getAdmins()).containsExactlyInAnyOrderElementsOf(expectedAdmins);
+        List<CaregiverSerialization> expectedCaregivers = caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList());
+        assertThat(responseBody.getCaregivers()).containsExactlyInAnyOrderElementsOf(expectedCaregivers);
     }
 
     @Test
@@ -117,6 +130,10 @@ public class OrganizationServiceTest {
 
     private static Organization buildOrganizationDefault() {
         return buildOrganization(ORGANIZATION_ID, ORGANIZATION_ID, ORGANIZATION_NAME);
+    }
+
+    private static Admin buildAdminDefault() {
+        return buildAdmin(ADMIN_ID1, ADMIN_ID2, EMAIL, FIRST_NAME, LAST_NAME);
     }
 
     private static Caregiver buildCaregiverDefault() {

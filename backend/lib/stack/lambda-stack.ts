@@ -17,6 +17,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly lambdaRole: iam.Role
   public readonly defaultFunction: lambda.Function;
   public readonly getOrganizationFunction: lambda.Function;
+  public readonly getAdminFunction: lambda.Function;
   public readonly createCaregiverFunction: lambda.Function;
   public readonly addPatientFunction: lambda.Function;
   public readonly removePatientFunction: lambda.Function;
@@ -78,6 +79,8 @@ export class LambdaStack extends cdk.Stack {
 
     this.getOrganizationFunction = this.createGetOrganizationFunction();
 
+    this.getAdminFunction = this.createGetAdminFunction();
+
     this.createCaregiverFunction = this.createCreateCaregiverFunction();
     this.addPatientFunction = this.createAddPatientFunction();
     this.removePatientFunction = this.createRemovePatientFunction();
@@ -100,6 +103,16 @@ export class LambdaStack extends cdk.Stack {
       this,
       'GetOrganizationFunction',
       LambdaStack.createLambdaFunctionProps('GetOrganizationFunction', 'organization.GetOrganizationHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction;
+  }
+
+  private createGetAdminFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'GetAdminFunction',
+      LambdaStack.createLambdaFunctionProps('GetAdminFunction', 'admin.GetAdminHandler', this.lambdaRole),
     )
 
     return lambdaFunction;
