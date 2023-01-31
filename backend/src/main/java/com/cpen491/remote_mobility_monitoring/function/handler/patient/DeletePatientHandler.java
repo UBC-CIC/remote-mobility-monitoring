@@ -11,9 +11,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePati
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateInternalServerErrorResponse;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateResponse;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.StatusCode;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.process;
 
 public class DeletePatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>  {
     private final PatientService patientService;
@@ -26,18 +24,14 @@ public class DeletePatientHandler implements RequestHandler<APIGatewayProxyReque
     }
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-        try {
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        return process((request) -> {
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             DeletePatientRequestBody requestBody = DeletePatientRequestBody.builder()
                     .patientId(patientId)
                     .build();
             DeletePatientResponseBody responseBody = patientService.deletePatient(requestBody);
-            return generateResponse(StatusCode.OK, gson.toJson(responseBody));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            return generateResponse(StatusCode.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return generateInternalServerErrorResponse();
-        }
+            return gson.toJson(responseBody);
+        }, requestEvent);
     }
 }

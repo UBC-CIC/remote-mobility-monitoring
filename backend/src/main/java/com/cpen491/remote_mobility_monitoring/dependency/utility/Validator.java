@@ -13,6 +13,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.organization.CreateOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
@@ -59,6 +60,7 @@ public class Validator {
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
     public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
+    public static final String CREATE_ORGANIZATION_NULL_ERROR_MESSAGE = "Create organization request body must not be null";
     public static final String GET_ORGANIZATION_NULL_ERROR_MESSAGE = "Get organization request body must not be null";
     public static final String CREATE_ADMIN_NULL_ERROR_MESSAGE = "Create admin request body must not be null";
     public static final String GET_ADMIN_NULL_ERROR_MESSAGE = "Get admin request body must not be null";
@@ -195,6 +197,11 @@ public class Validator {
         validateAuthCode(patient.getAuthCode());
         validateAuthCodeTimestamp(patient.getAuthCodeTimestamp());
         validateVerified(patient.getVerified());
+    }
+
+    public static void validateCreateOrganizationRequestBody(CreateOrganizationRequestBody body) {
+        Validate.notNull(body, CREATE_ORGANIZATION_NULL_ERROR_MESSAGE);
+        validateName(body.getOrganizationName());
     }
 
     public static void validateGetOrganizationRequestBody(GetOrganizationRequestBody body) {

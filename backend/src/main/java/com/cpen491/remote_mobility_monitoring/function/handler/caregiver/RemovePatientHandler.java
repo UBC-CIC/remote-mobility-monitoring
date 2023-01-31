@@ -11,9 +11,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePa
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateInternalServerErrorResponse;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateResponse;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.StatusCode;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.process;
 
 public class RemovePatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final CaregiverService caregiverService;
@@ -26,8 +24,8 @@ public class RemovePatientHandler implements RequestHandler<APIGatewayProxyReque
     }
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-        try {
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        return process((request) -> {
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             RemovePatientRequestBody requestBody = RemovePatientRequestBody.builder()
@@ -35,11 +33,7 @@ public class RemovePatientHandler implements RequestHandler<APIGatewayProxyReque
                     .patientId(patientId)
                     .build();
             RemovePatientResponseBody responseBody = caregiverService.removePatient(requestBody);
-            return generateResponse(StatusCode.OK, gson.toJson(responseBody));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            return generateResponse(StatusCode.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return generateInternalServerErrorResponse();
-        }
+            return gson.toJson(responseBody);
+        }, requestEvent);
     }
 }
