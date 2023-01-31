@@ -10,7 +10,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePati
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.process;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
 // TODO: decide which logger to use
 public class CreatePatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -25,7 +25,7 @@ public class CreatePatientHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        return process((request) -> {
+        return processApiGatewayRequest((request) -> {
             CreatePatientRequestBody requestBody = gson.fromJson(request.getBody(), CreatePatientRequestBody.class);
             CreatePatientResponseBody responseBody = patientService.createPatient(requestBody);
             return gson.toJson(responseBody);

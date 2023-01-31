@@ -11,7 +11,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminResp
 import com.cpen491.remote_mobility_monitoring.function.service.AdminService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.process;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
 public class GetAdminHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final AdminService adminService;
@@ -25,7 +25,7 @@ public class GetAdminHandler implements RequestHandler<APIGatewayProxyRequestEve
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        return process((request) -> {
+        return processApiGatewayRequest((request) -> {
             String adminId = request.getPathParameters().get(Const.ADMIN_ID_NAME);
             GetAdminRequestBody requestBody = GetAdminRequestBody.builder()
                     .adminId(adminId)

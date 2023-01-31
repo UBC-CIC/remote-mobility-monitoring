@@ -6,6 +6,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public class HandlerUtils {
@@ -25,25 +26,37 @@ public class HandlerUtils {
 
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "Sorry something went wrong";
 
-    public static APIGatewayProxyResponseEvent process(Function<APIGatewayProxyRequestEvent, String> func, APIGatewayProxyRequestEvent request) {
+    public static APIGatewayProxyResponseEvent processApiGatewayRequest(Function<APIGatewayProxyRequestEvent, String> func,
+                                                                        APIGatewayProxyRequestEvent request) {
         try {
             String responseBody = func.apply(request);
-            return generateResponse(StatusCode.OK, responseBody);
+            return generateApiGatewayResponse(StatusCode.OK, responseBody);
         } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
-            return generateResponse(StatusCode.BAD_REQUEST, e.getMessage());
+            return generateApiGatewayResponse(StatusCode.BAD_REQUEST, e.getMessage());
         } catch (RecordDoesNotExistException e) {
-            return generateResponse(StatusCode.NOT_FOUND, e.getMessage());
+            return generateApiGatewayResponse(StatusCode.NOT_FOUND, e.getMessage());
         } catch (InvalidAuthCodeException e) {
-            return generateResponse(StatusCode.UNAUTHORIZED, e.getMessage());
+            return generateApiGatewayResponse(StatusCode.UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
             // TODO: log this
-            return generateResponse(StatusCode.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);
+            return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);
         }
     }
 
-    private static APIGatewayProxyResponseEvent generateResponse(StatusCode statusCode, String body) {
+    private static APIGatewayProxyResponseEvent generateApiGatewayResponse(StatusCode statusCode, String body) {
         return new APIGatewayProxyResponseEvent()
                 .withStatusCode(statusCode.code)
                 .withBody(body);
+    }
+
+    public static void processGenericRequest(Function<Map<String, String>, String> func, Map<String, String> request) {
+        String message;
+        try {
+            message = func.apply(request);
+        } catch (Exception e) {
+            message = e.getMessage();
+        }
+        // TODO: log this instead
+        System.out.println(message);
     }
 }

@@ -16,7 +16,9 @@ export class LambdaStack extends cdk.Stack {
 
   public readonly lambdaRole: iam.Role
   public readonly defaultFunction: lambda.Function;
+  public readonly createOrganizationFunction: lambda.Function;
   public readonly getOrganizationFunction: lambda.Function;
+  public readonly createAdminFunction: lambda.Function;
   public readonly getAdminFunction: lambda.Function;
   public readonly createCaregiverFunction: lambda.Function;
   public readonly addPatientFunction: lambda.Function;
@@ -77,8 +79,10 @@ export class LambdaStack extends cdk.Stack {
       handler: 'index.handler',
     });
 
+    this.createOrganizationFunction = this.createCreateOrganizationFunction();
     this.getOrganizationFunction = this.createGetOrganizationFunction();
 
+    this.createAdminFunction = this.createCreateAdminFunction();
     this.getAdminFunction = this.createGetAdminFunction();
 
     this.createCaregiverFunction = this.createCreateCaregiverFunction();
@@ -98,11 +102,31 @@ export class LambdaStack extends cdk.Stack {
     this.deletePatientFunction = this.createDeletePatientFunction();
   }
 
+  private createCreateOrganizationFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'CreateOrganizationFunction',
+      LambdaStack.createLambdaFunctionProps('CreateOrganizationFunction', 'organization.CreateOrganizationHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction;
+  }
+
   private createGetOrganizationFunction(): lambda.Function {
     const lambdaFunction = new lambda.Function(
       this,
       'GetOrganizationFunction',
       LambdaStack.createLambdaFunctionProps('GetOrganizationFunction', 'organization.GetOrganizationHandler', this.lambdaRole),
+    )
+
+    return lambdaFunction;
+  }
+
+  private createCreateAdminFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'CreateAdminFunction',
+      LambdaStack.createLambdaFunctionProps('CreateAdminFunction', 'admin.CreateAdminHandler', this.lambdaRole),
     )
 
     return lambdaFunction;

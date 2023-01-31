@@ -11,7 +11,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOr
 import com.cpen491.remote_mobility_monitoring.function.service.OrganizationService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.process;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
 public class GetOrganizationHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final OrganizationService organizationService;
@@ -25,7 +25,7 @@ public class GetOrganizationHandler implements RequestHandler<APIGatewayProxyReq
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        return process((request) -> {
+        return processApiGatewayRequest((request) -> {
             String organizationId = request.getPathParameters().get(Const.ORGANIZATION_ID_NAME);
             GetOrganizationRequestBody requestBody = GetOrganizationRequestBody.builder()
                     .organizationId(organizationId)

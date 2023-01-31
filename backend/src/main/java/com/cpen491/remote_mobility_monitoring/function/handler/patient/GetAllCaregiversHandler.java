@@ -11,7 +11,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCare
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.process;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
 public class GetAllCaregiversHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final PatientService patientService;
@@ -25,7 +25,7 @@ public class GetAllCaregiversHandler implements RequestHandler<APIGatewayProxyRe
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        return process((request) -> {
+        return processApiGatewayRequest((request) -> {
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             GetAllCaregiversRequestBody requestBody = GetAllCaregiversRequestBody.builder()
                     .patientId(patientId)

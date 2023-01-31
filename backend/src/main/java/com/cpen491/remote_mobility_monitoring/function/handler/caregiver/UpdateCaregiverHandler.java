@@ -11,7 +11,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCa
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.process;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
 public class UpdateCaregiverHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final CaregiverService caregiverService;
@@ -25,7 +25,7 @@ public class UpdateCaregiverHandler implements RequestHandler<APIGatewayProxyReq
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        return process((request) -> {
+        return processApiGatewayRequest((request) -> {
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             UpdateCaregiverRequestBody requestBody = gson.fromJson(request.getBody(), UpdateCaregiverRequestBody.class);
             requestBody.setCaregiverId(caregiverId);
