@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import HealthKit
 
 struct Metric: Hashable {
     var name: String
@@ -15,14 +16,13 @@ struct Metric: Hashable {
 }
 
 struct MobilityView: View {
-    // These metrics are dummy data. They will be fetched from HealthKit in the next ticket
-    var metrics = [
-        Metric(name: "Step length", lastUpdated: "2022-12-24", value: "10 cms", logo: "StepLength"),
-        Metric(name: "Double support time", lastUpdated: "2022-12-24", value: "20 mins", logo: "DoubleSupportTime"),
-        Metric(name: "Walking speed", lastUpdated: "2022-12-24", value: "20 km/h", logo: "WalkingSpeed"),
-        Metric(name: "Walking asymmetry", lastUpdated: "2022-12-24", value: "20°", logo: "WalkingAsymmetry"),
-        Metric(name: "Distance walked", lastUpdated: "2022-12-24", value: "20 kms", logo: "DistanceWalked")
-    ];
+    let healthStore = HKHealthStore()
+    
+    var metrics = [Metric]()
+    
+    init() {
+        self.requestAuthorization()
+    }
     
     var body: some View {
         VStack(spacing: 50) {
@@ -66,6 +66,25 @@ struct MobilityView: View {
         }
         .padding(.horizontal, 32)
     }
+    
+    func requestAuthorization() {
+        let mobilityDataTypes: Set<HKObjectType> = [
+            HKObjectType.quantityType(forIdentifier: .stepCount)!,
+            HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
+            HKObjectType.quantityType(forIdentifier: .flightsClimbed)!,
+            HKObjectType.quantityType(forIdentifier: .walkingHeartRateAverage)!,
+            HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!
+        ]
+        
+        healthStore.requestAuthorization(toShare: nil, read: mobilityDataTypes) { (success, error) in
+            if success {
+                // Fetch mobility metrics data from HealthKit
+                // Update self.metrics with fetched data
+            } else {
+                print("Error requesting authorization: \(error?.localizedDescription ?? "")")
+            }
+        }
+    }
 }
 
 struct MobilityView_Previews: PreviewProvider {
@@ -73,3 +92,5 @@ struct MobilityView_Previews: PreviewProvider {
         MobilityView()
     }
 }
+
+

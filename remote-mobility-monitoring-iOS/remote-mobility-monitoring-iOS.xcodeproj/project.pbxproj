@@ -12,6 +12,7 @@
 		228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49C7296CB6510046DFD4 /* Assets.xcassets */; };
 		228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */; };
 		228B49D2296CB79A0046DFD4 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49D1296CB79A0046DFD4 /* RegisterView.swift */; };
+		22A771112989097600BB170A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22A771102989097600BB170A /* HealthKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,8 @@
 		228B49C7296CB6510046DFD4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		228B49D1296CB79A0046DFD4 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
+		22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "remote-mobility-monitoring-iOS.entitlements"; sourceTree = "<group>"; };
+		22A771102989097600BB170A /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -28,6 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22A771112989097600BB170A /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -39,6 +43,7 @@
 			children = (
 				228B49C2296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */,
 				228B49C1296CB64C0046DFD4 /* Products */,
+				22A7710F2989097600BB170A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -53,6 +58,7 @@
 		228B49C2296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */,
 				228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */,
 				227547B82980BD5100D12030 /* MobilityView.swift */,
 				228B49D1296CB79A0046DFD4 /* RegisterView.swift */,
@@ -68,6 +74,14 @@
 				228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		22A7710F2989097600BB170A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				22A771102989097600BB170A /* HealthKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -270,11 +284,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "remote-mobility-monitoring-iOS/remote-mobility-monitoring-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"remote-mobility-monitoring-iOS/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your mobility metrics and share with your healthcare providers.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -298,11 +314,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "remote-mobility-monitoring-iOS/remote-mobility-monitoring-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"remote-mobility-monitoring-iOS/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your mobility metrics and share with your healthcare providers.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
