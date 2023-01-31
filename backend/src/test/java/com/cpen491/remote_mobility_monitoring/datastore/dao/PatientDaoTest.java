@@ -247,9 +247,8 @@ public class PatientDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindAllCaregivers_WHEN_PatientRecordDoesNotExist_THEN_ReturnEmptyList() {
-        List<Caregiver> caregivers = cut.findAllCaregivers(PID);
-        assertThat(caregivers).isEmpty();
+    public void testFindAllCaregivers_WHEN_PatientRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        assertThatThrownBy(() -> cut.findAllCaregivers(PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test

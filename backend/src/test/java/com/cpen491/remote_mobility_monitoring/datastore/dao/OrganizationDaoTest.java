@@ -197,9 +197,8 @@ public class OrganizationDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindAllAdmins_WHEN_OrganizationRecordDoesNotExist_THEN_ReturnEmptyList() {
-        List<Admin> admins = cut.findAllAdmins(PID);
-        assertThat(admins).isEmpty();
+    public void testFindAllAdmins_WHEN_OrganizationRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        assertThatThrownBy(() -> cut.findAllAdmins(PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
@@ -241,9 +240,8 @@ public class OrganizationDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindAllCaregivers_WHEN_OrganizationRecordDoesNotExist_THEN_ReturnEmptyList() {
-        List<Caregiver> caregivers = cut.findAllCaregivers(PID);
-        assertThat(caregivers).isEmpty();
+    public void testFindAllCaregivers_WHEN_OrganizationRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        assertThatThrownBy(() -> cut.findAllCaregivers(PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test

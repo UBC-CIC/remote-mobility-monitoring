@@ -66,6 +66,7 @@ public class CaregiverDao {
      * @param patientId The id of the Patient record
      * @param caregiverId The id of the Caregiver record
      * @return {@link Boolean}
+     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
      */
@@ -73,6 +74,9 @@ public class CaregiverDao {
         log.info("Checking that Caregiver [{}] has Patient [{}]", caregiverId, patientId);
         Validator.validatePatientId(patientId);
         Validator.validateCaregiverId(caregiverId);
+
+        patientDao.findById(patientId);
+        findById(caregiverId);
 
         GetItemResponse response = genericDao.findByPrimaryKey(caregiverId, patientId);
         return response.hasItem();
@@ -96,7 +100,8 @@ public class CaregiverDao {
         Patient patient = patientDao.findById(patientId);
         Caregiver caregiver = findById(caregiverId);
 
-        if (hasPatient(patientId, caregiverId)) {
+        GetItemResponse response = genericDao.findByPrimaryKey(caregiverId, patientId);
+        if (response.hasItem()) {
             log.error("Patient [{}] already associated with Caregiver [{}]", patientId, caregiverId);
             throw new DuplicateRecordException("Patient/Caregiver association", patientId + ":" + caregiverId);
         }
@@ -187,12 +192,15 @@ public class CaregiverDao {
      *
      * @param caregiverId The id of the Caregiver record
      * @return {@link Organization}
+     * @throws RecordDoesNotExistException If record with the given caregiverId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty or invalid
      */
     public Organization findOrganization(String caregiverId) {
         log.info("Finding Organization of Caregiver [{}]", caregiverId);
         Validator.validateCaregiverId(caregiverId);
+
+        findById(caregiverId);
 
         QueryResponse response = genericDao
                 .findAllAssociationsOnSidIndex(caregiverId, OrganizationTable.ID_PREFIX);
@@ -210,12 +218,15 @@ public class CaregiverDao {
      *
      * @param caregiverId The id of the Caregiver record
      * @return {@link List}
+     * @throws RecordDoesNotExistException If record with the given caregiverId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty or invalid
      */
     public List<Patient> findAllPatients(String caregiverId) {
         log.info("Finding all Patient records of Caregiver [{}]", caregiverId);
         Validator.validateCaregiverId(caregiverId);
+
+        findById(caregiverId);
 
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociations(caregiverId, PatientTable.ID_PREFIX).items();

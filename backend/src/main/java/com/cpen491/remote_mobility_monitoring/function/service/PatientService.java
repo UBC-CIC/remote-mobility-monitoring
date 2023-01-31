@@ -163,6 +163,7 @@ public class PatientService {
      *
      * @param body The request body
      * @return {@link GetAllCaregiversResponseBody}
+     * @throws RecordDoesNotExistException If Patient record with the given patientId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
      */

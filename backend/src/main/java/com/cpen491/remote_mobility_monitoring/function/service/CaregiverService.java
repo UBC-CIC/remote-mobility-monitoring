@@ -100,7 +100,7 @@ public class CaregiverService {
     }
 
     /**
-     * Gets the Caregiver specified by caregiverId.
+     * Gets the Caregiver specified by caregiverId and its Organization.
      *
      * @param body The request body
      * @return {@link GetCaregiverResponseBody}
@@ -131,6 +131,7 @@ public class CaregiverService {
      *
      * @param body The request body
      * @return {@link GetAllPatientsResponseBody}
+     * @throws RecordDoesNotExistException If Caregiver record with the given caregiverId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty
      */

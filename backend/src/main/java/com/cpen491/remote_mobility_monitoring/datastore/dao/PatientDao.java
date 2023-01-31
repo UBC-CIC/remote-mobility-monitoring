@@ -115,13 +115,15 @@ public class PatientDao {
      *
      * @param patientId The id of the Patient record
      * @return {@link List}
+     * @throws RecordDoesNotExistException If record with the given patientId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty or invalid
      */
     public List<Caregiver> findAllCaregivers(String patientId) {
         log.info("Finding all Caregiver records caring for Patient [{}]", patientId);
         Validator.validatePatientId(patientId);
-        // TODO: throw record does not exist exception if Patient doesn't exist, same for other DAOs
+
+        findById(patientId);
 
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociationsOnSidIndex(patientId, CaregiverTable.ID_PREFIX).items();
