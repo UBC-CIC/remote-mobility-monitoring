@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.function;
 
 import com.cpen491.remote_mobility_monitoring.function.module.DatastoreModule;
+import com.cpen491.remote_mobility_monitoring.function.module.EnvironmentModule;
 import com.cpen491.remote_mobility_monitoring.function.module.ServiceModule;
 import com.cpen491.remote_mobility_monitoring.function.module.UtilityModule;
 import com.cpen491.remote_mobility_monitoring.function.service.AdminService;
@@ -14,6 +15,7 @@ import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = {
+        EnvironmentModule.class,
         DatastoreModule.class,
         ServiceModule.class,
         UtilityModule.class

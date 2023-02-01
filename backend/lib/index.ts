@@ -3,33 +3,47 @@ import { DynamoDbStack } from './stack/dynamodb-stack';
 import { LambdaStack } from './stack/lambda-stack';
 import { CognitoStack } from './stack/cognito-stack';
 import { TimestreamStack } from './stack/timestream-stack';
-import { ApiGatewayStack } from './stack/apigateway-stack';
+import { ApiGatewayStack, ApiGatewayStackProps } from './stack/apigateway-stack';
 
-// TODO: create dev stage
+const stages = ['dev', 'prod'];
+
 const app = new App();
-new CognitoStack(app, 'RemoteMobilityMonitoringCognitoStack');
-new TimestreamStack(app, 'RemoteMobilityMonitoringTimestreamStack');
-const dynamoDbStack = new DynamoDbStack(app, 'RemoteMobilityMonitoringDynamoStack');
-const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', {
-  table: dynamoDbStack.remoteMobilityMonitoringTable,
-});
-new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
-  defaultFunction: lambdaStack.defaultFunction,
-  getOrganizationFunction: lambdaStack.getOrganizationFunction,
-  getAdminFunction: lambdaStack.getAdminFunction,
-  createCaregiverFunction: lambdaStack.createCaregiverFunction,
-  addPatientFunction: lambdaStack.addPatientFunction,
-  removePatientFunction: lambdaStack.removePatientFunction,
-  getCaregiverFunction: lambdaStack.getCaregiverFunction,
-  getAllPatientsFunction: lambdaStack.getAllPatientsFunction,
-  updateCaregiverFunction: lambdaStack.updateCaregiverFunction,
-  deleteCaregiverFunction: lambdaStack.deleteCaregiverFunction,
-  createPatientFunction: lambdaStack.createPatientFunction,
-  updatePatientDeviceFunction: lambdaStack.updatePatientDeviceFunction,
-  verifyPatientFunction: lambdaStack.verifyPatientFunction,
-  getPatientFunction: lambdaStack.getPatientFunction,
-  getAllCaregiversFunction: lambdaStack.getAllCaregiversFunction,
-  updatePatientFunction: lambdaStack.updatePatientFunction,
-  deletePatientFunction: lambdaStack.deletePatientFunction,
-});
+stages.forEach((stage) => {
+  new TimestreamStack(app, `RemoteMobilityMonitoringTimestreamStack-${stage}`, {
+    stage: stage,
+  });
+  const dynamoDbStack = new DynamoDbStack(app, `RemoteMobilityMonitoringDynamoStack-${stage}`, {
+    stage: stage,
+  });
+  const lambdaStack = new LambdaStack(app, `RemoteMobilityMonitoringLambdaStack-${stage}`, {
+    stage: stage,
+    table: dynamoDbStack.remoteMobilityMonitoringTable,
+  });
+  const apigatewayStackProps: ApiGatewayStackProps = {
+    stage: stage,
+    defaultFunction: lambdaStack.defaultFunction,
+    getOrganizationFunction: lambdaStack.getOrganizationFunction,
+    getAdminFunction: lambdaStack.getAdminFunction,
+    createCaregiverFunction: lambdaStack.createCaregiverFunction,
+    addPatientFunction: lambdaStack.addPatientFunction,
+    removePatientFunction: lambdaStack.removePatientFunction,
+    getCaregiverFunction: lambdaStack.getCaregiverFunction,
+    getAllPatientsFunction: lambdaStack.getAllPatientsFunction,
+    updateCaregiverFunction: lambdaStack.updateCaregiverFunction,
+    deleteCaregiverFunction: lambdaStack.deleteCaregiverFunction,
+    createPatientFunction: lambdaStack.createPatientFunction,
+    updatePatientDeviceFunction: lambdaStack.updatePatientDeviceFunction,
+    verifyPatientFunction: lambdaStack.verifyPatientFunction,
+    getPatientFunction: lambdaStack.getPatientFunction,
+    getAllCaregiversFunction: lambdaStack.getAllCaregiversFunction,
+    updatePatientFunction: lambdaStack.updatePatientFunction,
+    deletePatientFunction: lambdaStack.deletePatientFunction,
+  }
+  if (stage === 'prod') {
+    new CognitoStack(app, `RemoteMobilityMonitoringCognitoStack-${stage}`);
+    new ApiGatewayStack(app, `RemoteMobilityMonitoringApiGatewayStack-${stage}`, apigatewayStackProps);
+  } else {
+    new ApiGatewayStack(app, `RemoteMobilityMonitoringApiGatewayStack-${stage}`, apigatewayStackProps);
+  }
+})
 app.synth();

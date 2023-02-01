@@ -42,6 +42,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Patie
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
 
 public class DaoTestParent {
+    private static final String TABLE_NAME = "REMOTE_MOBILITY_MONITORING";
     private static final String PORT = "8000";
     DynamoDbClient ddbClient;
     DynamoDbEnhancedClient ddbEnhancedClient;
@@ -58,7 +59,7 @@ public class DaoTestParent {
                     .dynamoDbClient(ddbClient)
                     .build();
 
-            genericDao = new GenericDao(ddbClient);
+            genericDao = new GenericDao(TABLE_NAME, ddbClient);
         }
     }
 
@@ -109,13 +110,13 @@ public class DaoTestParent {
                 .keySchema(keySchemaElements)
                 .globalSecondaryIndexes(globalSecondaryIndexes)
                 .billingMode(BillingMode.PAY_PER_REQUEST)
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build();
         ddbClient.createTable(request);
 
         // Wait until table is created
         DescribeTableRequest tableRequest = DescribeTableRequest.builder()
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build();
         DynamoDbWaiter ddbWaiter = ddbClient.waiter();
         ddbWaiter.waitUntilTableExists(tableRequest);
@@ -123,13 +124,13 @@ public class DaoTestParent {
 
     void teardownTable() {
         DeleteTableRequest request = DeleteTableRequest.builder()
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build();
         ddbClient.deleteTable(request);
 
         // Wait until table is deleted
         DescribeTableRequest tableRequest = DescribeTableRequest.builder()
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build();
         DynamoDbWaiter ddbWaiter = ddbClient.waiter();
         ddbWaiter.waitUntilTableNotExists(tableRequest);
@@ -152,28 +153,28 @@ public class DaoTestParent {
     void createOrganization(Organization organization) {
         ddbClient.putItem(PutItemRequest.builder()
                 .item(Organization.convertToMap(organization))
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build());
     }
 
     void createAdmin(Admin admin) {
         ddbClient.putItem(PutItemRequest.builder()
                 .item(Admin.convertToMap(admin))
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build());
     }
 
     void createCaregiver(Caregiver caregiver) {
         ddbClient.putItem(PutItemRequest.builder()
                 .item(Caregiver.convertToMap(caregiver))
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build());
     }
 
     void createPatient(Patient patient) {
         ddbClient.putItem(PutItemRequest.builder()
                 .item(Patient.convertToMap(patient))
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build());
     }
 
@@ -184,7 +185,7 @@ public class DaoTestParent {
 
         return ddbClient.getItem(GetItemRequest.builder()
                 .key(keyMap)
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build());
     }
 
@@ -195,7 +196,7 @@ public class DaoTestParent {
 
         ddbClient.putItem(PutItemRequest.builder()
                 .item(keyMap)
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(TABLE_NAME)
                 .build());
     }
 }

@@ -8,18 +8,17 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-// TODO: singleton
 public class DaoFactory {
     DynamoDbClient ddbClient;
     GenericDao genericDao;
 
-    public DaoFactory() {
-        this(createDynamoDbClient());
+    public DaoFactory(String tableName) {
+        this(tableName, createDynamoDbClient());
     }
 
-    public DaoFactory(DynamoDbClient ddbClient) {
+    public DaoFactory(String tableName, DynamoDbClient ddbClient) {
         this.ddbClient = ddbClient;
-        this.genericDao = new GenericDao(ddbClient);
+        this.genericDao = new GenericDao(tableName, ddbClient);
     }
 
     public OrganizationDao createOrganizationDao() {

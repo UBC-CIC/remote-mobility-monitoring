@@ -1,8 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import { formResourceName } from "../utility";
 
-interface ApiGatewayStackProps extends cdk.StackProps {
+export interface ApiGatewayStackProps extends cdk.StackProps {
+  readonly stage: string;
   readonly defaultFunction: lambda.Function;
   readonly getOrganizationFunction: lambda.Function;
   readonly getAdminFunction: lambda.Function;
@@ -26,7 +28,9 @@ export class ApiGatewayStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: ApiGatewayStackProps) {
     super(scope, id, props);
 
-    const api = new apigateway.LambdaRestApi(this, 'RemoteMobilityMonitoringApi', {
+    const restApiName = formResourceName('RemoteMobilityMonitoringApi', props.stage);
+    const api = new apigateway.LambdaRestApi(this, restApiName, {
+      restApiName: restApiName,
       handler: props.defaultFunction,
       proxy: false,
     });

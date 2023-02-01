@@ -28,7 +28,9 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtil
 @AllArgsConstructor
 public class GenericDao {
     @NonNull
-    DynamoDbClient ddbClient;
+    private String tableName;
+    @NonNull
+    private DynamoDbClient ddbClient;
 
     /**
      * Create or overwrites record.
@@ -38,7 +40,7 @@ public class GenericDao {
     public void put(Map<String, AttributeValue> item) {
         PutItemRequest request = PutItemRequest.builder()
                 .item(item)
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(tableName)
                 .build();
 
         ddbClient.putItem(request);
@@ -63,7 +65,7 @@ public class GenericDao {
 
         PutItemRequest request = PutItemRequest.builder()
                 .item(item)
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(tableName)
                 .build();
 
         ddbClient.putItem(request);
@@ -93,7 +95,7 @@ public class GenericDao {
 
         GetItemRequest request = GetItemRequest.builder()
                 .key(keyMap)
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(tableName)
                 .build();
 
         return ddbClient.getItem(request);
@@ -177,7 +179,7 @@ public class GenericDao {
                 .keyConditionExpression(expression)
                 .expressionAttributeNames(attributeNames)
                 .expressionAttributeValues(attributeValues)
-                .tableName(BaseTable.TABLE_NAME);
+                .tableName(tableName);
 
         QueryRequest request = index ? requestBuilder.indexName(indexName).build() : requestBuilder.build();
         return ddbClient.query(request);
@@ -203,13 +205,13 @@ public class GenericDao {
                 .keys(keyMaps)
                 .build();
         Map<String, KeysAndAttributes> requestItems = new HashMap<>();
-        requestItems.put(BaseTable.TABLE_NAME, keysAndAttributes);
+        requestItems.put(tableName, keysAndAttributes);
 
         BatchGetItemRequest request = BatchGetItemRequest.builder()
                 .requestItems(requestItems)
                 .build();
 
-        return ddbClient.batchGetItem(request).responses().get(BaseTable.TABLE_NAME);
+        return ddbClient.batchGetItem(request).responses().get(tableName);
     }
 
     /**
@@ -247,7 +249,7 @@ public class GenericDao {
 
         DeleteItemRequest request = DeleteItemRequest.builder()
                 .key(keyMap)
-                .tableName(BaseTable.TABLE_NAME)
+                .tableName(tableName)
                 .build();
 
         ddbClient.deleteItem(request);
