@@ -11,25 +11,62 @@ import HealthKit
 struct Metric: Hashable {
     var name: String
     var lastUpdated: String
-    var value: String
+    var value: HKQuantity
     var logo: String
 }
 
-struct MobilityView: View {
-    let healthStore = HKHealthStore()
-    
-    var metrics = [Metric]()
+class HealthStore: ObservableObject {
+    var healthStore: HKHealthStore?
+    var query: HKStatisticsQuery?
+    @Published var stepLength: HKQuantity?
+    @Published var metrics: [Metric] = []
     
     init() {
-        self.requestAuthorization()
+        if HKHealthStore.isHealthDataAvailable() {
+            healthStore = HKHealthStore()
+        }
     }
+
+    func setUpHealthStore() {
+        let typesToRead: Set = [HKQuantityType.quantityType(forIdentifier: .stepCount)!]
+        healthStore?.requestAuthorization(toShare: nil, read: typesToRead, completion: { success, error in
+            if success {
+                self.calculateStepLength()
+                self.updateMetrics()
+            }
+        })
+    }
+    
+    func calculateStepLength() {
+        guard let stepCount = HKObjectType.quantityType(forIdentifier: .stepCount) else {
+            fatalError("*** Unable to get the step count ***")
+        }
+        query = HKStatisticsQuery(quantityType: stepCount, quantitySamplePredicate: nil, options: .cumulativeSum) {
+            query, statistics, error in
+            DispatchQueue.main.async {
+                self.stepLength = statistics?.sumQuantity()
+                self.updateMetrics()
+                print("----> calculateStepLength: \(String(describing: self.stepLength))")
+            }
+        }
+        healthStore!.execute(query!)
+    }
+    
+    func updateMetrics() {
+        let stepLengthStandard = HKQuantity(unit: HKUnit(from: ""), doubleValue: 0.0)
+        metrics = [Metric(name: "Step Length", lastUpdated: "Today", value: stepLength ?? stepLengthStandard, logo: "StepLength")]
+    }
+}
+
+struct MobilityView: View {
+    @ObservedObject var healthStore = HealthStore()
     
     var body: some View {
         VStack(spacing: 50) {
             Text("Mobility")
                 .font(.largeTitle)
             VStack {
-                ForEach(metrics, id: \.self) { metric in
+                ForEach(healthStore.metrics, id: \.self) { metric in
                     GeometryReader { geo in
                         RoundedRectangle(cornerRadius: 25)
                             .fill(Color.white)
@@ -45,11 +82,13 @@ struct MobilityView: View {
                                         Text(metric.lastUpdated)
                                     }
                                     Spacer()
-                                    Text(metric.value)
+                                    Text("\(metric.value)")
                                 }
                             )
                     }
                 }
+            }.onAppear {
+                healthStore.setUpHealthStore()
             }
             
             Button(action: {
@@ -65,25 +104,6 @@ struct MobilityView: View {
             }
         }
         .padding(.horizontal, 32)
-    }
-    
-    func requestAuthorization() {
-        let mobilityDataTypes: Set<HKObjectType> = [
-            HKObjectType.quantityType(forIdentifier: .stepCount)!,
-            HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
-            HKObjectType.quantityType(forIdentifier: .flightsClimbed)!,
-            HKObjectType.quantityType(forIdentifier: .walkingHeartRateAverage)!,
-            HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!
-        ]
-        
-        healthStore.requestAuthorization(toShare: nil, read: mobilityDataTypes) { (success, error) in
-            if success {
-                // Fetch mobility metrics data from HealthKit
-                // Update self.metrics with fetched data
-            } else {
-                print("Error requesting authorization: \(error?.localizedDescription ?? "")")
-            }
-        }
     }
 }
 

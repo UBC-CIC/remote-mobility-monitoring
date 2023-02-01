@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import HealthKit
 
 @main
 struct remote_mobility_monitoring_iOSApp: App {
