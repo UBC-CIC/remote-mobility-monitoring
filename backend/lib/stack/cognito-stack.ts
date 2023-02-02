@@ -4,9 +4,11 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 export class CognitoStack extends cdk.Stack {
   private static CALLBACK_URLS = ['https://example.com/callback'];
   private static LOGOUT_URLS = ['https://example.com/logout'];
+  private static DOMAIN_PREFIX = process.env.COGNITO_DOMAIN_PREFIX || 'mobimon'; // Put domain in env when deploying, unless deploying to prod
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
-    public readonly userPoolDomain: cognito.UserPoolDomain;
+  public readonly userPoolDomain: cognito.UserPoolDomain;
+  public readonly userPoolAdminGroup: cognito.CfnUserPoolGroup;
 
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -31,8 +33,14 @@ export class CognitoStack extends cdk.Stack {
 
     this.userPoolDomain = this.userPool.addDomain('app-domain', {
       cognitoDomain: {
-        domainPrefix: 'mobimon'
+        domainPrefix: CognitoStack.DOMAIN_PREFIX
       }
+    });
+
+    this.userPoolAdminGroup = new cognito.CfnUserPoolGroup(this, 'RemoteMobilityMonitoringUserPoolAdminGroup', {
+      userPoolId: this.userPool.userPoolId,
+      groupName: 'Admin',
+      description: 'Admin group for Remote Mobility Monitoring',
     });
   }
 }
