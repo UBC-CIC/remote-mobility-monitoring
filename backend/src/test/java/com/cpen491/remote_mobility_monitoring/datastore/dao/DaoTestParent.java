@@ -5,7 +5,6 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import org.apache.commons.lang3.tuple.Pair;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
@@ -45,18 +44,13 @@ public class DaoTestParent {
     private static final String TABLE_NAME = "REMOTE_MOBILITY_MONITORING";
     private static final String PORT = "8000";
     DynamoDbClient ddbClient;
-    DynamoDbEnhancedClient ddbEnhancedClient;
     GenericDao genericDao;
 
     private void setupDynamoDbClients() {
-        if (ddbClient == null || ddbEnhancedClient == null) {
+        if (ddbClient == null) {
             ddbClient = DynamoDbClient.builder()
                     .region(Region.US_WEST_2)
                     .endpointOverride(URI.create("http://localhost:" + PORT))
-                    .build();
-
-            ddbEnhancedClient = DynamoDbEnhancedClient.builder()
-                    .dynamoDbClient(ddbClient)
                     .build();
 
             genericDao = new GenericDao(TABLE_NAME, ddbClient);
