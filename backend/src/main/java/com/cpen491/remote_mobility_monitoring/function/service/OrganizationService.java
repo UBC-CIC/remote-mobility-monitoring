@@ -15,10 +15,12 @@ import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOr
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody.CaregiverSerialization;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 public class OrganizationService {
     @NonNull
@@ -34,6 +36,7 @@ public class OrganizationService {
      * @throws NullPointerException Above 2 exceptions are thrown if organizationName is empty
      */
     public CreateOrganizationResponseBody createOrganization(CreateOrganizationRequestBody body) {
+        log.info("Creating Organization {}", body);
         Validator.validateCreateOrganizationRequestBody(body);
 
         Organization organization = Organization.builder()
@@ -56,6 +59,7 @@ public class OrganizationService {
      * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty
      */
     public GetOrganizationResponseBody getOrganization(GetOrganizationRequestBody body) {
+        log.info("Getting Organization {}", body);
         Validator.validateGetOrganizationRequestBody(body);
 
         Organization organization = organizationDao.findById(body.getOrganizationId());

@@ -27,6 +27,7 @@ public class RemovePatientHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Remove Patient request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
@@ -35,6 +36,7 @@ public class RemovePatientHandler implements RequestHandler<APIGatewayProxyReque
                     .patientId(patientId)
                     .build();
             RemovePatientResponseBody responseBody = caregiverService.removePatient(requestBody);
+            log.info("Responding to Remove Patient request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

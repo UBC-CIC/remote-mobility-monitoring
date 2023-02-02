@@ -43,7 +43,6 @@ public class HandlerUtils {
             log.error("Got {} error {}, responding with unauthorized", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
-            // TODO: log this
             log.error("Got {} error {} with cause {}, responding with internal server error",
                     e.getClass(), e.getMessage(), e.getCause());
             return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);

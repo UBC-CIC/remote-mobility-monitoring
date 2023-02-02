@@ -27,12 +27,14 @@ public class GetAllCaregiversHandler implements RequestHandler<APIGatewayProxyRe
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Get all Caregivers request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             GetAllCaregiversRequestBody requestBody = GetAllCaregiversRequestBody.builder()
                     .patientId(patientId)
                     .build();
             GetAllCaregiversResponseBody responseBody = patientService.getAllCaregivers(requestBody);
+            log.info("Responding to Get all Caregivers request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

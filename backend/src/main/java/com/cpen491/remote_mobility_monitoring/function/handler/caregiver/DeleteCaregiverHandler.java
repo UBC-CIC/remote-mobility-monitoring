@@ -27,12 +27,14 @@ public class DeleteCaregiverHandler implements RequestHandler<APIGatewayProxyReq
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Delete Caregiver request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             DeleteCaregiverRequestBody requestBody = DeleteCaregiverRequestBody.builder()
                     .caregiverId(caregiverId)
                     .build();
             DeleteCaregiverResponseBody responseBody = caregiverService.deleteCaregiver(requestBody);
+            log.info("Responding to Delete Caregiver request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

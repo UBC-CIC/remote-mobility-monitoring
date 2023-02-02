@@ -30,7 +30,6 @@ public class DatastoreModule {
     @Provides
     @Singleton
     public static DaoFactory daoFactory(@Named(DYNAMO_DB_TABLE_NAME) String tableName) {
-        // TODO: create own DynamoDbClient?
         return new DaoFactory(tableName);
     }
 

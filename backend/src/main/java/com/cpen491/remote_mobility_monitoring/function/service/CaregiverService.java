@@ -24,10 +24,12 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CaregiverService {
     @NonNull
@@ -45,6 +47,7 @@ public class CaregiverService {
      *                              title, phoneNumber, or organizationId are empty
      */
     public CreateCaregiverResponseBody createCaregiver(CreateCaregiverRequestBody body) {
+        log.info("Creating Caregiver {}", body);
         Validator.validateCreateCaregiverRequestBody(body);
 
         Caregiver caregiver = Caregiver.builder()
@@ -72,6 +75,7 @@ public class CaregiverService {
      * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
      */
     public AddPatientResponseBody addPatient(AddPatientRequestBody body) {
+        log.info("Adding Patient {}", body);
         Validator.validateAddPatientRequestBody(body);
 
         caregiverDao.addPatient(body.getPatientId(), body.getCaregiverId());
@@ -90,6 +94,7 @@ public class CaregiverService {
      * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
      */
     public RemovePatientResponseBody removePatient(RemovePatientRequestBody body) {
+        log.info("Removing Patient {}", body);
         Validator.validateRemovePatientRequestBody(body);
 
         caregiverDao.removePatient(body.getPatientId(), body.getCaregiverId());
@@ -109,6 +114,7 @@ public class CaregiverService {
      * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty
      */
     public GetCaregiverResponseBody getCaregiver(GetCaregiverRequestBody body) {
+        log.info("Getting Caregiver {}", body);
         Validator.validateGetCaregiverRequestBody(body);
 
         Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
@@ -136,6 +142,7 @@ public class CaregiverService {
      * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty
      */
     public GetAllPatientsResponseBody getAllPatients(GetAllPatientsRequestBody body) {
+        log.info("Getting all Patients {}", body);
         Validator.validateGetAllPatientsRequestBody(body);
 
         List<Patient> patients = caregiverDao.findAllPatients(body.getCaregiverId());
@@ -157,6 +164,7 @@ public class CaregiverService {
      *                              title, or phoneNumber are empty
      */
     public UpdateCaregiverResponseBody updateCaregiver(UpdateCaregiverRequestBody body) {
+        log.info("Updating Caregiver {}", body);
         Validator.validateUpdateCaregiverRequestBody(body);
 
         Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
@@ -181,6 +189,7 @@ public class CaregiverService {
      * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty
      */
     public DeleteCaregiverResponseBody deleteCaregiver(DeleteCaregiverRequestBody body) {
+        log.info("Deleting Caregiver {}", body);
         Validator.validateDeleteCaregiverRequestBody(body);
 
         caregiverDao.delete(body.getCaregiverId());

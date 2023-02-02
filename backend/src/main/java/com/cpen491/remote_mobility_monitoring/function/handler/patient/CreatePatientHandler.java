@@ -26,9 +26,11 @@ public class CreatePatientHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Create Patient request with body: {}", requestEvent.getBody());
         return processApiGatewayRequest((request) -> {
             CreatePatientRequestBody requestBody = gson.fromJson(request.getBody(), CreatePatientRequestBody.class);
             CreatePatientResponseBody responseBody = patientService.createPatient(requestBody);
+            log.info("Responding to Create Patient request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

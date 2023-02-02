@@ -27,12 +27,14 @@ public class DeletePatientHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Delete Patient request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             DeletePatientRequestBody requestBody = DeletePatientRequestBody.builder()
                     .patientId(patientId)
                     .build();
             DeletePatientResponseBody responseBody = patientService.deletePatient(requestBody);
+            log.info("Responding to Delete Patient request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

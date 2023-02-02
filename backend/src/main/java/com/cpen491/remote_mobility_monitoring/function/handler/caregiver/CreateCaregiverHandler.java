@@ -26,9 +26,11 @@ public class CreateCaregiverHandler implements RequestHandler<APIGatewayProxyReq
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Create Caregiver request with body: {}", requestEvent.getBody());
         return processApiGatewayRequest((request) -> {
             CreateCaregiverRequestBody requestBody = gson.fromJson(request.getBody(), CreateCaregiverRequestBody.class);
             CreateCaregiverResponseBody responseBody = caregiverService.createCaregiver(requestBody);
+            log.info("Responding to Create Caregiver request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

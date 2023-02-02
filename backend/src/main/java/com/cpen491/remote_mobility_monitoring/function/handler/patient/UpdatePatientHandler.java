@@ -27,11 +27,14 @@ public class UpdatePatientHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Update Patient request with path parameters: {} and body: {}",
+                requestEvent.getPathParameters(), requestEvent.getBody());
         return processApiGatewayRequest((request) -> {
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             UpdatePatientRequestBody requestBody = gson.fromJson(request.getBody(), UpdatePatientRequestBody.class);
             requestBody.setPatientId(patientId);
             UpdatePatientResponseBody responseBody = patientService.updatePatient(requestBody);
+            log.info("Responding to Update Patient request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

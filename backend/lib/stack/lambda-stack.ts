@@ -251,6 +251,9 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         'DYNAMO_DB_TABLE_NAME': this.dynamoDbTableName,
       },
+      currentVersionOptions: {
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      },
     });
     LambdaStack.enableSnapStart(lambdaFunction);
     return lambdaFunction;
@@ -262,6 +265,7 @@ export class LambdaStack extends cdk.Stack {
     };
   }
 
+  // TODO: delete previous lambda versions
   private createLambdaAlias(functionName: string, lambdaFunction: lambda.Function): lambda.Alias {
     const aliasName = `${functionName}Alias`;
     return new lambda.Alias(this, aliasName, {

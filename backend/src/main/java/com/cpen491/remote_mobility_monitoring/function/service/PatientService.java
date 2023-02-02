@@ -25,6 +25,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,7 +37,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtil
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.parseTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.secondsBetweenTimes;
 
-// TODO: logging
+@Slf4j
 @RequiredArgsConstructor
 public class PatientService {
     // TODO: make this configurable
@@ -58,6 +59,7 @@ public class PatientService {
      *                              dateOfBirth, or phoneNumber are empty
      */
     public CreatePatientResponseBody createPatient(CreatePatientRequestBody body) {
+        log.info("Creating Patient {}", body);
         Validator.validateCreatePatientRequestBody(body);
 
         Patient newPatient = Patient.builder()
@@ -88,6 +90,7 @@ public class PatientService {
      * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public UpdatePatientDeviceResponseBody updatePatientDevice(UpdatePatientDeviceRequestBody body) {
+        log.info("Updating Patient device {}", body);
         Validator.validateUpdatePatientDeviceRequestBody(body);
 
         Patient patient = patientDao.findById(body.getPatientId());
@@ -113,6 +116,7 @@ public class PatientService {
      *                              or deviceId are empty or invalid
      */
     public VerifyPatientResponseBody verifyPatient(VerifyPatientRequestBody body) {
+        log.info("Verifying Patient {}", body);
         Validator.validateVerifyPatientRequestBody(body);
 
         Patient patient = patientDao.findById(body.getPatientId());
@@ -144,6 +148,7 @@ public class PatientService {
      * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
      */
     public GetPatientResponseBody getPatient(GetPatientRequestBody body) {
+        log.info("Getting Patient {}", body);
         Validator.validateGetPatientRequestBody(body);
 
         Patient patient = patientDao.findById(body.getPatientId());
@@ -168,6 +173,7 @@ public class PatientService {
      * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
      */
     public GetAllCaregiversResponseBody getAllCaregivers(GetAllCaregiversRequestBody body) {
+        log.info("Getting all Caregivers {}", body);
         Validator.validateGetAllCaregiversRequestBody(body);
 
         List<Caregiver> caregivers = patientDao.findAllCaregivers(body.getPatientId());
@@ -189,6 +195,7 @@ public class PatientService {
      *                              or phoneNumber are empty
      */
     public UpdatePatientResponseBody updatePatient(UpdatePatientRequestBody body) {
+        log.info("Updating Patient {}", body);
         Validator.validateUpdatePatientRequestBody(body);
 
         Patient patient = patientDao.findById(body.getPatientId());
@@ -211,6 +218,7 @@ public class PatientService {
      * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
      */
     public DeletePatientResponseBody deletePatient(DeletePatientRequestBody body) {
+        log.info("Deleting Patient {}", body);
         Validator.validateDeletePatientRequestBody(body);
 
         patientDao.delete(body.getPatientId());
