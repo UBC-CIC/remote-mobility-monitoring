@@ -10,9 +10,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOr
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.OrganizationService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
+@Slf4j
 public class GetOrganizationHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final OrganizationService organizationService;
     private final Gson gson;
@@ -25,12 +27,14 @@ public class GetOrganizationHandler implements RequestHandler<APIGatewayProxyReq
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Get Organization request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String organizationId = request.getPathParameters().get(Const.ORGANIZATION_ID_NAME);
             GetOrganizationRequestBody requestBody = GetOrganizationRequestBody.builder()
                     .organizationId(organizationId)
                     .build();
             GetOrganizationResponseBody responseBody = organizationService.getOrganization(requestBody);
+            log.info("Responding to Get Organization request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

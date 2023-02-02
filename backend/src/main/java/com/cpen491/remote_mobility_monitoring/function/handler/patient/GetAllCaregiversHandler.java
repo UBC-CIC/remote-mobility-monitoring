@@ -10,9 +10,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCare
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
+@Slf4j
 public class GetAllCaregiversHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final PatientService patientService;
     private final Gson gson;
