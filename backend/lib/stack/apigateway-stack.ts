@@ -6,22 +6,22 @@ import { formResourceName } from "../utility";
 export interface ApiGatewayStackProps extends cdk.StackProps {
   readonly stage: string;
   readonly defaultFunction: lambda.Function;
-  readonly getOrganizationFunction: lambda.Function;
-  readonly getAdminFunction: lambda.Function;
-  readonly createCaregiverFunction: lambda.Function;
-  readonly addPatientFunction: lambda.Function;
-  readonly removePatientFunction: lambda.Function;
-  readonly getCaregiverFunction: lambda.Function;
-  readonly getAllPatientsFunction: lambda.Function;
-  readonly updateCaregiverFunction: lambda.Function;
-  readonly deleteCaregiverFunction: lambda.Function;
-  readonly createPatientFunction: lambda.Function;
-  readonly updatePatientDeviceFunction: lambda.Function;
-  readonly verifyPatientFunction: lambda.Function;
-  readonly getPatientFunction: lambda.Function;
-  readonly getAllCaregiversFunction: lambda.Function;
-  readonly updatePatientFunction: lambda.Function;
-  readonly deletePatientFunction: lambda.Function;
+  readonly getOrganizationFunction: lambda.Alias;
+  readonly getAdminFunction: lambda.Alias;
+  readonly createCaregiverFunction: lambda.Alias;
+  readonly addPatientFunction: lambda.Alias;
+  readonly removePatientFunction: lambda.Alias;
+  readonly getCaregiverFunction: lambda.Alias;
+  readonly getAllPatientsFunction: lambda.Alias;
+  readonly updateCaregiverFunction: lambda.Alias;
+  readonly deleteCaregiverFunction: lambda.Alias;
+  readonly createPatientFunction: lambda.Alias;
+  readonly updatePatientDeviceFunction: lambda.Alias;
+  readonly verifyPatientFunction: lambda.Alias;
+  readonly getPatientFunction: lambda.Alias;
+  readonly getAllCaregiversFunction: lambda.Alias;
+  readonly updatePatientFunction: lambda.Alias;
+  readonly deletePatientFunction: lambda.Alias;
 }
 
 export class ApiGatewayStack extends cdk.Stack {
@@ -86,7 +86,7 @@ export class ApiGatewayStack extends cdk.Stack {
     patient_id.addMethod('DELETE', deletePatientFunctionIntegration);
   }
 
-  private static createLambdaIntegration(lambdaFunction: lambda.Function) {
+  private static createLambdaIntegration(lambdaFunction: lambda.Alias | lambda.Function) {
     return new apigateway.LambdaIntegration(lambdaFunction, { proxy: true });
   }
 }
