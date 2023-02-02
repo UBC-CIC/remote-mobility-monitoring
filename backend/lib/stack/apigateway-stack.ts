@@ -16,6 +16,7 @@ interface ApiGatewayStackProps extends cdk.StackProps {
   readonly verifyPatientFunction: lambda.Function;
   readonly getPatientFunction: lambda.Function;
   readonly deletePatientFunction: lambda.Function;
+  readonly testFunction: lambda.Function;
 }
 
 export class ApiGatewayStack extends cdk.Stack {
@@ -24,7 +25,7 @@ export class ApiGatewayStack extends cdk.Stack {
 
     const api = new apigateway.LambdaRestApi(this, 'RemoteMobilityMonitoringApi', {
       handler: props.defaultFunction,
-      proxy: false,
+      proxy: false
     });
 
     const getOrganizationFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getOrganizationFunction);
@@ -42,21 +43,28 @@ export class ApiGatewayStack extends cdk.Stack {
     const getPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getPatientFunction);
     const deletePatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.deletePatientFunction);
 
+    const testFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.testFunction);
+
+    // /organizations
     const organizations = api.root.addResource('organizations');
-    const organization_id = organizations.addResource('{organization_id}');
-    organization_id.addMethod('GET', getOrganizationFunctionIntegration);
+    const organization_id = organizations.addResource('{organization_id}'); // /organizations/{organization_id}
+    organization_id.addMethod('GET', getOrganizationFunctionIntegration); // GET /organizations/{organization_id}
 
+    // /caregivers
     const caregivers = api.root.addResource('caregivers');
-    caregivers.addMethod('POST', createCaregiverFunctionIntegration);
-    const caregiver_id = caregivers.addResource('{caregiver_id}');
-    caregiver_id.addMethod('GET', getCaregiverFunctionIntegration);
-    caregiver_id.addMethod('DELETE', deleteCaregiverFunctionIntegration);
+    caregivers.addMethod('POST', createCaregiverFunctionIntegration); // /caregivers
+    const caregiver_id = caregivers.addResource('{caregiver_id}');  // /caregivers/{caregiver_id}
+    caregiver_id.addMethod('GET', getCaregiverFunctionIntegration); // GET /caregivers/{caregiver_id}
+    caregiver_id.addMethod('DELETE', deleteCaregiverFunctionIntegration); // DELETE /caregivers/{caregiver_id}
+    // /caregivers/{caregiver_id}/patients
     const caregiver_patients = caregiver_id.addResource('patients');
-    caregiver_patients.addMethod('GET', getAllPatientsFunctionIntegration);
-    const caregiver_patient_id = caregiver_patients.addResource('{patient_id}');
-    caregiver_patient_id.addMethod('POST', addPatientFunctionIntegration);
-    caregiver_patient_id.addMethod('DELETE', removePatientFunctionIntegration);
+    caregiver_patients.addMethod('GET', getAllPatientsFunctionIntegration); // GET /caregivers/{caregiver_id}/patients
+    // /caregivers/{caregiver_id}/patients/{patient_id}
+    const caregiver_patient_id = caregiver_patients.addResource('{patient_id}'); // /caregivers/{caregiver_id}/patients/{patient_id}
+    caregiver_patient_id.addMethod('POST', addPatientFunctionIntegration);  // POST /caregivers/{caregiver_id}/patients/{patient_id}
+    caregiver_patient_id.addMethod('DELETE', removePatientFunctionIntegration); // DELETE /caregivers/{caregiver_id}/patients/{patient_id}
 
+    // /patients
     const patients = api.root.addResource('patients');
     patients.addMethod('POST', createPatientFunctionIntegration);
     const patient_id = patients.addResource('{patient_id}');
@@ -64,6 +72,11 @@ export class ApiGatewayStack extends cdk.Stack {
     patient_id.addResource('verify').addMethod('POST', verifyPatientFunctionIntegration);
     patient_id.addMethod('GET', getPatientFunctionIntegration);
     patient_id.addMethod('DELETE', deletePatientFunctionIntegration);
+
+    // /test
+    const test = api.root.addResource('test');
+    test.addMethod('POST', testFunctionIntegration, {
+    });
   }
 
   private static createLambdaIntegration(lambdaFunction: lambda.Function) {

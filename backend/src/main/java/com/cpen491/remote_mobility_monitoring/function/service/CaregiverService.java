@@ -7,6 +7,9 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
+import com.cpen491.remote_mobility_monitoring.function.schema.Const;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
@@ -22,14 +25,23 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.DeliveryMediumType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.MessageActionType;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CaregiverService {
     @NonNull
     private CaregiverDao caregiverDao;
+    private static CognitoIdentityProviderClient cognitoIdentityProviderClient = CognitoIdentityProviderClient.builder().region(Region.US_WEST_2).build();
 
     /**
      * Creates a Caregiver and adds it to an Organization.
@@ -158,5 +170,30 @@ public class CaregiverService {
         return DeleteCaregiverResponseBody.builder()
                 .message("OK")
                 .build();
+    }
+
+    public CreateCognitoUserResponseBody createCognitoUser(CreateCognitoUserRequestBody body) {
+        Validator.validateCreateAdminUserRequestBody(body);
+        AdminCreateUserRequest adminCreateUserParams = AdminCreateUserRequest.builder()
+                .desiredDeliveryMediums(DeliveryMediumType.EMAIL)
+                .messageAction(MessageActionType.SUPPRESS)
+                .username(body.getUsername())
+                .userAttributes(
+                        AttributeType.builder().name("email").value(body.getEmail()).build(),
+                        AttributeType.builder().name("given_name").value(body.getFirstName()).build(),
+                        AttributeType.builder().name("family_name").value(body.getLastName()).build(),
+                        AttributeType.builder().name("phone_number").value(body.getPhoneNumber()).build()
+                )
+                .userPoolId(Const.COGNITO_USERPOOL_ID)
+                .build();
+        try {
+            log.info("creating user in cognito");
+            cognitoIdentityProviderClient.adminCreateUser(adminCreateUserParams);
+            log.info("user created in cognito");
+            return CreateCognitoUserResponseBody.builder().message("User created successfully").build();
+        } catch (Exception e) {
+            log.error("error creating user in cognito", e);
+            throw new RuntimeException(e);
+        }
     }
 }

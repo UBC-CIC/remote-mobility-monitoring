@@ -8,6 +8,8 @@ import com.cpen491.remote_mobility_monitoring.function.service.OrganizationServi
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
 import dagger.Component;
+import dagger.Provides;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 
 import javax.inject.Singleton;
 

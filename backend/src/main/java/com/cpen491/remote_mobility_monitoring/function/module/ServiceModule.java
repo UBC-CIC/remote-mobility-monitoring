@@ -8,6 +8,7 @@ import com.cpen491.remote_mobility_monitoring.function.service.OrganizationServi
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import dagger.Module;
 import dagger.Provides;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 
 import javax.inject.Singleton;
 

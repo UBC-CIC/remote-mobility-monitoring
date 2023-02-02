@@ -6,11 +6,12 @@ import { TimestreamStack } from './stack/timestream-stack';
 import { ApiGatewayStack } from './stack/apigateway-stack';
 
 const app = new App();
-new CognitoStack(app, 'RemoteMobilityMonitoringCognitoStack');
+const cognitoStack = new CognitoStack(app, 'RemoteMobilityMonitoringCognitoStack');
 new TimestreamStack(app, 'RemoteMobilityMonitoringTimestreamStack');
 const dynamoDbStack = new DynamoDbStack(app, 'RemoteMobilityMonitoringDynamoStack');
 const lambdaStack = new LambdaStack(app, 'RemoteMobilityMonitoringLambdaStack', {
   table: dynamoDbStack.remoteMobilityMonitoringTable,
+  userPool: cognitoStack.userPool,
 });
 new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
   defaultFunction: lambdaStack.defaultFunction,
@@ -26,5 +27,6 @@ new ApiGatewayStack(app, 'RemoteMobilityMonitoringApiGatewayStack', {
   verifyPatientFunction: lambdaStack.verifyPatientFunction,
   getPatientFunction: lambdaStack.getPatientFunction,
   deletePatientFunction: lambdaStack.deletePatientFunction,
+  testFunction: lambdaStack.testFunction
 });
 app.synth();

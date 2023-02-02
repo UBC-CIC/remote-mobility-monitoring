@@ -4,6 +4,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
@@ -32,6 +33,7 @@ public class Validator {
     public static final String ID_BLANK_ERROR_MESSAGE = "id must be present";
     public static final String NAME_BLANK_ERROR_MESSAGE = "name must be present";
     public static final String EMAIL_BLANK_ERROR_MESSAGE = "email must be present";
+    public static final String USERNAME_BLANK_ERROR_MESSAGE = "username must be present";
     public static final String FIRST_NAME_BLANK_ERROR_MESSAGE = "first_name must be present";
     public static final String LAST_NAME_BLANK_ERROR_MESSAGE = "last_name must be present";
     public static final String TITLE_BLANK_ERROR_MESSAGE = "title must be present";
@@ -86,6 +88,10 @@ public class Validator {
 
     public static void validateEmail(String email) {
         Validate.notBlank(email, EMAIL_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validateUsername(String username) {
+        Validate.notBlank(username, USERNAME_BLANK_ERROR_MESSAGE);
     }
 
     public static void validateFirstName(String firstName) {
@@ -259,5 +265,17 @@ public class Validator {
     public static void validateDeletePatientRequestBody(DeletePatientRequestBody body) {
         Validate.notNull(body, DELETE_PATIENT_NULL_ERROR_MESSAGE);
         validatePatientId(body.getPatientId());
+    }
+
+    // ~~~ADMIN VALIDATION~~~
+    public static void validateCreateAdminUserRequestBody(CreateCognitoUserRequestBody body) {
+        Validate.notNull(body, CREATE_CAREGIVER_NULL_ERROR_MESSAGE);
+        validateUsername(body.getUsername());
+        validateEmail(body.getEmail());
+        validateFirstName(body.getFirstName());
+        validateLastName(body.getLastName());
+        validateTitle(body.getTitle());
+        validatePhoneNumber(body.getPhoneNumber());
+        validateOrganizationId(body.getOrganizationId());
     }
 }

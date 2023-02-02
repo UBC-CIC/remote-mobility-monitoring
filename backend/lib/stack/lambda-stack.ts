@@ -2,9 +2,11 @@ import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 
 interface LambdaStackProps extends cdk.StackProps {
   readonly table: dynamodb.Table;
+  readonly userPool: cognito.UserPool;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -13,6 +15,7 @@ export class LambdaStack extends cdk.Stack {
   private static handlerPathPrefix = 'com.cpen491.remote_mobility_monitoring.function.handler.';
   private static timeout = cdk.Duration.seconds(300);
   private static memorySize = 512;
+  private readonly userPool: cognito.UserPool;
 
   public readonly lambdaRole: iam.Role
   public readonly defaultFunction: lambda.Function;
@@ -28,6 +31,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly verifyPatientFunction: lambda.Function;
   public readonly getPatientFunction: lambda.Function;
   public readonly deletePatientFunction: lambda.Function;
+  public readonly testFunction: lambda.Function;
 
   constructor(scope: cdk.App, id: string, props: LambdaStackProps) {
     super(scope, id, props);
@@ -60,6 +64,14 @@ export class LambdaStack extends cdk.Stack {
       resources: ['*'],
     }));
 
+    // Adds Cognito policies to the lambda role
+    this.lambdaRole.addManagedPolicy(
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCognitoPowerUser')
+    )
+    this.lambdaRole.addManagedPolicy(
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCognitoDeveloperAuthenticatedIdentities')
+    )
+
     // TODO: DLQs? Layers?
 
     this.defaultFunction = new lambda.Function(this, 'DefaultFunction', {
@@ -72,6 +84,8 @@ export class LambdaStack extends cdk.Stack {
       `),
       handler: 'index.handler',
     });
+
+    this.userPool = props.userPool;
 
     this.getOrganizationFunction = this.createGetOrganizationFunction();
 
@@ -87,13 +101,14 @@ export class LambdaStack extends cdk.Stack {
     this.verifyPatientFunction = this.createVerifyPatientFunction();
     this.getPatientFunction = this.createGetPatientFunction();
     this.deletePatientFunction = this.createDeletePatientFunction();
+    this.testFunction = this.createTestFunction();
   }
 
   private createGetOrganizationFunction(): lambda.Function {
     const lambdaFunction = new lambda.Function(
       this,
       'GetOrganizationFunction',
-      LambdaStack.createLambdaFunctionProps('GetOrganizationFunction', 'organization.GetOrganizationHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('GetOrganizationFunction', 'organization.GetOrganizationHandler', this.lambdaRole, this.userPool),
     )
 
     return lambdaFunction;
@@ -103,7 +118,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'CreateCaregiverFunction',
-      LambdaStack.createLambdaFunctionProps('CreateCaregiverFunction', 'caregiver.CreateCaregiverHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('CreateCaregiverFunction', 'caregiver.CreateCaregiverHandler', this.lambdaRole, this.userPool),
     );
 
     return lambdaFunction;
@@ -113,7 +128,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'AddPatientFunction',
-      LambdaStack.createLambdaFunctionProps('AddPatientFunction', 'caregiver.AddPatientHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('AddPatientFunction', 'caregiver.AddPatientHandler', this.lambdaRole, this.userPool),
     )
 
     return lambdaFunction;
@@ -123,7 +138,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'RemovePatientFunction',
-      LambdaStack.createLambdaFunctionProps('RemovePatientFunction', 'caregiver.RemovePatientHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('RemovePatientFunction', 'caregiver.RemovePatientHandler', this.lambdaRole, this.userPool),
     )
 
     return lambdaFunction;
@@ -133,7 +148,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'GetCaregiverFunction',
-      LambdaStack.createLambdaFunctionProps('GetCaregiverFunction', 'caregiver.GetCaregiverHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('GetCaregiverFunction', 'caregiver.GetCaregiverHandler', this.lambdaRole, this.userPool),
     )
 
     return lambdaFunction;
@@ -143,7 +158,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'GetAllPatientsFunction',
-      LambdaStack.createLambdaFunctionProps('GetAllPatientsFunction', 'caregiver.GetAllPatientsHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('GetAllPatientsFunction', 'caregiver.GetAllPatientsHandler', this.lambdaRole, this.userPool),
     )
 
     return lambdaFunction;
@@ -153,7 +168,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'DeleteCaregiverFunction',
-      LambdaStack.createLambdaFunctionProps('DeleteCaregiverFunction', 'caregiver.DeleteCaregiverHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('DeleteCaregiverFunction', 'caregiver.DeleteCaregiverHandler', this.lambdaRole, this.userPool),
     );
 
     return lambdaFunction;
@@ -163,7 +178,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'CreatePatientFunction',
-      LambdaStack.createLambdaFunctionProps('CreatePatientFunction', 'patient.CreatePatientHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('CreatePatientFunction', 'patient.CreatePatientHandler', this.lambdaRole, this.userPool),
     );
 
     // (lambdaFunction.node.defaultChild as lambda.CfnFunction).addPropertyOverride('SnapStart', {
@@ -180,7 +195,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'UpdatePatientDeviceFunction',
-      LambdaStack.createLambdaFunctionProps('UpdatePatientDeviceFunction', 'patient.UpdatePatientDeviceHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('UpdatePatientDeviceFunction', 'patient.UpdatePatientDeviceHandler', this.lambdaRole, this.userPool),
     );
 
     return lambdaFunction;
@@ -190,7 +205,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'VerifyPatientFunction',
-      LambdaStack.createLambdaFunctionProps('VerifyPatientFunction', 'patient.VerifyPatientHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('VerifyPatientFunction', 'patient.VerifyPatientHandler', this.lambdaRole, this.userPool),
     );
 
     return lambdaFunction;
@@ -200,7 +215,7 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'GetPatientFunction',
-      LambdaStack.createLambdaFunctionProps('GetPatientFunction', 'patient.GetPatientHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('GetPatientFunction', 'patient.GetPatientHandler', this.lambdaRole, this.userPool),
     )
 
     return lambdaFunction;
@@ -210,13 +225,23 @@ export class LambdaStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(
       this,
       'DeletePatientFunction',
-      LambdaStack.createLambdaFunctionProps('DeletePatientFunction', 'patient.DeletePatientHandler', this.lambdaRole),
+      LambdaStack.createLambdaFunctionProps('DeletePatientFunction', 'patient.DeletePatientHandler', this.lambdaRole, this.userPool),
     )
 
     return lambdaFunction;
   }
 
-  private static createLambdaFunctionProps(name: string, handler: string, role: iam.Role): lambda.FunctionProps {
+  private createTestFunction(): lambda.Function {
+    const lambdaFunction = new lambda.Function(
+      this,
+      'TestFunction',
+      LambdaStack.createLambdaFunctionProps('TestFunction', 'test.TestHandler', this.lambdaRole, this.userPool),
+    )
+
+    return lambdaFunction;
+  }
+
+  private static createLambdaFunctionProps(name: string, handler: string, role: iam.Role, userPool: cognito.UserPool): lambda.FunctionProps {
     return {
       functionName: name,
       runtime: LambdaStack.runtime,
@@ -225,6 +250,10 @@ export class LambdaStack extends cdk.Stack {
       timeout: LambdaStack.timeout,
       memorySize: LambdaStack.memorySize,
       role: role,
+      environment: {
+        'COGNITO_USERPOOL_ID': userPool.userPoolId,
+        'COGNITO_USERPOOL_ARN': userPool.userPoolArn,
+      }
     };
   }
 }
