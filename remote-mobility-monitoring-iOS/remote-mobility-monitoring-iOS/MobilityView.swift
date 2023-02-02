@@ -18,7 +18,11 @@ struct Metric: Hashable {
 class HealthStore: ObservableObject {
     var healthStore: HKHealthStore?
     var query: HKStatisticsQuery?
-    @Published var stepLength: HKQuantity?
+    @Published var walkingStepLength: HKQuantity?
+    @Published var walkingDoubleSupportPercentage: HKQuantity?
+    @Published var walkingSpeed: HKQuantity?
+    @Published var walkingAsymmetryPercentage: HKQuantity?
+    @Published var distanceWalkingRunning: HKQuantity?
     @Published var metrics: [Metric] = []
     
     init() {
@@ -28,33 +32,94 @@ class HealthStore: ObservableObject {
     }
 
     func setUpHealthStore() {
-        let typesToRead: Set = [HKQuantityType.quantityType(forIdentifier: .stepCount)!]
+        let typesToRead: Set = [
+            HKObjectType.quantityType(forIdentifier: .stepCount)!,
+            HKObjectType.quantityType(forIdentifier: .walkingDoubleSupportPercentage)!,
+            HKObjectType.quantityType(forIdentifier: .walkingSpeed)!,
+            HKObjectType.quantityType(forIdentifier: .walkingAsymmetryPercentage)!,
+            HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
+        ]
         healthStore?.requestAuthorization(toShare: nil, read: typesToRead, completion: { success, error in
             if success {
-                self.calculateStepLength()
+                self.retrieveMetric(name: "Step Length", typeIdentifier: .walkingStepLength)
+                self.retrieveMetric(name: "Double Support Time", typeIdentifier: .walkingDoubleSupportPercentage)
+                self.retrieveMetric(name: "Walking Speed", typeIdentifier: .walkingSpeed)
+                self.retrieveMetric(name: "Walking Asymmetry", typeIdentifier: .walkingAsymmetryPercentage)
+                self.retrieveMetric(name: "Distance Walked", typeIdentifier: .distanceWalkingRunning)
                 self.updateMetrics()
             }
         })
     }
-    
-    func calculateStepLength() {
-        guard let stepCount = HKObjectType.quantityType(forIdentifier: .stepCount) else {
-            fatalError("*** Unable to get the step count ***")
+
+    func retrieveMetric(name: String, typeIdentifier: HKQuantityTypeIdentifier) {
+        guard let quantityType = HKQuantityType.quantityType(forIdentifier: typeIdentifier) else {
+            return
         }
-        query = HKStatisticsQuery(quantityType: stepCount, quantitySamplePredicate: nil, options: .cumulativeSum) {
-            query, statistics, error in
-            DispatchQueue.main.async {
-                self.stepLength = statistics?.sumQuantity()
+                
+        let now = Date()
+        let startOfDay = Calendar.current.startOfDay(for: now)
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictEndDate)
+        
+        if(name != "Distance Walked") {
+            let query = HKStatisticsQuery(quantityType: quantityType,
+                                        quantitySamplePredicate: predicate,
+                                        options: .discreteAverage) {
+                (query, result, error) in
+                DispatchQueue.main.async {
+                    guard let result = result, error == nil else {
+                        return
+                    }
+                
+                    switch name {
+                        case "Step Length":
+                            self.walkingStepLength = result.averageQuantity()!
+                        case "Double Support Time":
+                            self.walkingDoubleSupportPercentage = result.averageQuantity()!
+                        case "Walking Speed":
+                            self.walkingSpeed = result.averageQuantity()!
+                        case "Walking Asymmetry":
+                            self.walkingAsymmetryPercentage = result.averageQuantity()!
+                        default:
+                            return
+                    }
+                }
                 self.updateMetrics()
-                print("----> calculateStepLength: \(String(describing: self.stepLength))")
             }
+            self.healthStore!.execute(query)
+        } else {
+            let query = HKStatisticsQuery(quantityType: quantityType,
+                                        quantitySamplePredicate: nil,
+                                        options: .cumulativeSum) {
+                (query, result, error) in
+                DispatchQueue.main.async {
+                    guard let result = result, error == nil else {
+                        return
+                    }
+                
+                    self.distanceWalkingRunning = result.sumQuantity()!
+                }
+                self.updateMetrics()
+            }
+            self.healthStore!.execute(query)
         }
-        healthStore!.execute(query!)
     }
     
     func updateMetrics() {
-        let stepLengthStandard = HKQuantity(unit: HKUnit(from: ""), doubleValue: 0.0)
-        metrics = [Metric(name: "Step Length", lastUpdated: "Today", value: stepLength ?? stepLengthStandard, logo: "StepLength")]
+        let stepLengthStandard = HKQuantity(unit: HKUnit(from: "cm"), doubleValue: 10.0)
+        let doubleSupportTimeStandard = HKQuantity(unit: HKUnit(from: "min"), doubleValue: 0.15)
+        let walkingSpeedStandard = HKQuantity(unit: HKUnit(from: "m/s"), doubleValue: 20.0)
+        let walkingAsymmetryStandard = HKQuantity(unit: HKUnit.percent(), doubleValue: 0.1)
+        let distanceWalkedStandard = HKQuantity(unit: HKUnit.meter(), doubleValue: 20.0)
+        
+        DispatchQueue.main.async {
+            self.metrics = [
+                Metric(name: "Step Length", lastUpdated: "Today", value: self.walkingStepLength ?? stepLengthStandard, logo: "StepLength"),
+                Metric(name: "Double Support Time", lastUpdated: "Today", value: self.walkingDoubleSupportPercentage ?? doubleSupportTimeStandard, logo: "DoubleSupportTime"),
+                Metric(name: "Walking Speed", lastUpdated: "Today", value: self.walkingSpeed ?? walkingSpeedStandard, logo: "WalkingSpeed"),
+                Metric(name: "Walking Asymmetry", lastUpdated: "Today", value: self.walkingAsymmetryPercentage ?? walkingAsymmetryStandard, logo: "WalkingAsymmetry"),
+                Metric(name: "Distance Walked", lastUpdated: "Today", value: self.distanceWalkingRunning ?? distanceWalkedStandard, logo: "DistanceWalked")
+            ]
+        }
     }
 }
 
