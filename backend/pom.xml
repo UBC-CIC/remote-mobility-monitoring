@@ -158,8 +158,21 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="io.github.edwgiz.log4j.maven.plugins.shade.transformer.Log4j2PluginCacheFileTransformer">
+                                </transformer>
+                            </transformers>
+                        </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>io.github.edwgiz</groupId>
+                        <artifactId>log4j-maven-shade-plugin-extensions</artifactId>
+                        <version>${log4j.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>
