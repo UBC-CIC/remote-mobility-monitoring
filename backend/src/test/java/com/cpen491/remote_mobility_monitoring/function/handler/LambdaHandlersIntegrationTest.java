@@ -65,10 +65,10 @@ public class LambdaHandlersIntegrationTest {
     private static final String PATIENT_NAME2 = "PatientTest2";
     private static final String PATIENT_UPDATED_NAME2 = "PatientTestTwo";
     private static final String PATIENT_NAME3 = "PatientTest3";
-    private static final String DEVICE_ID1 = "device-1";
-    private static final String DEVICE_ID2 = "device-2";
-    private static final String DEVICE_ID_UPDATED2 = "device-two";
-    private static final String DEVICE_ID3 = "device-3";
+    private static final String DEVICE_ID1 = "device-test1";
+    private static final String DEVICE_ID2 = "device-test2";
+    private static final String DEVICE_ID_UPDATED2 = "device-testTwo";
+    private static final String DEVICE_ID3 = "device-test3";
     private static final String PATIENT_PHONE_NUMBER = "+1010101010";
     private static final String PATIENT_DATE_OF_BIRTH = "2000-01-01";
     private static final String INVALID_AUTH_CODE = "invalid";
