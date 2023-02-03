@@ -60,7 +60,7 @@ public class CaregiverService {
         caregiverDao.create(caregiver, body.getOrganizationId());
 
         return CreateCaregiverResponseBody.builder()
-                .message("OK")
+                .caregiverId(caregiver.getPid())
                 .build();
     }
 

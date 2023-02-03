@@ -44,7 +44,7 @@ public class DaoFactory {
     }
 
     public static DynamoDbClient createDynamoDbClient() {
-        // TODO: retry policy https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/using.html
+        // retry policy https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/using.html
         SdkHttpClient httpClient = UrlConnectionHttpClient.builder().build();
         try {
             return DynamoDbClient.builder()
