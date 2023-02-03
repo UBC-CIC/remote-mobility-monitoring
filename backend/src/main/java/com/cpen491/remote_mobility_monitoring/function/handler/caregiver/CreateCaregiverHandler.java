@@ -11,6 +11,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.google.gson.Gson;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateInternalServerErrorResponse;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateResponse;
@@ -32,7 +33,7 @@ public class CreateCaregiverHandler implements RequestHandler<APIGatewayProxyReq
             CreateCaregiverRequestBody requestBody = gson.fromJson(request.getBody(), CreateCaregiverRequestBody.class);
             CreateCaregiverResponseBody responseBody = caregiverService.createCaregiver(requestBody);
             return generateResponse(StatusCode.OK, gson.toJson(responseBody));
-        } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
+        } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException | CognitoIdentityProviderException e) {
             return generateResponse(StatusCode.BAD_REQUEST, e.getMessage());
         } catch (RecordDoesNotExistException e) {
             return generateResponse(StatusCode.NOT_FOUND, e.getMessage());

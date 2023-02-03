@@ -22,8 +22,8 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public static CaregiverService caregiverService(CaregiverDao caregiverDao) {
-        return new CaregiverService(caregiverDao);
+    public static CaregiverService caregiverService(CaregiverDao caregiverDao, CognitoIdentityProviderClient cognitoIdentityProviderClient) {
+        return new CaregiverService(caregiverDao, cognitoIdentityProviderClient);
     }
 
     @Provides

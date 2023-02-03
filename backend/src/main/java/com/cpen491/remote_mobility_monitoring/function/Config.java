@@ -1,5 +1,6 @@
 package com.cpen491.remote_mobility_monitoring.function;
 
+import com.cpen491.remote_mobility_monitoring.function.module.CognitoModule;
 import com.cpen491.remote_mobility_monitoring.function.module.DatastoreModule;
 import com.cpen491.remote_mobility_monitoring.function.module.ServiceModule;
 import com.cpen491.remote_mobility_monitoring.function.module.UtilityModule;
@@ -17,7 +18,9 @@ import javax.inject.Singleton;
 @Component(modules = {
         DatastoreModule.class,
         ServiceModule.class,
-        UtilityModule.class
+        UtilityModule.class,
+        CognitoModule.class
+
 })
 public interface Config {
     OrganizationService organizationService();

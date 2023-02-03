@@ -23,15 +23,13 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCareg
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientResponseBody;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.DeliveryMediumType;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.MessageActionType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,8 +39,8 @@ import java.util.stream.Collectors;
 public class CaregiverService {
     @NonNull
     private CaregiverDao caregiverDao;
-    private static CognitoIdentityProviderClient cognitoIdentityProviderClient = CognitoIdentityProviderClient.builder().region(Region.US_WEST_2).build();
-
+    @NonNull
+    private CognitoIdentityProviderClient cognitoIdentityProviderClient;
     /**
      * Creates a Caregiver and adds it to an Organization.
      *
@@ -56,6 +54,42 @@ public class CaregiverService {
      */
     public CreateCaregiverResponseBody createCaregiver(CreateCaregiverRequestBody body) {
         Validator.validateCreateCaregiverRequestBody(body);
+
+        UserType cognitoUser;
+        AdminCreateUserRequest adminCreateUserParams = AdminCreateUserRequest.builder()
+                .desiredDeliveryMediums(DeliveryMediumType.EMAIL)
+                //.messageAction(MessageActionType.SUPPRESS)
+                .username(body.getEmail())
+                .userAttributes(
+                        AttributeType.builder().name("email_verified").value("true").build(),
+                        AttributeType.builder().name("email").value(body.getEmail()).build(),
+                        AttributeType.builder().name("given_name").value(body.getFirstName()).build(),
+                        AttributeType.builder().name("family_name").value(body.getLastName()).build(),
+                        AttributeType.builder().name("phone_number").value(body.getPhoneNumber()).build()
+                )
+                .userPoolId(Const.COGNITO_USERPOOL_ID == null ? "us-west-2_killme" : Const.COGNITO_USERPOOL_ID)
+                .build();
+        try {
+            log.info("creating user in cognito");
+            cognitoIdentityProviderClient.adminCreateUser(adminCreateUserParams);
+            log.info("user created in cognito");
+        } catch (CognitoIdentityProviderException e) {
+            log.error("error creating user in cognito", e);
+            throw e;
+        } catch (Exception e) {
+            log.error("error creating user in cognito", e);
+            throw new RuntimeException(e);
+        }
+
+        // Switch to sub if we want to index by userID instead of email
+//        String sub;
+//        try {
+//            sub = cognitoUser.attributes().stream().filter(attributeType -> attributeType.name().equals("sub")).findFirst().get().value();
+//        }
+//        catch (Exception e) {
+//            log.error("error getting sub from cognito", e);
+//            throw new RuntimeException(e);
+//        }
 
         Caregiver caregiver = Caregiver.builder()
                 .email(body.getEmail())
@@ -172,13 +206,17 @@ public class CaregiverService {
                 .build();
     }
 
+
     public CreateCognitoUserResponseBody createCognitoUser(CreateCognitoUserRequestBody body) {
         Validator.validateCreateAdminUserRequestBody(body);
+
+        AdminCreateUserResponse cognitoUser;
         AdminCreateUserRequest adminCreateUserParams = AdminCreateUserRequest.builder()
                 .desiredDeliveryMediums(DeliveryMediumType.EMAIL)
-                .messageAction(MessageActionType.SUPPRESS)
-                .username(body.getUsername())
+                //.messageAction(MessageActionType.SUPPRESS)
+                .username(body.getEmail())
                 .userAttributes(
+                        AttributeType.builder().name("email_verified").value("true").build(),
                         AttributeType.builder().name("email").value(body.getEmail()).build(),
                         AttributeType.builder().name("given_name").value(body.getFirstName()).build(),
                         AttributeType.builder().name("family_name").value(body.getLastName()).build(),
@@ -188,12 +226,15 @@ public class CaregiverService {
                 .build();
         try {
             log.info("creating user in cognito");
-            cognitoIdentityProviderClient.adminCreateUser(adminCreateUserParams);
+            cognitoUser = cognitoIdentityProviderClient.adminCreateUser(adminCreateUserParams);
             log.info("user created in cognito");
-            return CreateCognitoUserResponseBody.builder().message("User created successfully").build();
         } catch (Exception e) {
             log.error("error creating user in cognito", e);
             throw new RuntimeException(e);
         }
+
+        return CreateCognitoUserResponseBody.builder()
+                .message("OK")
+                .build();
     }
 }

@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,12 +87,14 @@ public class CaregiverServiceTest {
     CaregiverService cut;
     @Mock
     CaregiverDao caregiverDao;
+    @Mock
+    CognitoIdentityProviderClient cognitoIdentityProviderClient;
     ArgumentCaptor<Caregiver> caregiverCaptor;
 
     @BeforeEach
     public void setup() {
         caregiverCaptor = ArgumentCaptor.forClass(Caregiver.class);
-        cut = new CaregiverService(caregiverDao);
+        cut = new CaregiverService(caregiverDao, cognitoIdentityProviderClient);
     }
 
     @Test
