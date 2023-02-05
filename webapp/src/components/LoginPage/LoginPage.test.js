@@ -15,9 +15,9 @@ describe("LoginPage", () => {
         expect(headerElement).toBeInTheDocument();
     });
 
-    test("renders a form with a username and password input", () => {
+    test("renders a form with a email and password input", () => {
         const {getByPlaceholderText } = render(<LoginPage />);
-        const usernameInput = getByPlaceholderText("Username");
+        const usernameInput = getByPlaceholderText("Email");
         const passwordInput = getByPlaceholderText("Password");
         expect(usernameInput).toBeInTheDocument();
         expect(passwordInput).toBeInTheDocument();
