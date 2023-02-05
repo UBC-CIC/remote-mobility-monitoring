@@ -10,19 +10,8 @@ import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.Const;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.*;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsResponseBody.PatientSerialization;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientResponseBody;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -144,7 +133,7 @@ public class CaregiverService {
     }
 
     /**
-     * Gets the Caregiver specified by caregiverId.
+     * Gets the Caregiver specified by caregiverId and its Organization.
      *
      * @param body The request body
      * @return {@link GetCaregiverResponseBody}
@@ -175,6 +164,7 @@ public class CaregiverService {
      *
      * @param body The request body
      * @return {@link GetAllPatientsResponseBody}
+     * @throws RecordDoesNotExistException If Caregiver record with the given caregiverId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if caregiverId is empty
      */
@@ -185,6 +175,33 @@ public class CaregiverService {
 
         return GetAllPatientsResponseBody.builder()
                 .patients(patients.stream().map(PatientSerialization::fromPatient).collect(Collectors.toList()))
+                .build();
+    }
+
+    /**
+     * Updates a Caregiver.
+     *
+     * @param body The request body
+     * @return {@link UpdateCaregiverResponseBody}
+     * @throws DuplicateRecordException If record with the given email already exists
+     * @throws RecordDoesNotExistException If record with the given id does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of caregiverId, email, firstName, lastName,
+     *                              title, or phoneNumber are empty
+     */
+    public UpdateCaregiverResponseBody updateCaregiver(UpdateCaregiverRequestBody body) {
+        Validator.validateUpdateCaregiverRequestBody(body);
+
+        Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
+        caregiver.setEmail(body.getEmail());
+        caregiver.setFirstName(body.getFirstName());
+        caregiver.setLastName(body.getLastName());
+        caregiver.setTitle(body.getTitle());
+        caregiver.setPhoneNumber(body.getPhoneNumber());
+        caregiverDao.update(caregiver);
+
+        return UpdateCaregiverResponseBody.builder()
+                .message("OK")
                 .build();
     }
 
@@ -208,7 +225,7 @@ public class CaregiverService {
 
 
     public CreateCognitoUserResponseBody createCognitoUser(CreateCognitoUserRequestBody body) {
-        Validator.validateCreateAdminUserRequestBody(body);
+        Validator.validateCreateCognitoUserRequestBody(body);
 
         AdminCreateUserResponse cognitoUser;
         AdminCreateUserRequest adminCreateUserParams = AdminCreateUserRequest.builder()

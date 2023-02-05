@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.BaseTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.convertToAttributeValue;
@@ -222,13 +221,16 @@ public class GenericDao {
         String currentTime = getCurrentUtcTimeString();
         item.put(BaseTable.UPDATED_AT_NAME, convertToAttributeValue(currentTime));
 
-        List<Map<String, AttributeValue>> keyMaps = findAllPrimaryKeysContainingId(getFromMap(item, BaseTable.PID_NAME));
+        List<Map<String, AttributeValue>> keyMaps = findAllRecordsContainingId(getFromMap(item, BaseTable.PID_NAME));
 
-        // TODO: async?
         for (Map<String, AttributeValue> keyMap : keyMaps) {
-            item.put(BaseTable.PID_NAME, keyMap.get(BaseTable.PID_NAME));
-            item.put(BaseTable.SID_NAME, keyMap.get(BaseTable.SID_NAME));
-            put(item);
+            keyMap = new HashMap<>(keyMap);
+            AttributeValue pid = keyMap.get(BaseTable.PID_NAME);
+            AttributeValue sid = keyMap.get(BaseTable.SID_NAME);
+            keyMap.putAll(item);
+            keyMap.put(BaseTable.PID_NAME, pid);
+            keyMap.put(BaseTable.SID_NAME, sid);
+            put(keyMap);
         }
     }
 
@@ -257,27 +259,20 @@ public class GenericDao {
      * @param keyVal The partition key value
      */
     public void delete(String keyVal) {
-        List<Map<String, AttributeValue>> keyMaps = findAllPrimaryKeysContainingId(keyVal);
+        List<Map<String, AttributeValue>> keyMaps = findAllRecordsContainingId(keyVal);
 
         for (Map<String, AttributeValue> keyMap : keyMaps) {
             deleteByPrimaryKey(getFromMap(keyMap, BaseTable.PID_NAME), getFromMap(keyMap, BaseTable.SID_NAME));
         }
     }
 
-    private List<Map<String, AttributeValue>> findAllPrimaryKeysContainingId(String keyVal) {
+    private List<Map<String, AttributeValue>> findAllRecordsContainingId(String keyVal) {
         List<Map<String, AttributeValue>> keyMaps = new ArrayList<>();
         List<Map<String, AttributeValue>> pidItems = findAllByPartitionKey(keyVal).items();
         List<Map<String, AttributeValue>> sidItems = findAllByPartitionKeyOnIndex(BaseTable.SID_NAME, keyVal, BaseTable.SID_INDEX_NAME).items();
 
         keyMaps.addAll(pidItems);
         keyMaps.addAll(sidItems);
-        keyMaps = keyMaps.stream().map(item -> {
-            Map<String, AttributeValue> keyMap = new HashMap<>();
-            keyMap.put(BaseTable.PID_NAME, item.get(BaseTable.PID_NAME));
-            keyMap.put(BaseTable.SID_NAME, item.get(BaseTable.SID_NAME));
-            return keyMap;
-        }).collect(Collectors.toList());
-
         return keyMaps;
     }
 

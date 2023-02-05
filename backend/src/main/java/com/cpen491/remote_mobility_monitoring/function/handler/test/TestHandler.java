@@ -30,17 +30,12 @@ public class TestHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
     }
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-        try {
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+
+        return processApiGatewayRequest((request) -> {
             CreateCognitoUserRequestBody requestBody = gson.fromJson(request.getBody(), CreateCognitoUserRequestBody.class);
             CreateCognitoUserResponseBody responseBody = caregiverService.createCognitoUser(requestBody);
-            return generateResponse(StatusCode.OK, gson.toJson(responseBody));
-        } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
-            return generateResponse(StatusCode.BAD_REQUEST, e.getMessage());
-        } catch (RecordDoesNotExistException e) {
-            return generateResponse(StatusCode.NOT_FOUND, e.getMessage());
-        } catch (Exception e) {
-            return generateInternalServerErrorResponse();
-        }
+            return gson.toJson(responseBody);
+        }, requestEvent);
     }
 }

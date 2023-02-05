@@ -4,18 +4,24 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.organization.CreateOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import org.apache.commons.lang3.Validate;
 
@@ -56,18 +62,23 @@ public class Validator {
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
     public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
+    public static final String CREATE_ORGANIZATION_NULL_ERROR_MESSAGE = "Create organization request body must not be null";
     public static final String GET_ORGANIZATION_NULL_ERROR_MESSAGE = "Get organization request body must not be null";
+    public static final String CREATE_ADMIN_NULL_ERROR_MESSAGE = "Create admin request body must not be null";
+    public static final String GET_ADMIN_NULL_ERROR_MESSAGE = "Get admin request body must not be null";
     public static final String CREATE_CAREGIVER_NULL_ERROR_MESSAGE = "Create caregiver request body must not be null";
     public static final String ADD_PATIENT_NULL_ERROR_MESSAGE = "Add patient request body must not be null";
     public static final String REMOVE_PATIENT_NULL_ERROR_MESSAGE = "Remove patient request body must not be null";
     public static final String GET_CAREGIVER_NULL_ERROR_MESSAGE = "Get caregiver request body must not be null";
-    public static final String GET_ALL_PATIENTS_NULL_ERROR_MESSAGE =
-            "Get all patients for caregiver request body must not be null";
+    public static final String GET_ALL_PATIENTS_NULL_ERROR_MESSAGE = "Get all patients request body must not be null";
+    public static final String UPDATE_CAREGIVER_NULL_ERROR_MESSAGE = "Update caregiver request body must not be null";
     public static final String DELETE_CAREGIVER_NULL_ERROR_MESSAGE = "Delete caregiver request body must not be null";
     public static final String CREATE_PATIENT_NULL_ERROR_MESSAGE = "Create patient request body must not be null";
     public static final String UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE = "Update patient device request body must not be null";
     public static final String VERIFY_PATIENT_NULL_ERROR_MESSAGE = "Verify patient request body must not be null";
     public static final String GET_PATIENT_NULL_ERROR_MESSAGE = "Get patient request body must not be null";
+    public static final String GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE = "Get all caregivers request body must not be null";
+    public static final String UPDATE_PATIENT_NULL_ERROR_MESSAGE = "Update patient request body must not be null";
     public static final String DELETE_PATIENT_NULL_ERROR_MESSAGE = "Delete patient request body must not be null";
 
     public static void validatePidEqualsSid(String pid, String sid) {
@@ -194,9 +205,27 @@ public class Validator {
         validateVerified(patient.getVerified());
     }
 
+    public static void validateCreateOrganizationRequestBody(CreateOrganizationRequestBody body) {
+        Validate.notNull(body, CREATE_ORGANIZATION_NULL_ERROR_MESSAGE);
+        validateName(body.getOrganizationName());
+    }
+
     public static void validateGetOrganizationRequestBody(GetOrganizationRequestBody body) {
         Validate.notNull(body, GET_ORGANIZATION_NULL_ERROR_MESSAGE);
         validateOrganizationId(body.getOrganizationId());
+    }
+
+    public static void validateCreateAdminRequestBody(CreateAdminRequestBody body) {
+        Validate.notNull(body, CREATE_ADMIN_NULL_ERROR_MESSAGE);
+        validateEmail(body.getEmail());
+        validateFirstName(body.getFirstName());
+        validateLastName(body.getLastName());
+        validateOrganizationId(body.getOrganizationId());
+    }
+
+    public static void validateGetAdminRequestBody(GetAdminRequestBody body) {
+        Validate.notNull(body, GET_ADMIN_NULL_ERROR_MESSAGE);
+        validateAdminId(body.getAdminId());
     }
 
     public static void validateCreateCaregiverRequestBody(CreateCaregiverRequestBody body) {
@@ -231,6 +260,16 @@ public class Validator {
         validateCaregiverId(body.getCaregiverId());
     }
 
+    public static void validateUpdateCaregiverRequestBody(UpdateCaregiverRequestBody body) {
+        Validate.notNull(body, UPDATE_CAREGIVER_NULL_ERROR_MESSAGE);
+        validateCaregiverId(body.getCaregiverId());
+        validateEmail(body.getEmail());
+        validateFirstName(body.getFirstName());
+        validateLastName(body.getLastName());
+        validateTitle(body.getTitle());
+        validatePhoneNumber(body.getPhoneNumber());
+    }
+
     public static void validateDeleteCaregiverRequestBody(DeleteCaregiverRequestBody body) {
         Validate.notNull(body, DELETE_CAREGIVER_NULL_ERROR_MESSAGE);
         validateCaregiverId(body.getCaregiverId());
@@ -262,13 +301,26 @@ public class Validator {
         validatePatientId(body.getPatientId());
     }
 
+    public static void validateGetAllCaregiversRequestBody(GetAllCaregiversRequestBody body) {
+        Validate.notNull(body, GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE);
+        validatePatientId(body.getPatientId());
+    }
+
+    public static void validateUpdatePatientRequestBody(UpdatePatientRequestBody body) {
+        Validate.notNull(body, UPDATE_PATIENT_NULL_ERROR_MESSAGE);
+        validatePatientId(body.getPatientId());
+        validateFirstName(body.getFirstName());
+        validateLastName(body.getLastName());
+        validatePhoneNumber(body.getPhoneNumber());
+    }
+
     public static void validateDeletePatientRequestBody(DeletePatientRequestBody body) {
         Validate.notNull(body, DELETE_PATIENT_NULL_ERROR_MESSAGE);
         validatePatientId(body.getPatientId());
     }
 
     // ~~~ADMIN VALIDATION~~~
-    public static void validateCreateAdminUserRequestBody(CreateCognitoUserRequestBody body) {
+    public static void validateCreateCognitoUserRequestBody(CreateCognitoUserRequestBody body) {
         Validate.notNull(body, CREATE_CAREGIVER_NULL_ERROR_MESSAGE);
         validateUsername(body.getUsername());
         validateEmail(body.getEmail());

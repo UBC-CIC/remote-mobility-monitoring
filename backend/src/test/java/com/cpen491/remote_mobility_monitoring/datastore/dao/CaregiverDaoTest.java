@@ -165,6 +165,10 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     @Test
     public void testHasPatient_HappyCase() {
+        Patient patient = buildPatientDefault();
+        createPatient(patient);
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
         putPrimaryKey(PID, PATIENT_ID1);
 
         boolean result = cut.hasPatient(PATIENT_ID1, PID);
@@ -172,7 +176,26 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     @Test
+    public void testHasPatient_WHEN_PatientRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
+        assertThatThrownBy(() -> cut.hasPatient(PATIENT_ID1, PID)).isInstanceOf(RecordDoesNotExistException.class);
+    }
+
+    @Test
+    public void testHasPatient_WHEN_CaregiverRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        Patient patient = buildPatientDefault();
+        createPatient(patient);
+        assertThatThrownBy(() -> cut.hasPatient(PATIENT_ID1, PID)).isInstanceOf(RecordDoesNotExistException.class);
+    }
+
+    @Test
     public void testHasPatient_WHEN_PatientNotAdded_THEN_ReturnFalse() {
+        Patient patient = buildPatientDefault();
+        createPatient(patient);
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
+
         boolean result = cut.hasPatient(PATIENT_ID1, PID);
         assertFalse(result);
     }
@@ -393,9 +416,8 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindOrganization_WHEN_CaregiverRecordDoesNotExist_THEN_ReturnNull() {
-        Organization organization = cut.findOrganization(PID);
-        assertNull(organization);
+    public void testFindOrganization_WHEN_CaregiverRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        assertThatThrownBy(() -> cut.findOrganization(PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
@@ -441,9 +463,8 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindAllPatients_WHEN_CaregiverRecordDoesNotExist_THEN_ReturnEmptyList() {
-        List<Patient> patients = cut.findAllPatients(PID);
-        assertThat(patients).isEmpty();
+    public void testFindAllPatients_WHEN_CaregiverRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
+        assertThatThrownBy(() -> cut.findAllPatients(PID)).isInstanceOf(RecordDoesNotExistException.class);
     }
 
     @Test
@@ -503,9 +524,9 @@ public class CaregiverDaoTest extends DaoTestParent {
     public void testUpdate_WHEN_RecordAlsoExistsInAssociations_THEN_UpdateAllDuplicateRecords() {
         Caregiver newRecord1 = buildCaregiverDefault();
         createCaregiver(newRecord1);
-        Caregiver newRecord2 = buildCaregiverDefault();
-        newRecord2.setSid(PATIENT_ID1);
-        createCaregiver(newRecord2);
+        Patient newRecord2 = buildPatientDefault();
+        newRecord2.setPid(PID);
+        createPatient(newRecord2);
         Caregiver newRecord3 = buildCaregiverDefault();
         newRecord3.setPid(EXISTS_ORGANIZATION_ID);
         createCaregiver(newRecord3);
@@ -516,6 +537,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
         assertEquals(EMAIL2, findByPrimaryKey(PID, PID).item().get(CaregiverTable.EMAIL_NAME).s());
         assertEquals(EMAIL2, findByPrimaryKey(PID, PATIENT_ID1).item().get(CaregiverTable.EMAIL_NAME).s());
+        assertEquals(DEVICE_ID1, findByPrimaryKey(PID, PATIENT_ID1).item().get(PatientTable.DEVICE_ID_NAME).s());
         assertEquals(EMAIL2, findByPrimaryKey(EXISTS_ORGANIZATION_ID, PID).item().get(CaregiverTable.EMAIL_NAME).s());
     }
 

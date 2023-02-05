@@ -1,6 +1,14 @@
 package com.cpen491.remote_mobility_monitoring.dependency.utility;
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+
+import java.util.Map;
+import java.util.function.Function;
 
 public class HandlerUtils {
     public enum StatusCode {
@@ -19,13 +27,48 @@ public class HandlerUtils {
 
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "Sorry something went wrong";
 
-    public static APIGatewayProxyResponseEvent generateResponse(StatusCode statusCode, String body) {
+    public static APIGatewayProxyResponseEvent processApiGatewayRequest(Function<APIGatewayProxyRequestEvent, String> func,
+                                                                        APIGatewayProxyRequestEvent request) {
+        try {
+            String responseBody = func.apply(request);
+            return generateApiGatewayResponse(StatusCode.OK, responseBody);
+        } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
+            return generateApiGatewayResponse(StatusCode.BAD_REQUEST, e.getMessage());
+        } catch (RecordDoesNotExistException e) {
+            return generateApiGatewayResponse(StatusCode.NOT_FOUND, e.getMessage());
+        } catch (InvalidAuthCodeException e) {
+            return generateApiGatewayResponse(StatusCode.UNAUTHORIZED, e.getMessage());
+        }
+        // catch cognito create user exceptions
+        catch (AliasExistsException |                   // email or PN already exists
+                 UsernameExistsException |              // username already exists
+                 InvalidPasswordException |             // password does not meet requirements?
+                 TooManyFailedAttemptsException |       // too many failed attempts
+                 TooManyRequestsException               // too many requests
+                e) {
+            return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
+        catch (Exception e) {
+            // TODO: log this
+            return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);
+        }
+    }
+
+    private static APIGatewayProxyResponseEvent generateApiGatewayResponse(StatusCode statusCode, String body) {
         return new APIGatewayProxyResponseEvent()
                 .withStatusCode(statusCode.code)
                 .withBody(body);
     }
 
-    public static APIGatewayProxyResponseEvent generateInternalServerErrorResponse() {
-        return generateResponse(StatusCode.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);
+    public static void processGenericRequest(Function<Map<String, String>, String> func, Map<String, String> request) {
+        String message;
+        try {
+            message = func.apply(request);
+        } catch (Exception e) {
+            message = e.getMessage();
+        }
+        // TODO: log this instead
+        System.out.println(message);
     }
 }

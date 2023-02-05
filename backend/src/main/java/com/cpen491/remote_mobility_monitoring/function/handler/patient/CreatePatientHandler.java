@@ -10,9 +10,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePati
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateInternalServerErrorResponse;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.generateResponse;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.StatusCode;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
 // TODO: decide which logger to use
 public class CreatePatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -26,16 +24,11 @@ public class CreatePatientHandler implements RequestHandler<APIGatewayProxyReque
     }
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-        try {
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        return processApiGatewayRequest((request) -> {
             CreatePatientRequestBody requestBody = gson.fromJson(request.getBody(), CreatePatientRequestBody.class);
             CreatePatientResponseBody responseBody = patientService.createPatient(requestBody);
-            return generateResponse(StatusCode.OK, gson.toJson(responseBody));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            return generateResponse(StatusCode.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            // TODO: log this
-            return generateInternalServerErrorResponse();
-        }
+            return gson.toJson(responseBody);
+        }, requestEvent);
     }
 }

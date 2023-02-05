@@ -2,7 +2,8 @@ import * as cdk from 'aws-cdk-lib';
 import * as timestream from 'aws-cdk-lib/aws-timestream';
 
 export class TimestreamStack extends cdk.Stack {
-  public static databaseName = 'RemoteMobilityMonitoringTimestreamDatabase';
+  public static databaseName = 'REMOTE_MOBILITY_MONITORING_DATABASE';
+  public static tableName = 'METRICS';
 
   public readonly database: timestream.CfnDatabase;
   public readonly mobilityData: timestream.CfnTable;
@@ -11,12 +12,12 @@ export class TimestreamStack extends cdk.Stack {
     super(scope, id, props);
     
     this.database = new timestream.CfnDatabase(this, 'RemoteMobilityMonitoringTimestreamDatabase', {
-      databaseName: TimestreamStack.databaseName
+      databaseName: TimestreamStack.databaseName,
     });
 
     this.mobilityData = new timestream.CfnTable(this, 'RemoteMobilityMonitoringTimestreamTable', {
       databaseName: this.database.ref,
-      tableName: 'RemoteMobilityMonitoringTimestreamTable'
+      tableName: TimestreamStack.tableName,
     });
   }
 }

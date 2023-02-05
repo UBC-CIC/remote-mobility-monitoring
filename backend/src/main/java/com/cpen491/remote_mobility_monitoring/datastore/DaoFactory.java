@@ -8,6 +8,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
+// TODO: singleton
 public class DaoFactory {
     DynamoDbClient ddbClient;
     GenericDao genericDao;

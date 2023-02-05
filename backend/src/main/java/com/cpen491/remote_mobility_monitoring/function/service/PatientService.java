@@ -5,23 +5,31 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversResponseBody.CaregiverSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
@@ -147,6 +155,50 @@ public class PatientService {
                 .dateOfBirth(patient.getDateOfBirth())
                 .phoneNumber(patient.getPhoneNumber())
                 .createdAt(patient.getCreatedAt())
+                .build();
+    }
+
+    /**
+     * Get all Caregivers for a Patient.
+     *
+     * @param body The request body
+     * @return {@link GetAllCaregiversResponseBody}
+     * @throws RecordDoesNotExistException If Patient record with the given patientId does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId is empty
+     */
+    public GetAllCaregiversResponseBody getAllCaregivers(GetAllCaregiversRequestBody body) {
+        Validator.validateGetAllCaregiversRequestBody(body);
+
+        List<Caregiver> caregivers = patientDao.findAllCaregivers(body.getPatientId());
+
+        return GetAllCaregiversResponseBody.builder()
+                .caregivers(caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList()))
+                .build();
+    }
+
+    /**
+     * Updates a Patient.
+     *
+     * @param body The request body
+     * @return {@link UpdatePatientResponseBody}
+     * @throws DuplicateRecordException If record with the given deviceId already exists
+     * @throws RecordDoesNotExistException If record with the given id does not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of patientId, firstName, lastName,
+     *                              or phoneNumber are empty
+     */
+    public UpdatePatientResponseBody updatePatient(UpdatePatientRequestBody body) {
+        Validator.validateUpdatePatientRequestBody(body);
+
+        Patient patient = patientDao.findById(body.getPatientId());
+        patient.setFirstName(body.getFirstName());
+        patient.setLastName(body.getLastName());
+        patient.setPhoneNumber(body.getPhoneNumber());
+        patientDao.update(patient);
+
+        return UpdatePatientResponseBody.builder()
+                .message("OK")
                 .build();
     }
 
