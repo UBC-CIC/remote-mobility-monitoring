@@ -1,71 +1,71 @@
-import React, {useState} from "react";
-import "./ForceChangePassword.css";
+import React, {useState, useEffect} from "react";
+import "./ChangePassword.css";
 import { useNavigate} from "react-router-dom";
+import {createUser} from "../../Cognito";
 import {FaArrowLeft} from "react-icons/fa";
-import { useSelector } from "react-redux";
-import {State} from "../../store";
+import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 
-function ForceChangePassword() {
+function ChangePassword() {
     const [password, setPassword] = useState("");
+    const [oldPassword, setOldPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const nav = useNavigate();
-    const cognitoUser = useSelector((state: State) => state.cognitoUser);
+    const username = localStorage.getItem("username");
+    if (!username) {
+        nav("/login");
+    }
+    const cognitoUser = createUser(username? username: "");
+    useEffect(() => {
+        cognitoUser.getSession((err: Error) => {
+            if (err) {
+                console.log("err");
+                nav("/login");
+                return;
+            }
+            setLoading(false);
+        });
+    });
+
     const handleKey = (event:React.KeyboardEvent) => {
         if(event.key === "Enter") {
             handleSubmit();
         }
     };
     const handleSubmit = ()=> {
+        if (loading) return;
         if(! (password.length >= 8)) return;
         if(! /\d/.test(password)) return;
         if(! /[a-z]/.test(password)) return;
         if(! /[A-Z]/.test(password)) return;
         if(! /[`!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~]/.test(password)) return;
         if (password !== confirmPassword) return;
-        const username = localStorage.getItem("username");
-        if (!username) {
-            alert("An error occured. Please log in again");
-            nav("/login");
-            return;
-        }
-        const callback = {
-            onSuccess: function() {
-                if (localStorage.getItem("username")) {
-                    localStorage.removeItem("username");
-                }
-                localStorage.setItem("username", cognitoUser.getUsername());
-                nav("/");
-            },
-            onFailure: function(err: any) {
-                let errMsg = err.message || JSON.stringify(err);
-                if (errMsg.includes("required parameter USERNAME")) {
-                    errMsg = "Please enter your email";
-                }
-                else if (errMsg.includes("Incorrect username")) {
-                    errMsg = "Incorrect email or password";
-                }
-                console.log(errMsg);
-            },
-            newPasswordRequired: function() {
-                nav("/login");
+        cognitoUser.changePassword(oldPassword, password, (err) => {
+            if (err) {
+                alert(err.message || JSON.stringify(err));
             }
-        };
-        cognitoUser.completeNewPasswordChallenge(password, null, callback);
+            else {
+                nav("/");
+            }
+        });
     };
     return (
         <div className="force-pwd">
-            <div className="icon" onClick={() => nav("/login")}><FaArrowLeft size="15px"/> Login Page</div>
-            <div className="title"><h2> Update password</h2>
-                <p className="desc">Since this is the first time you&#39;re logging in, you must change your password to continue</p>
+            <div className="icon" onClick={() => nav("/")}><FaArrowLeft size="15px"/> Home Page</div>
+            <div className="title"><h2> Change password</h2>
+                <p className="desc">Please enter your old password for verification along with your new desired password</p>
             </div>
             <div></div>
             <div></div>
             <div className="wrapper">
                 <div className='login-input'>
-                    <input type='password' placeholder='Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
+                    <input type='password' placeholder='Old Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setOldPassword(e.target.value)}></input>
+                    <input type='password' placeholder='New Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
                     <input type='password' placeholder='Confirm Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setConfirmPassword(e.target.value)}></input>
-                    <button type='submit' onClick={(e) => handleSubmit()}>Change Password</button>
+                    {loading === true? 
+                        <button type='submit' onClick={(e) => {return;}}>Loading</button>:
+                        <button type='submit' onClick={(e) => handleSubmit()}>Change Password</button>}
                     {error === ("")? null: <p className="err">{error}</p>}
                 </div>
             </div>
@@ -83,4 +83,4 @@ function ForceChangePassword() {
     );
 }
 
-export default ForceChangePassword;
+export default ChangePassword;

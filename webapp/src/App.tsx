@@ -2,6 +2,7 @@ import React from "react";
 import "./App.css";
 import LoginPage from "./components/LoginPage/LoginPage";
 import ForceChangePassword from "./components/LoginPage/ForceChangePassword";
+import ChangePassword from "./components/ChangePassword/ChangePassword";
 import Home from "./Home";
 import SystemAdmin from "./components/SystemAdmin/SystemAdmin";
 import ProtectedRoute from "./ProtectedRoute";
@@ -24,6 +25,9 @@ function App() {
                     }/>
                     <Route path="/newuserpwd" element={
                         <ProtectedRoute><ForceChangePassword/></ProtectedRoute>
+                    }/>
+                    <Route path="/changepwd" element={
+                        <ProtectedRoute><ChangePassword/></ProtectedRoute>
                     }/>
                 </Routes>
             </Router>

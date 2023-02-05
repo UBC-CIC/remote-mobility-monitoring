@@ -1,9 +1,8 @@
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 
 export const createUser = (email: string) => {
-    const userPoolId = "secret";
     const poolData = {
-        UserPoolId: userPoolId,
+        UserPoolId: "secret",
         ClientId: "secret", // Your client id here
     };
     const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
