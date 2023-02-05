@@ -10,9 +10,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
+@Slf4j
 public class UpdateCaregiverHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final CaregiverService caregiverService;
     private final Gson gson;
@@ -25,11 +27,14 @@ public class UpdateCaregiverHandler implements RequestHandler<APIGatewayProxyReq
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Update Caregiver request with path parameters: {} and body: {}",
+                requestEvent.getPathParameters(), requestEvent.getBody());
         return processApiGatewayRequest((request) -> {
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             UpdateCaregiverRequestBody requestBody = gson.fromJson(request.getBody(), UpdateCaregiverRequestBody.class);
             requestBody.setCaregiverId(caregiverId);
             UpdateCaregiverResponseBody responseBody = caregiverService.updateCaregiver(requestBody);
+            log.info("Responding to Update Caregiver request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

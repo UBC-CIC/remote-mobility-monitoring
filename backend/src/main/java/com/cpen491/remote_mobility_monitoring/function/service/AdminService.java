@@ -12,7 +12,9 @@ import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequ
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class AdminService {
     @NonNull
@@ -30,6 +32,7 @@ public class AdminService {
      *                              lastName, or organizationId are empty
      */
     public CreateAdminResponseBody createAdmin(CreateAdminRequestBody body) {
+        log.info("Creating Admin {}", body);
         Validator.validateCreateAdminRequestBody(body);
 
         Admin admin = Admin.builder()
@@ -54,6 +57,7 @@ public class AdminService {
      * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public GetAdminResponseBody getAdmin(GetAdminRequestBody body) {
+        log.info("Getting Admin {}", body);
         Validator.validateGetAdminRequestBody(body);
 
         Admin admin = adminDao.findById(body.getAdminId());

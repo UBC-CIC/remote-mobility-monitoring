@@ -10,9 +10,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
+@Slf4j
 public class DeletePatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>  {
     private final PatientService patientService;
     private final Gson gson;
@@ -25,12 +27,14 @@ public class DeletePatientHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Delete Patient request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
             DeletePatientRequestBody requestBody = DeletePatientRequestBody.builder()
                     .patientId(patientId)
                     .build();
             DeletePatientResponseBody responseBody = patientService.deletePatient(requestBody);
+            log.info("Responding to Delete Patient request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

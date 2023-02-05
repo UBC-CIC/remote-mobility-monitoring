@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCaregiverResponseBody {
-    @SerializedName(Const.MESSAGE_NAME)
-    private String message;
+    @SerializedName(Const.CAREGIVER_ID_NAME)
+    private String caregiverId;
 }

@@ -13,7 +13,6 @@ public final class Const {
     private static final String INDEX_NAME_SUFFIX = "-gsi";
 
     public static class BaseTable {
-        public static final String TABLE_NAME = "REMOTE_MOBILITY_MONITORING";
         public static final String PID_NAME = "pid";
         public static final String SID_NAME = "sid";
         public static final String CREATED_AT_NAME = "created_at";

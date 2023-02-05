@@ -1,5 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import { formResourceName } from "../utility";
+
+interface DynamoDbStackProps extends cdk.StackProps {
+  readonly stage: string;
+}
 
 export class DynamoDbStack extends cdk.Stack {
   public static TABLE_NAME = 'REMOTE_MOBILITY_MONITORING';
@@ -14,17 +19,18 @@ export class DynamoDbStack extends cdk.Stack {
 
   public readonly remoteMobilityMonitoringTable: dynamodb.Table;
 
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.App, id: string, props: DynamoDbStackProps) {
     super(scope, id, props);
 
-    this.remoteMobilityMonitoringTable = this.createRemoteMobilityMonitoringTable();
+    const tableName = formResourceName(DynamoDbStack.TABLE_NAME, props.stage);
+    this.remoteMobilityMonitoringTable = this.createRemoteMobilityMonitoringTable(tableName);
   }
 
-  private createRemoteMobilityMonitoringTable(): dynamodb.Table {
+  private createRemoteMobilityMonitoringTable(tableName: string): dynamodb.Table {
     const table = new dynamodb.Table(
       this,
-      DynamoDbStack.TABLE_NAME,
-      DynamoDbStack.createTableProps(DynamoDbStack.TABLE_NAME, DynamoDbStack.PK_NAME, DynamoDbStack.SK_NAME)
+      'RemoteMobilityMonitoringDynamoDB',
+      DynamoDbStack.createTableProps(tableName, DynamoDbStack.PK_NAME, DynamoDbStack.SK_NAME)
     );
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.SID_GSI_NAME, DynamoDbStack.SK_NAME, DynamoDbStack.PK_NAME));
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ORGANIZATION_NAME_GSI_NAME, 'org-name'));

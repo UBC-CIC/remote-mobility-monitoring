@@ -10,9 +10,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatie
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
+@Slf4j
 public class AddPatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final CaregiverService caregiverService;
     private final Gson gson;
@@ -25,6 +27,7 @@ public class AddPatientHandler implements RequestHandler<APIGatewayProxyRequestE
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Add Patient request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
@@ -33,6 +36,7 @@ public class AddPatientHandler implements RequestHandler<APIGatewayProxyRequestE
                     .patientId(patientId)
                     .build();
             AddPatientResponseBody responseBody = caregiverService.addPatient(requestBody);
+            log.info("Responding to Add Patient request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

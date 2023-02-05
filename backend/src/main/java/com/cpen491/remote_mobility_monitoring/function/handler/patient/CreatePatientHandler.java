@@ -9,10 +9,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
-// TODO: decide which logger to use
+@Slf4j
 public class CreatePatientHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final PatientService patientService;
     private final Gson gson;
@@ -25,9 +26,11 @@ public class CreatePatientHandler implements RequestHandler<APIGatewayProxyReque
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Create Patient request with body: {}", requestEvent.getBody());
         return processApiGatewayRequest((request) -> {
             CreatePatientRequestBody requestBody = gson.fromJson(request.getBody(), CreatePatientRequestBody.class);
             CreatePatientResponseBody responseBody = patientService.createPatient(requestBody);
+            log.info("Responding to Create Patient request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

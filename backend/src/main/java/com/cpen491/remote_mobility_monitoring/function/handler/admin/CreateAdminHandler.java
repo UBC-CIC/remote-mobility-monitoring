@@ -8,11 +8,13 @@ import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminR
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.AdminService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processGenericRequest;
 
+@Slf4j
 public class CreateAdminHandler implements RequestHandler<Map<String, String>, Void> {
     private final AdminService adminService;
     private final Gson gson;
@@ -25,6 +27,7 @@ public class CreateAdminHandler implements RequestHandler<Map<String, String>, V
 
     @Override
     public Void handleRequest(Map<String, String> event, Context context) {
+        log.info("Received Create Admin request with event {}", event);
         processGenericRequest((request) -> {
             CreateAdminRequestBody requestBody = CreateAdminRequestBody.builder()
                     .email(event.get(Const.EMAIL_NAME))
@@ -33,6 +36,7 @@ public class CreateAdminHandler implements RequestHandler<Map<String, String>, V
                     .organizationId(event.get(Const.ORGANIZATION_ID_NAME))
                     .build();
             CreateAdminResponseBody responseBody = adminService.createAdmin(requestBody);
+            log.info("Responding to Create Admin request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, event);
         return null;

@@ -8,11 +8,13 @@ import com.cpen491.remote_mobility_monitoring.function.schema.organization.Creat
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.CreateOrganizationResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.OrganizationService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processGenericRequest;
 
+@Slf4j
 public class CreateOrganizationHandler implements RequestHandler<Map<String, String>, Void> {
     private final OrganizationService organizationService;
     private final Gson gson;
@@ -25,11 +27,13 @@ public class CreateOrganizationHandler implements RequestHandler<Map<String, Str
 
     @Override
     public Void handleRequest(Map<String, String> event, Context context) {
+        log.info("Received Create Organization request with event {}", event);
         processGenericRequest((request) -> {
             CreateOrganizationRequestBody requestBody = CreateOrganizationRequestBody.builder()
                     .organizationName(event.get(Const.ORGANIZATION_NAME_NAME))
                     .build();
             CreateOrganizationResponseBody responseBody = organizationService.createOrganization(requestBody);
+            log.info("Responding to Create Organization request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, event);
         return null;

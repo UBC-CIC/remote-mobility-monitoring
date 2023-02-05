@@ -10,9 +10,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
+@Slf4j
 public class DeleteCaregiverHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final CaregiverService caregiverService;
     private final Gson gson;
@@ -25,12 +27,14 @@ public class DeleteCaregiverHandler implements RequestHandler<APIGatewayProxyReq
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        log.info("Received Delete Caregiver request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             DeleteCaregiverRequestBody requestBody = DeleteCaregiverRequestBody.builder()
                     .caregiverId(caregiverId)
                     .build();
             DeleteCaregiverResponseBody responseBody = caregiverService.deleteCaregiver(requestBody);
+            log.info("Responding to Delete Caregiver request with response body {}", responseBody);
             return gson.toJson(responseBody);
         }, requestEvent);
     }

@@ -6,10 +6,12 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 public class HandlerUtils {
     public enum StatusCode {
         OK(200),
@@ -33,10 +35,13 @@ public class HandlerUtils {
             String responseBody = func.apply(request);
             return generateApiGatewayResponse(StatusCode.OK, responseBody);
         } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
+            log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, e.getMessage());
         } catch (RecordDoesNotExistException e) {
+            log.error("Got {} error {}, responding with not found", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.NOT_FOUND, e.getMessage());
         } catch (InvalidAuthCodeException e) {
+            log.error("Got {} error {}, responding with unauthorized", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.UNAUTHORIZED, e.getMessage());
         }
         // catch cognito create user exceptions
@@ -46,11 +51,13 @@ public class HandlerUtils {
                  TooManyFailedAttemptsException |       // too many failed attempts
                  TooManyRequestsException               // too many requests
                 e) {
+            log.error("Got {} error {}, responding with unauthorized", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
         catch (Exception e) {
-            // TODO: log this
+            log.error("Got {} error {} with cause {}, responding with internal server error",
+                    e.getClass(), e.getMessage(), e.getCause());
             return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);
         }
     }
@@ -62,13 +69,10 @@ public class HandlerUtils {
     }
 
     public static void processGenericRequest(Function<Map<String, String>, String> func, Map<String, String> request) {
-        String message;
         try {
-            message = func.apply(request);
+            func.apply(request);
         } catch (Exception e) {
-            message = e.getMessage();
+            log.error("Got {} error {} with cause{}", e.getClass(), e.getMessage(), e.getCause());
         }
-        // TODO: log this instead
-        System.out.println(message);
     }
 }
