@@ -4,8 +4,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -37,25 +37,17 @@ public class HandlerUtils {
         } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
             log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, e.getMessage());
+        } catch (CognitoException e) {
+            Throwable cause = e.getCause();
+            log.error("Got CognitoException due to {} with message {}, responding with bad request", cause.getClass(), cause.getMessage());
+            return generateApiGatewayResponse(StatusCode.BAD_REQUEST, cause.getMessage());
         } catch (RecordDoesNotExistException e) {
             log.error("Got {} error {}, responding with not found", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.NOT_FOUND, e.getMessage());
         } catch (InvalidAuthCodeException e) {
             log.error("Got {} error {}, responding with unauthorized", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.UNAUTHORIZED, e.getMessage());
-        }
-        // catch cognito create user exceptions
-        catch (AliasExistsException |                   // email or PN already exists
-                 UsernameExistsException |              // username already exists
-                 InvalidPasswordException |             // password does not meet requirements?
-                 TooManyFailedAttemptsException |       // too many failed attempts
-                 TooManyRequestsException               // too many requests
-                e) {
-            log.error("Got {} error {}, responding with unauthorized", e.getClass(), e.getMessage());
-            return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Got {} error {} with cause {}, responding with internal server error",
                     e.getClass(), e.getMessage(), e.getCause());
             return generateApiGatewayResponse(StatusCode.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);

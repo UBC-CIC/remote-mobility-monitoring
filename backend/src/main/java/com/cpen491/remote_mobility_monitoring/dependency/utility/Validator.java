@@ -5,7 +5,6 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
@@ -36,10 +35,8 @@ public class Validator {
     public static final String PID_BLANK_ERROR_MESSAGE = "pid must be present";
     public static final String SID_BLANK_ERROR_MESSAGE = "sid must be present";
     public static final String PID_NOT_EQUAL_SID_ERROR_MESSAGE = "pid must be the same as sid";
-    public static final String ID_BLANK_ERROR_MESSAGE = "id must be present";
     public static final String NAME_BLANK_ERROR_MESSAGE = "name must be present";
     public static final String EMAIL_BLANK_ERROR_MESSAGE = "email must be present";
-    public static final String USERNAME_BLANK_ERROR_MESSAGE = "username must be present";
     public static final String FIRST_NAME_BLANK_ERROR_MESSAGE = "first_name must be present";
     public static final String LAST_NAME_BLANK_ERROR_MESSAGE = "last_name must be present";
     public static final String TITLE_BLANK_ERROR_MESSAGE = "title must be present";
@@ -89,20 +86,12 @@ public class Validator {
         }
     }
 
-    public static void validateId(String id) {
-        Validate.notBlank(id, ID_BLANK_ERROR_MESSAGE);
-    }
-
     public static void validateName(String name) {
         Validate.notBlank(name, NAME_BLANK_ERROR_MESSAGE);
     }
 
     public static void validateEmail(String email) {
         Validate.notBlank(email, EMAIL_BLANK_ERROR_MESSAGE);
-    }
-
-    public static void validateUsername(String username) {
-        Validate.notBlank(username, USERNAME_BLANK_ERROR_MESSAGE);
     }
 
     public static void validateFirstName(String firstName) {
@@ -187,6 +176,8 @@ public class Validator {
 
     public static void validateCaregiver(Caregiver caregiver) {
         Validate.notNull(caregiver, CAREGIVER_RECORD_NULL_ERROR_MESSAGE);
+        validatePidEqualsSid(caregiver.getPid(), caregiver.getSid());
+        validateCaregiverId(caregiver.getPid());
         validateEmail(caregiver.getEmail());
         validateFirstName(caregiver.getFirstName());
         validateLastName(caregiver.getLastName());
@@ -317,17 +308,5 @@ public class Validator {
     public static void validateDeletePatientRequestBody(DeletePatientRequestBody body) {
         Validate.notNull(body, DELETE_PATIENT_NULL_ERROR_MESSAGE);
         validatePatientId(body.getPatientId());
-    }
-
-    // ~~~ADMIN VALIDATION~~~
-    public static void validateCreateCognitoUserRequestBody(CreateCognitoUserRequestBody body) {
-        Validate.notNull(body, CREATE_CAREGIVER_NULL_ERROR_MESSAGE);
-        validateUsername(body.getUsername());
-        validateEmail(body.getEmail());
-        validateFirstName(body.getFirstName());
-        validateLastName(body.getLastName());
-        validateTitle(body.getTitle());
-        validatePhoneNumber(body.getPhoneNumber());
-        validateOrganizationId(body.getOrganizationId());
     }
 }

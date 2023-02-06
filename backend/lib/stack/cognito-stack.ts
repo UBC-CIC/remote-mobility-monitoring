@@ -37,7 +37,7 @@ export class CognitoStack extends cdk.Stack {
       }
     });
 
-    const userPoolDomainName = props.stage == 'prod' ? CognitoStack.DOMAIN_PREFIX : formResourceName(CognitoStack.DOMAIN_PREFIX, props.stage);
+    const userPoolDomainName = props.stage === 'prod' ? CognitoStack.DOMAIN_PREFIX : formResourceName(CognitoStack.DOMAIN_PREFIX, props.stage);
     this.userPoolDomain = this.userPool.addDomain('app-domain', {
       cognitoDomain: {
         domainPrefix: userPoolDomainName

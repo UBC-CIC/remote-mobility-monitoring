@@ -7,6 +7,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import dagger.Module;
 import dagger.Provides;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -15,22 +16,10 @@ import static com.cpen491.remote_mobility_monitoring.function.module.Environment
 
 @Module
 public class DatastoreModule {
-    // Prevent lazy loading DynamoDbClient by using static initializer
-    // This creates DynamoDbClient and significantly reduces cold start time
-    static {
-        try {
-            DaoFactory factory = daoFactory("REMOTE_MOBILITY_MONITORING-dev");
-            OrganizationDao orgDao = organizationDao(factory);
-            orgDao.findAllCaregivers("org-12345");
-        } catch (Exception e) {
-            // Expects exception
-        }
-    }
-
     @Provides
     @Singleton
-    public static DaoFactory daoFactory(@Named(DYNAMO_DB_TABLE_NAME) String tableName) {
-        return new DaoFactory(tableName);
+    public static DaoFactory daoFactory(@Named(DYNAMO_DB_TABLE_NAME) String tableName, DynamoDbClient ddbClient) {
+        return new DaoFactory(tableName, ddbClient);
     }
 
     @Provides

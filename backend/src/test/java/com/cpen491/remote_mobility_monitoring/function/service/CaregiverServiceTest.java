@@ -4,6 +4,8 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
@@ -29,7 +31,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,6 +74,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class CaregiverServiceTest {
     private static final String CAREGIVER_ID = "car-1";
+    private static final String CAREGIVER_ID_NO_PREFIX = "1";
+    private static final String PASSWORD = "password123";
     private static final String EMAIL = "jackjackson@email.com";
     private static final String TITLE1 = "caregiver";
     private static final String TITLE2 = "manager";
@@ -92,31 +95,48 @@ public class CaregiverServiceTest {
     @Mock
     CaregiverDao caregiverDao;
     @Mock
-    CognitoIdentityProviderClient cognitoIdentityProviderClient;
+    CognitoWrapper cognitoWrapper;
     ArgumentCaptor<Caregiver> caregiverCaptor;
 
     @BeforeEach
     public void setup() {
         caregiverCaptor = ArgumentCaptor.forClass(Caregiver.class);
-        cut = new CaregiverService(caregiverDao, cognitoIdentityProviderClient);
+        cut = new CaregiverService(caregiverDao, cognitoWrapper);
     }
 
     @Test
     public void testCreateCaregiver_HappyCase() {
+        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
+
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
         CreateCaregiverResponseBody responseBody = cut.createCaregiver(requestBody);
 
         verify(caregiverDao, times(1)).create(caregiverCaptor.capture(), eq(ORGANIZATION_ID));
+        assertEquals(CAREGIVER_ID, caregiverCaptor.getValue().getPid());
+        assertEquals(CAREGIVER_ID, caregiverCaptor.getValue().getSid());
         assertEquals(EMAIL, caregiverCaptor.getValue().getEmail());
         assertEquals(FIRST_NAME, caregiverCaptor.getValue().getFirstName());
         assertEquals(LAST_NAME, caregiverCaptor.getValue().getLastName());
         assertEquals(TITLE1, caregiverCaptor.getValue().getTitle());
         assertEquals(PHONE_NUMBER, caregiverCaptor.getValue().getPhoneNumber());
         assertNotNull(responseBody);
+        assertEquals(CAREGIVER_ID, responseBody.getCaregiverId());
+        assertEquals(PASSWORD, responseBody.getPassword());
+    }
+
+    @Test
+    public void testCreateCaregiver_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(cognitoWrapper).createUser(anyString());
+
+        CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
+        assertThatThrownBy(() -> cut.createCaregiver(requestBody)).isSameAs(toThrow);
     }
 
     @Test
     public void testCreateCaregiver_WHEN_CaregiverDaoCreateThrows_THEN_ThrowSameException() {
+        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
+
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(caregiverDao).create(any(Caregiver.class), anyString());
 

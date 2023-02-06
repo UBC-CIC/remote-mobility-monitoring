@@ -55,7 +55,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CaregiverDaoTest extends DaoTestParent {
     private static final String PID = "car-1";
+    private static final String PID2 = "car-2";
     private static final String SID = PID;
+    private static final String SID2 = PID2;
     private static final String EMAIL1 = "janedoe@email.com";
     private static final String EMAIL2 = "janedoeiscool@email.com";
     private static final String FIRST_NAME = "Jane";
@@ -97,8 +99,8 @@ public class CaregiverDaoTest extends DaoTestParent {
         assertTrue(response.hasItem());
 
         newRecord = Caregiver.convertFromMap(response.item());
-        assertNotEquals(PID, newRecord.getPid());
-        assertNotEquals(SID, newRecord.getSid());
+        assertEquals(PID, newRecord.getPid());
+        assertEquals(SID, newRecord.getSid());
         assertEquals(EMAIL1, newRecord.getEmail());
         assertEquals(FIRST_NAME, newRecord.getFirstName());
         assertEquals(LAST_NAME, newRecord.getLastName());
@@ -122,6 +124,8 @@ public class CaregiverDaoTest extends DaoTestParent {
     public void testCreate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
         Caregiver newRecord = buildCaregiverDefault();
         cut.create(newRecord, EXISTS_ORGANIZATION_ID);
+        newRecord.setPid(PID2);
+        newRecord.setSid(SID2);
         assertThatThrownBy(() -> cut.create(newRecord, EXISTS_ORGANIZATION_ID)).isInstanceOf(DuplicateRecordException.class);
     }
 
@@ -134,6 +138,14 @@ public class CaregiverDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
                 Arguments.of(null, EXISTS_ORGANIZATION_ID, CAREGIVER_RECORD_NULL_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(null, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
+                        EXISTS_ORGANIZATION_ID, PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver("", SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
+                        EXISTS_ORGANIZATION_ID, PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, null, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
+                        EXISTS_ORGANIZATION_ID, SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, "", EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
+                        EXISTS_ORGANIZATION_ID, SID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCaregiver(PID, SID, null, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
                         EXISTS_ORGANIZATION_ID, EMAIL_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCaregiver(PID, SID, "", FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
@@ -159,7 +171,11 @@ public class CaregiverDaoTest extends DaoTestParent {
                 Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
                         "", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCaregiver(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
-                        PID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+                        PID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PATIENT_ID1, PATIENT_ID1, EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
+                        EXISTS_ORGANIZATION_ID, CAREGIVER_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildCaregiver(PID, SID + "1", EMAIL1, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER),
+                        EXISTS_ORGANIZATION_ID, PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
 
@@ -383,6 +399,8 @@ public class CaregiverDaoTest extends DaoTestParent {
         Caregiver newRecord1 = buildCaregiverDefault();
         cut.create(newRecord1, EXISTS_ORGANIZATION_ID);
         Caregiver newRecord2 = buildCaregiverDefault();
+        newRecord2.setPid(PID2);
+        newRecord2.setSid(SID2);
         newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2, EXISTS_ORGANIZATION_ID);
 
@@ -512,6 +530,8 @@ public class CaregiverDaoTest extends DaoTestParent {
         Caregiver newRecord1 = buildCaregiverDefault();
         cut.create(newRecord1, EXISTS_ORGANIZATION_ID);
         Caregiver newRecord2 = buildCaregiverDefault();
+        newRecord2.setPid(PID2);
+        newRecord2.setSid(SID2);
         newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2, EXISTS_ORGANIZATION_ID);
 

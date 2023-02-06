@@ -16,13 +16,11 @@ public final class Const {
     public static final String CAREGIVER_ID_NAME = "caregiver_id";
     public static final String PATIENT_ID_NAME = "patient_id";
     public static final String DEVICE_ID_NAME = "device_id";
+    public static final String PASSWORD_NAME = "password";
     public static final String AUTH_CODE_NAME = "auth_code";
     public static final String CREATED_AT_NAME = "created_at";
     public static final String PATIENTS_NAME = "patients";
     public static final String ADMINS_NAME = "admins";
     public static final String CAREGIVERS_NAME = "caregivers";
     public static final String MESSAGE_NAME = "message";
-    public static final String USERNAME_NAME = "username";
-    public static final String COGNITO_USERPOOL_ID = System.getenv("COGNITO_USERPOOL_ID");
-    public static final String COGNITO_USERPOOL_ARN = System.getenv("COGNITO_USERPOOL_ARN");    // Do we need this?
 }

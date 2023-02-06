@@ -263,7 +263,6 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         'DYNAMO_DB_TABLE_NAME': this.dynamoDbTableName,
         'COGNITO_USERPOOL_ID': this.userPool.userPoolId,
-        'COGNITO_USERPOOL_ARN': this.userPool.userPoolArn,
       },
     });
     LambdaStack.enableSnapStart(lambdaFunction);

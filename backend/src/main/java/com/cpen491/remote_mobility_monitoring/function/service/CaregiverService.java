@@ -6,20 +6,33 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotE
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
-import com.cpen491.remote_mobility_monitoring.function.schema.Const;
-import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateCognitoUserResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.*;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetAllPatientsResponseBody.PatientSerialization;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.GetCaregiverResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,12 +40,14 @@ public class CaregiverService {
     @NonNull
     private CaregiverDao caregiverDao;
     @NonNull
-    private CognitoIdentityProviderClient cognitoIdentityProviderClient;
+    private CognitoWrapper cognitoWrapper;
+
     /**
      * Creates a Caregiver and adds it to an Organization.
      *
      * @param body The request body
      * @return {@link CreateCaregiverResponseBody}
+     * @throws CognitoException If Cognito fails to create user
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
@@ -43,43 +58,12 @@ public class CaregiverService {
         log.info("Creating Caregiver {}", body);
         Validator.validateCreateCaregiverRequestBody(body);
 
-        UserType cognitoUser;
-        AdminCreateUserRequest adminCreateUserParams = AdminCreateUserRequest.builder()
-                .desiredDeliveryMediums(DeliveryMediumType.EMAIL)
-                //.messageAction(MessageActionType.SUPPRESS)
-                .username(body.getEmail())
-                .userAttributes(
-                        AttributeType.builder().name("email_verified").value("true").build(),
-                        AttributeType.builder().name("email").value(body.getEmail()).build(),
-                        AttributeType.builder().name("given_name").value(body.getFirstName()).build(),
-                        AttributeType.builder().name("family_name").value(body.getLastName()).build(),
-                        AttributeType.builder().name("phone_number").value(body.getPhoneNumber()).build()
-                )
-                .userPoolId(Const.COGNITO_USERPOOL_ID == null ? "us-west-2_killme" : Const.COGNITO_USERPOOL_ID)
-                .build();
-        try {
-            log.info("creating user in cognito");
-            cognitoIdentityProviderClient.adminCreateUser(adminCreateUserParams);
-            log.info("user created in cognito");
-        } catch (CognitoIdentityProviderException e) {
-            log.error("error creating user in cognito", e);
-            throw e;
-        } catch (Exception e) {
-            log.error("error creating user in cognito", e);
-            throw new RuntimeException(e);
-        }
-
-        // Switch to sub if we want to index by userID instead of email
-//        String sub;
-//        try {
-//            sub = cognitoUser.attributes().stream().filter(attributeType -> attributeType.name().equals("sub")).findFirst().get().value();
-//        }
-//        catch (Exception e) {
-//            log.error("error getting sub from cognito", e);
-//            throw new RuntimeException(e);
-//        }
+        CognitoUser user = cognitoWrapper.createUser(body.getEmail());
+        String caregiverId = CaregiverTable.ID_PREFIX + user.getId();
 
         Caregiver caregiver = Caregiver.builder()
+                .pid(caregiverId)
+                .sid(caregiverId)
                 .email(body.getEmail())
                 .firstName(body.getFirstName())
                 .lastName(body.getLastName())
@@ -89,7 +73,8 @@ public class CaregiverService {
         caregiverDao.create(caregiver, body.getOrganizationId());
 
         return CreateCaregiverResponseBody.builder()
-                .caregiverId(caregiver.getPid())
+                .caregiverId(caregiverId)
+                .password(user.getPassword())
                 .build();
     }
 
@@ -224,38 +209,6 @@ public class CaregiverService {
         caregiverDao.delete(body.getCaregiverId());
 
         return DeleteCaregiverResponseBody.builder()
-                .message("OK")
-                .build();
-    }
-
-
-    public CreateCognitoUserResponseBody createCognitoUser(CreateCognitoUserRequestBody body) {
-        Validator.validateCreateCognitoUserRequestBody(body);
-
-        AdminCreateUserResponse cognitoUser;
-        AdminCreateUserRequest adminCreateUserParams = AdminCreateUserRequest.builder()
-                .desiredDeliveryMediums(DeliveryMediumType.EMAIL)
-                //.messageAction(MessageActionType.SUPPRESS)
-                .username(body.getEmail())
-                .userAttributes(
-                        AttributeType.builder().name("email_verified").value("true").build(),
-                        AttributeType.builder().name("email").value(body.getEmail()).build(),
-                        AttributeType.builder().name("given_name").value(body.getFirstName()).build(),
-                        AttributeType.builder().name("family_name").value(body.getLastName()).build(),
-                        AttributeType.builder().name("phone_number").value(body.getPhoneNumber()).build()
-                )
-                .userPoolId(Const.COGNITO_USERPOOL_ID)
-                .build();
-        try {
-            log.info("creating user in cognito");
-            cognitoUser = cognitoIdentityProviderClient.adminCreateUser(adminCreateUserParams);
-            log.info("user created in cognito");
-        } catch (Exception e) {
-            log.error("error creating user in cognito", e);
-            throw new RuntimeException(e);
-        }
-
-        return CreateCognitoUserResponseBody.builder()
                 .message("OK")
                 .build();
     }
