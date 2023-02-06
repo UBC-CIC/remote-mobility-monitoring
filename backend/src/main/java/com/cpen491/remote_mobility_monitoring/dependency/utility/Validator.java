@@ -169,6 +169,8 @@ public class Validator {
 
     public static void validateAdmin(Admin admin) {
         Validate.notNull(admin, ADMIN_RECORD_NULL_ERROR_MESSAGE);
+        validatePidEqualsSid(admin.getPid(), admin.getSid());
+        validateAdminId(admin.getPid());
         validateEmail(admin.getEmail());
         validateFirstName(admin.getFirstName());
         validateLastName(admin.getLastName());

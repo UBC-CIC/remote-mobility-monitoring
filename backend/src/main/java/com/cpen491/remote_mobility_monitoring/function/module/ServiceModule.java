@@ -24,8 +24,8 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public static AdminService adminService(AdminDao adminDao) {
-        return new AdminService(adminDao);
+    public static AdminService adminService(AdminDao adminDao, CognitoWrapper cognitoWrapper) {
+        return new AdminService(adminDao, cognitoWrapper);
     }
 
     @Provides

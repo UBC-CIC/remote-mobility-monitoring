@@ -3,6 +3,8 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.AdminDao;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequestBody;
@@ -45,6 +47,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class AdminServiceTest {
     private static final String ADMIN_ID = "adm-1";
+    private static final String ADMIN_ID_NO_PREFIX = "1";
+    private static final String PASSWORD = "password123";
     private static final String EMAIL = "jackjackson@email.com";
     private static final String FIRST_NAME = "Jack";
     private static final String LAST_NAME = "Jackson";
@@ -55,28 +59,47 @@ public class AdminServiceTest {
     AdminService cut;
     @Mock
     AdminDao adminDao;
+    @Mock
+    CognitoWrapper cognitoWrapper;
     ArgumentCaptor<Admin> adminCaptor;
 
     @BeforeEach
     public void setup() {
         adminCaptor = ArgumentCaptor.forClass(Admin.class);
-        cut = new AdminService(adminDao);
+        cut = new AdminService(adminDao, cognitoWrapper);
     }
 
     @Test
     public void testCreateAdmin_HappyCase() {
+        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(ADMIN_ID_NO_PREFIX, PASSWORD));
+
         CreateAdminRequestBody requestBody = buildCreateAdminRequestBody();
         CreateAdminResponseBody responseBody = cut.createAdmin(requestBody);
 
         verify(adminDao, times(1)).create(adminCaptor.capture(), eq(ORGANIZATION_ID));
+        assertEquals(ADMIN_ID, adminCaptor.getValue().getPid());
+        assertEquals(ADMIN_ID, adminCaptor.getValue().getSid());
         assertEquals(EMAIL, adminCaptor.getValue().getEmail());
         assertEquals(FIRST_NAME, adminCaptor.getValue().getFirstName());
         assertEquals(LAST_NAME, adminCaptor.getValue().getLastName());
         assertNotNull(responseBody);
+        assertEquals(ADMIN_ID, responseBody.getAdminId());
+        assertEquals(PASSWORD, responseBody.getPassword());
+    }
+
+    @Test
+    public void testCreateAdmin_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(cognitoWrapper).createUser(anyString());
+
+        CreateAdminRequestBody requestBody = buildCreateAdminRequestBody();
+        assertThatThrownBy(() -> cut.createAdmin(requestBody)).isSameAs(toThrow);
     }
 
     @Test
     public void testCreateAdmin_WHEN_AdminDaoCreateThrows_THEN_ThrowSameException() {
+        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(ADMIN_ID_NO_PREFIX, PASSWORD));
+
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(adminDao).create(any(Admin.class), anyString());
 

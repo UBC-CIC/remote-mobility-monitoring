@@ -41,7 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdminDaoTest extends DaoTestParent {
     private static final String PID = "adm-1";
+    private static final String PID2 = "adm-2";
     private static final String SID = PID;
+    private static final String SID2 = PID2;
     private static final String EMAIL1 = "johnsmith@email.com";
     private static final String EMAIL2 = "johnsmithiscool@email.com";
     private static final String FIRST_NAME = "John";
@@ -76,8 +78,8 @@ class AdminDaoTest extends DaoTestParent {
         assertTrue(response.hasItem());
 
         newRecord = Admin.convertFromMap(response.item());
-        assertNotEquals(PID, newRecord.getPid());
-        assertNotEquals(SID, newRecord.getSid());
+        assertEquals(PID, newRecord.getPid());
+        assertEquals(SID, newRecord.getSid());
         assertEquals(EMAIL1, newRecord.getEmail());
         assertEquals(FIRST_NAME, newRecord.getFirstName());
         assertEquals(LAST_NAME, newRecord.getLastName());
@@ -99,6 +101,8 @@ class AdminDaoTest extends DaoTestParent {
     public void testCreate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
         Admin newRecord = buildAdminDefault();
         cut.create(newRecord, EXISTS_ORGANIZATION_ID);
+        newRecord.setPid(PID2);
+        newRecord.setSid(SID2);
         assertThatThrownBy(() -> cut.create(newRecord, EXISTS_ORGANIZATION_ID)).isInstanceOf(DuplicateRecordException.class);
     }
 
@@ -111,6 +115,10 @@ class AdminDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
                 Arguments.of(null, EXISTS_ORGANIZATION_ID, ADMIN_RECORD_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(null, SID, EMAIL1, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin("", SID, EMAIL1, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, null, EMAIL1, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, "", EMAIL1, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, SID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID, null, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, EMAIL_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID, "", FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, EMAIL_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID, EMAIL1, null, LAST_NAME), EXISTS_ORGANIZATION_ID, FIRST_NAME_BLANK_ERROR_MESSAGE),
@@ -119,7 +127,10 @@ class AdminDaoTest extends DaoTestParent {
                 Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, ""), EXISTS_ORGANIZATION_ID, LAST_NAME_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), null, ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), "", ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), PID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+                Arguments.of(buildAdmin(PID, SID, EMAIL1, FIRST_NAME, LAST_NAME), PID, ORGANIZATION_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(EXISTS_ORGANIZATION_ID, EXISTS_ORGANIZATION_ID, EMAIL1, FIRST_NAME, LAST_NAME),
+                        EXISTS_ORGANIZATION_ID, ADMIN_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAdmin(PID, SID + "1", EMAIL1, FIRST_NAME, LAST_NAME), EXISTS_ORGANIZATION_ID, PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
 
@@ -234,6 +245,8 @@ class AdminDaoTest extends DaoTestParent {
         Admin newRecord1 = buildAdminDefault();
         cut.create(newRecord1, EXISTS_ORGANIZATION_ID);
         Admin newRecord2 = buildAdminDefault();
+        newRecord2.setPid(PID2);
+        newRecord2.setSid(SID2);
         newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2, EXISTS_ORGANIZATION_ID);
 

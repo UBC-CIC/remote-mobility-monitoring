@@ -33,7 +33,7 @@ public class AdminDao {
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of email, firstName,
+     * @throws NullPointerException Above 2 exceptions are thrown if any of pid, sid, email, firstName,
      *                              lastName, or organizationId are empty
      */
     public void create(Admin newRecord, String organizationId) {
@@ -48,7 +48,7 @@ public class AdminDao {
             throw new DuplicateRecordException(Admin.class.getSimpleName(), newRecord.getEmail());
         }
 
-        genericDao.setIdAndDate(newRecord, AdminTable.ID_PREFIX);
+        genericDao.setDate(newRecord);
         Map<String, AttributeValue> adminMap = Admin.convertToMap(newRecord);
         genericDao.put(adminMap);
         genericDao.addAssociation(Organization.convertToMap(organization), adminMap);
@@ -138,8 +138,6 @@ public class AdminDao {
     public void update(Admin updatedRecord) {
         log.info("Updating Admin record {}", updatedRecord);
         Validator.validateAdmin(updatedRecord);
-        Validator.validatePidEqualsSid(updatedRecord.getPid(), updatedRecord.getSid());
-        Validator.validateAdminId(updatedRecord.getPid());
 
         Admin found = findByEmail(updatedRecord.getEmail());
         if (found != null && !found.getPid().equals(updatedRecord.getPid())) {
