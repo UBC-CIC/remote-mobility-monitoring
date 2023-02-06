@@ -3,8 +3,8 @@ package com.cpen491.remote_mobility_monitoring.dependency.utility;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
-import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 import lombok.extern.slf4j.Slf4j;
 
