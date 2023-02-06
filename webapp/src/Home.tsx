@@ -11,6 +11,9 @@ function App() {
             <button onClick={() => {
                 nav("/sysadmin");
             }}>Sysadmin</button>
+            <button onClick={() => {
+                nav("/Dashboard");
+            }}>Dashboard</button>
         </div>
     );
 }
