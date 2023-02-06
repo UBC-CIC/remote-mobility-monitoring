@@ -8,11 +8,20 @@
 import SwiftUI
 import HealthKit
 
+@main
+struct remote_mobility_monitoring_iOSApp: App {
+    var body: some Scene {
+        WindowGroup {
+            LoadingView()
+        }
+    }
+}
+
 struct LoadingView: View {
     @State private var isLoading = true
 
     var body: some View {
-        addWalkingStepLengthData()
+        addHealthKitData()
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             self.isLoading = false
         }
@@ -26,7 +35,7 @@ struct LoadingView: View {
         }
     }
     
-    func addWalkingStepLengthData() {
+    func addHealthKitData() {
         let healthStore = HKHealthStore()
         let typesToShare: Set = [
             HKObjectType.quantityType(forIdentifier: .stepCount)!,
@@ -113,15 +122,6 @@ struct LoadingView: View {
                     print("Error saving walking running distance data: \(error?.localizedDescription ?? "Unknown error")")
                 }
             }
-        }
-    }
-}
-
-@main
-struct remote_mobility_monitoring_iOSApp: App {
-    var body: some Scene {
-        WindowGroup {
-            LoadingView()
         }
     }
 }

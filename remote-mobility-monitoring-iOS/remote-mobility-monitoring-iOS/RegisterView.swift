@@ -10,7 +10,7 @@ import HealthKit
 struct RegisterView: View {
     var body: some View {
         NavigationView {
-            VStack(spacing: 16) {
+            VStack() {
                 Text("Register")
                     .font(.largeTitle)
                 Spacer()
@@ -22,12 +22,12 @@ struct RegisterView: View {
                             Button(action: {
                             }) {
                                 Text("Scan QR Code")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
+                                    .font(ButtonStyling.font)
+                                    .foregroundColor(ButtonStyling.foreGroundColor)
                                     .padding()
                                     .frame(minWidth: 0,maxWidth: (geometry.size.width * 2/3))
-                                    .background(Color(UIColor(red: 54/255, green: 51/255, blue: 140/255, alpha: 1.0)))
-                                    .cornerRadius(25)
+                                    .background(ButtonStyling.color)
+                                    .cornerRadius(ButtonStyling.cornerRadius)
                             }
                             Spacer()
                         }
@@ -37,12 +37,12 @@ struct RegisterView: View {
                 Spacer()
                 NavigationLink(destination: MobilityView()) {
                     Text("Submit")
-                        .font(.headline)
-                        .foregroundColor(.white)
+                        .font(ButtonStyling.font)
+                        .foregroundColor(ButtonStyling.foreGroundColor)
                         .padding()
                         .frame(minWidth: 0, maxWidth: .infinity)
-                        .background(Color(UIColor(red: 54/255, green: 51/255, blue: 140/255, alpha: 1.0)))
-                        .cornerRadius(25)
+                        .background(ButtonStyling.color)
+                        .cornerRadius(ButtonStyling.cornerRadius)
                 }
             }
             .padding(.horizontal, 32)

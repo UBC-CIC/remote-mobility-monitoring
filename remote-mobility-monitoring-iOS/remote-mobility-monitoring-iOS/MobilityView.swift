@@ -133,9 +133,9 @@ struct MobilityView: View {
             VStack {
                 ForEach(healthStore.metrics, id: \.self) { metric in
                     GeometryReader { geo in
-                        RoundedRectangle(cornerRadius: 25)
-                            .fill(Color.white)
-                            .shadow(radius: 5)
+                        RoundedRectangle(cornerRadius: CardStyling.cornerRadius)
+                            .fill(CardStyling.foreGroundColor)
+                            .shadow(radius: CardStyling.shadow)
                             .frame(height: geo.size.height * 0.8)
                             .overlay(
                                 HStack {
@@ -160,12 +160,12 @@ struct MobilityView: View {
                 // Send data action
             }) {
                 Text("Send Data")
-                    .font(.headline)
-                    .foregroundColor(.white)
+                    .font(ButtonStyling.font)
+                    .foregroundColor(ButtonStyling.foreGroundColor)
                     .padding()
                     .frame(minWidth: 0, maxWidth: .infinity)
-                    .background(Color(UIColor(red: 54/255, green: 51/255, blue: 140/255, alpha: 1.0)))
-                    .cornerRadius(25)
+                    .background(ButtonStyling.color)
+                    .cornerRadius(ButtonStyling.cornerRadius)
             }
         }
         .padding(.horizontal, 32)

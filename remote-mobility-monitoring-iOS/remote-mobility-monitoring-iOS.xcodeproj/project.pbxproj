@@ -13,6 +13,7 @@
 		228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */; };
 		228B49D2296CB79A0046DFD4 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49D1296CB79A0046DFD4 /* RegisterView.swift */; };
 		22A771112989097600BB170A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22A771102989097600BB170A /* HealthKit.framework */; };
+		22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EE32102990AC8C0096DCA5 /* Styling.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		228B49D1296CB79A0046DFD4 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "remote-mobility-monitoring-iOS.entitlements"; sourceTree = "<group>"; };
 		22A771102989097600BB170A /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		22EE32102990AC8C0096DCA5 /* Styling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Styling.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 				228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */,
 				227547B82980BD5100D12030 /* MobilityView.swift */,
 				228B49D1296CB79A0046DFD4 /* RegisterView.swift */,
+				22EE32102990AC8C0096DCA5 /* Styling.swift */,
 				228B49C7296CB6510046DFD4 /* Assets.xcassets */,
 				228B49C9296CB6510046DFD4 /* Preview Content */,
 			);
@@ -156,6 +159,7 @@
 			files = (
 				228B49D2296CB79A0046DFD4 /* RegisterView.swift in Sources */,
 				227547B92980BD5100D12030 /* MobilityView.swift in Sources */,
+				22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */,
 				228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
