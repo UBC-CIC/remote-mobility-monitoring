@@ -1,0 +1,67 @@
+.Dashboard {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.Dashboard h1 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.date-picker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 25%;
+    margin-bottom: 10px;
+    margin-left: 20px;
+}
+
+.start-date-picker, .end-date-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.start-date-picker span, .end-date-picker span {
+    margin-bottom: 5px;
+    font-size: medium;
+}
+
+.buttons {
+    display: inline-block;
+    align-items: center;
+    justify-content: space-between;
+    width: 50%;
+    margin-top: -35px;
+    margin-left: 1100px;
+}
+
+button[name="export-button"] {
+    background-color: rgb(44, 43, 43);
+    color: white;
+    margin-right: 5px;
+    border-radius: 8px;
+}
+
+button[name="update-button"] {
+    background-color: rgb(69, 69, 228);
+    color: white;
+    margin-right: 5px;
+    border-radius: 8px;
+}
+
+button[name="share-button"] {
+    background-color: rgb(62, 210, 62);
+    color: white;
+    margin-right: 5px;
+    border-radius: 8px;
+}
+
+button[name="remove-button"] {
+    background-color: red;
+    color: white;
+    margin-right: 5px;
+    border-radius: 8px;
+}

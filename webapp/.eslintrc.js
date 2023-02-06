@@ -2,7 +2,8 @@ module.exports = {
     "env": {
         "browser": true,
         "es2021": true,
-        "jest": true
+        "jest": true,
+        "node": true
     },
     "extends": [
         "eslint:recommended",
@@ -25,10 +26,7 @@ module.exports = {
             "error",
             4
         ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
+        "linebreak-style": 0,
         "quotes": [
             "error",
             "double"
@@ -42,5 +40,5 @@ module.exports = {
         "react": {
             "version": "detect"
         }
-}
+    }
 };
