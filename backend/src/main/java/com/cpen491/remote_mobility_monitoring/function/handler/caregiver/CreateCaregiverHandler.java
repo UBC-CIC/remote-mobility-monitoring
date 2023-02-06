@@ -9,7 +9,6 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.google.gson.Gson;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
