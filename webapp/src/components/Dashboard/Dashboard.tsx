@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Card, Table } from "antd";
+import { Table } from "antd";
 import { Line } from "react-chartjs-2";
-import moment from "moment";
 import DatePicker from "react-datepicker";
 import "./Dashboard.css";
 import "react-datepicker/dist/react-datepicker.css";
+
 
 interface Props {
   patientName: string;
@@ -21,7 +21,7 @@ interface Props {
 // dummy data
 const sampleData = [
     {
-        date: "2022-01-01",
+        date: "2023-01-01",
         stepLength: 60,
         doubleSupportTime: 10,
         walkingSpeed: 1.5,
@@ -29,7 +29,7 @@ const sampleData = [
         distanceWalked: 1000,
     },
     {
-        date: "2022-01-02",
+        date: "2023-01-02",
         stepLength: 55,
         doubleSupportTime: 11,
         walkingSpeed: 1.6,
@@ -37,7 +37,7 @@ const sampleData = [
         distanceWalked: 900,
     },
     {
-        date: "2022-02-01",
+        date: "2023-02-04",
         stepLength: 65,
         doubleSupportTime: 11,
         walkingSpeed: 1.7,
@@ -49,21 +49,21 @@ const sampleData = [
 function Dashboard() {
     const [startDate, setStartDate] = useState<Date | null>();
     const [endDate, setEndDate] = useState<Date | null>();
-    //const [startDate, setStartDate] = useState<moment.Moment | null>();
-    //const [endDate, setEndDate] = useState<moment.Moment | null>();
-   
    
     //TODO:   make api call and convert the data into prop
     const dummyProp = {
         patientName: "John Doe",
         data: sampleData,
     } as Props;
-
-    /*
-    const filteredData = dummyProp.data.filter(
-        (d) => (!startDate || moment(d.date).isSameOrAfter(startDate)) && (!endDate || moment(d.date).isSameOrBefore(endDate))
-    );
     
+    const stringToDate = (s: string) => {
+        const parts = s.split("-");
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    };
+    
+    const filteredData = dummyProp.data.filter(
+        (d) => (!startDate || stringToDate(d.date).getTime()>=startDate.getTime()) && (!endDate || stringToDate(d.date).getTime()<=endDate.getTime())
+    );
    
     const stepLengthData = filteredData.map((d) => d.stepLength);
     const doubleSupportTimeData = filteredData.map((d) => d.doubleSupportTime);
@@ -71,31 +71,33 @@ function Dashboard() {
     const walkingAsymmetryData = filteredData.map((d) => d.walkingAsymmetry);
     const distanceWalkedData = filteredData.map((d) => d.distanceWalked);
     const dateData = filteredData.map((d) => d.date);
-
+    
     const averageStepLength = stepLengthData.reduce( ( p, c ) => p + c, 0 ) / stepLengthData.length;
     const averageDoubleSupportTime = doubleSupportTimeData.reduce( ( p, c ) => p + c, 0 ) / doubleSupportTimeData.length;
     const averageWalkingSpeed = walkingSpeedData.reduce( ( p, c ) => p + c, 0 ) / walkingSpeedData.length;
     const averageWalkingAsymmetry = walkingAsymmetryData.reduce( ( p, c ) => p + c, 0 ) / walkingAsymmetryData.length;
-*/
+
     const handleExportData = () => {
         // implement logic to export data as a csv file
-        console.log("");
+        //console.log("");
     };
    
     const handleUpdateDevice = () => {
         // implement logic to update the device used to collect data
-        console.log("");
+        //console.log("");
     };
    
     const handleShareData = () => {
         // implement logic to share data with another caregiver
-        console.log("");
+        //console.log("");
     };
    
     const handleRemoveRecord = () => {
         // implement logic to remove this patient's record
-        console.log("");
+        //console.log("");
     };
+
+    
     /*   
     const graphData = {
         labels: dateData,
@@ -188,6 +190,26 @@ function Dashboard() {
                 <button type="button" name="share-button"  onClick={handleShareData}>Share</button>
                 <button type="button" name="remove-button" onClick={handleRemoveRecord}>Remove</button>
             </div>
+            <div className="cards">
+                <div className="card">
+                    <h3>Step Length</h3>
+                    <p>{Math.round(averageStepLength)} cm</p>
+                </div>
+                <div className="card">
+                    <h3>Double Supoort Time</h3>
+                    <p>{Math.round(averageDoubleSupportTime)}%</p>
+                </div>
+                <div className="card">
+                    <h3>Walking Speed</h3>
+                    <p>{Math.round(averageWalkingSpeed)} kpm</p>
+                </div>
+                <div className="card">
+                    <h3>Walking Asymmetry</h3>
+                    <p>{Math.round(averageWalkingAsymmetry)}%</p>
+                </div>
+            </div>
+
+
         </div>
     );
 }
@@ -207,6 +229,12 @@ export default Dashboard;
                 <Button className="update-button" onClick={handleUpdateDevice}>Update Device</Button>
                 <Button className="share-button" onClick={handleShareData}>Share</Button>
                 <Button className="remove-button" onClick={handleRemoveRecord}>Remove</Button>
+            </div>
+                        <div className="cards" >
+                <Card title="Step Length">{averageStepLength}</Card>
+                <Card title="Double Support Time">{averageDoubleSupportTime}</Card>
+                <Card title="Walking Speed">{averageWalkingSpeed}</Card>
+                <Card title="Walking Asymmetry">{averageWalkingAsymmetry}</Card>
             </div>
             <div className="cards" style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
                 <Card title="Step Length" style={{ width: 300, display: "inline-block" }}> {averageStepLength}</Card>
