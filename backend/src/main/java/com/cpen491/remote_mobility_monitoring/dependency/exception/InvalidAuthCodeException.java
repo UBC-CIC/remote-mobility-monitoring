@@ -1,4 +1,4 @@
-package com.cpen491.remote_mobility_monitoring.datastore.exception;
+package com.cpen491.remote_mobility_monitoring.dependency.exception;
 
 public class InvalidAuthCodeException extends RuntimeException {
     private static final String ERROR_MESSAGE = "auth_code is invalid";

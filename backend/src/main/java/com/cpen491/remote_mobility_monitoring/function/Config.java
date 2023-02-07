@@ -1,5 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.function;
 
+import com.cpen491.remote_mobility_monitoring.function.module.AuthModule;
+import com.cpen491.remote_mobility_monitoring.function.module.AwsModule;
 import com.cpen491.remote_mobility_monitoring.function.module.DatastoreModule;
 import com.cpen491.remote_mobility_monitoring.function.module.EnvironmentModule;
 import com.cpen491.remote_mobility_monitoring.function.module.ServiceModule;
@@ -16,9 +18,11 @@ import javax.inject.Singleton;
 @Singleton
 @Component(modules = {
         EnvironmentModule.class,
+        AwsModule.class,
         DatastoreModule.class,
+        AuthModule.class,
         ServiceModule.class,
-        UtilityModule.class
+        UtilityModule.class,
 })
 public interface Config {
     OrganizationService organizationService();

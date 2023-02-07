@@ -14,4 +14,6 @@ import lombok.NoArgsConstructor;
 public class CreateCaregiverResponseBody {
     @SerializedName(Const.CAREGIVER_ID_NAME)
     private String caregiverId;
+    @SerializedName(Const.PASSWORD_NAME)
+    private String password;
 }

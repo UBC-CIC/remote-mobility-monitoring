@@ -3,8 +3,9 @@ package com.cpen491.remote_mobility_monitoring.dependency.utility;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
-import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -36,6 +37,10 @@ public class HandlerUtils {
         } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
             log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, e.getMessage());
+        } catch (CognitoException e) {
+            Throwable cause = e.getCause();
+            log.error("Got CognitoException due to {} with message {}, responding with bad request", cause.getClass(), cause.getMessage());
+            return generateApiGatewayResponse(StatusCode.BAD_REQUEST, cause.getMessage());
         } catch (RecordDoesNotExistException e) {
             log.error("Got {} error {}, responding with not found", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.NOT_FOUND, e.getMessage());
@@ -55,11 +60,12 @@ public class HandlerUtils {
                 .withBody(body);
     }
 
-    public static void processGenericRequest(Function<Map<String, String>, String> func, Map<String, String> request) {
+    public static String processGenericRequest(Function<Map<String, String>, String> func, Map<String, String> request) {
         try {
-            func.apply(request);
+            return func.apply(request);
         } catch (Exception e) {
             log.error("Got {} error {} with cause{}", e.getClass(), e.getMessage(), e.getCause());
+            return null;
         }
     }
 }

@@ -5,6 +5,9 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminResponseBody;
@@ -14,17 +17,22 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
+
 @Slf4j
 @RequiredArgsConstructor
 public class AdminService {
     @NonNull
     private AdminDao adminDao;
+    @NonNull
+    private CognitoWrapper cognitoWrapper;
 
     /**
      * Creates an Admin and adds it to an Organization.
      *
      * @param body The request body
      * @return {@link CreateAdminResponseBody}
+     * @throws CognitoException If Cognito fails to create user
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
@@ -35,7 +43,12 @@ public class AdminService {
         log.info("Creating Admin {}", body);
         Validator.validateCreateAdminRequestBody(body);
 
+        CognitoUser user = cognitoWrapper.createUser(body.getEmail());
+        String adminId = AdminTable.ID_PREFIX + user.getId();
+
         Admin admin = Admin.builder()
+                .pid(adminId)
+                .sid(adminId)
                 .email(body.getEmail())
                 .firstName(body.getFirstName())
                 .lastName(body.getLastName())
@@ -43,7 +56,8 @@ public class AdminService {
         adminDao.create(admin, body.getOrganizationId());
 
         return CreateAdminResponseBody.builder()
-                .message("OK")
+                .adminId(adminId)
+                .password(user.getPassword())
                 .build();
     }
 

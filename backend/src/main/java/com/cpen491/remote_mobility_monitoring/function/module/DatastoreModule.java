@@ -7,6 +7,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import dagger.Module;
 import dagger.Provides;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -19,9 +20,14 @@ public class DatastoreModule {
     // This creates DynamoDbClient and significantly reduces cold start time
     static {
         try {
-            DaoFactory factory = daoFactory("REMOTE_MOBILITY_MONITORING-dev");
-            OrganizationDao orgDao = organizationDao(factory);
-            orgDao.findAllCaregivers("org-12345");
+            System.out.println("THREE");
+            DynamoDbClient ddbClient = AwsModule.dynamoDbClient(AwsModule.httpClient());
+            DaoFactory daoFactory = daoFactory(EnvironmentModule.dynamoDbTableName(), ddbClient);
+            OrganizationDao organizationDao = organizationDao(daoFactory);
+            PatientDao patientDao = patientDao(daoFactory);
+            CaregiverDao caregiverDao = caregiverDao(daoFactory, organizationDao, patientDao);
+            caregiverDao.hasPatient("pat-123", "car-123");
+            System.out.println("FOUR");
         } catch (Exception e) {
             // Expects exception
         }
@@ -29,8 +35,8 @@ public class DatastoreModule {
 
     @Provides
     @Singleton
-    public static DaoFactory daoFactory(@Named(DYNAMO_DB_TABLE_NAME) String tableName) {
-        return new DaoFactory(tableName);
+    public static DaoFactory daoFactory(@Named(DYNAMO_DB_TABLE_NAME) String tableName, DynamoDbClient ddbClient) {
+        return new DaoFactory(tableName, ddbClient);
     }
 
     @Provides

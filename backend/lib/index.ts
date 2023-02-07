@@ -9,6 +9,9 @@ const stages = ['dev', 'prod'];
 
 const app = new App();
 stages.forEach((stage) => {
+  const cognitoStack = new CognitoStack(app, `RemoteMobilityMonitoringCognitoStack-${stage}`, {
+    stage: stage,
+  });
   new TimestreamStack(app, `RemoteMobilityMonitoringTimestreamStack-${stage}`, {
     stage: stage,
   });
@@ -18,9 +21,11 @@ stages.forEach((stage) => {
   const lambdaStack = new LambdaStack(app, `RemoteMobilityMonitoringLambdaStack-${stage}`, {
     stage: stage,
     table: dynamoDbStack.remoteMobilityMonitoringTable,
+    userPool: cognitoStack.userPool
   });
   const apigatewayStackProps: ApiGatewayStackProps = {
     stage: stage,
+    userPool: cognitoStack.userPool,
     defaultFunction: lambdaStack.defaultFunction,
     getOrganizationFunction: lambdaStack.getOrganizationAlias,
     getAdminFunction: lambdaStack.getAdminAlias,
@@ -39,11 +44,6 @@ stages.forEach((stage) => {
     updatePatientFunction: lambdaStack.updatePatientAlias,
     deletePatientFunction: lambdaStack.deletePatientAlias,
   }
-  if (stage === 'prod') {
-    new CognitoStack(app, `RemoteMobilityMonitoringCognitoStack-${stage}`);
-    new ApiGatewayStack(app, `RemoteMobilityMonitoringApiGatewayStack-${stage}`, apigatewayStackProps);
-  } else {
-    new ApiGatewayStack(app, `RemoteMobilityMonitoringApiGatewayStack-${stage}`, apigatewayStackProps);
-  }
+  new ApiGatewayStack(app, `RemoteMobilityMonitoringApiGatewayStack-${stage}`, apigatewayStackProps);
 })
 app.synth();

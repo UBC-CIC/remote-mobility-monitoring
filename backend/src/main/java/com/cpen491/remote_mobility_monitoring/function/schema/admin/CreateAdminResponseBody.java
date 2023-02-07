@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateAdminResponseBody {
-    @SerializedName(Const.MESSAGE_NAME)
-    private String message;
+    @SerializedName(Const.ADMIN_ID_NAME)
+    private String adminId;
+    @SerializedName(Const.PASSWORD_NAME)
+    private String password;
 }

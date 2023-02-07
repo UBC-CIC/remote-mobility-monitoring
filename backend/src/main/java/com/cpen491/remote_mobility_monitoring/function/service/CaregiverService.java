@@ -6,6 +6,9 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotE
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
@@ -29,17 +32,22 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
+
 @Slf4j
 @RequiredArgsConstructor
 public class CaregiverService {
     @NonNull
     private CaregiverDao caregiverDao;
+    @NonNull
+    private CognitoWrapper cognitoWrapper;
 
     /**
      * Creates a Caregiver and adds it to an Organization.
      *
      * @param body The request body
      * @return {@link CreateCaregiverResponseBody}
+     * @throws CognitoException If Cognito fails to create user
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
@@ -50,7 +58,12 @@ public class CaregiverService {
         log.info("Creating Caregiver {}", body);
         Validator.validateCreateCaregiverRequestBody(body);
 
+        CognitoUser user = cognitoWrapper.createUser(body.getEmail());
+        String caregiverId = CaregiverTable.ID_PREFIX + user.getId();
+
         Caregiver caregiver = Caregiver.builder()
+                .pid(caregiverId)
+                .sid(caregiverId)
                 .email(body.getEmail())
                 .firstName(body.getFirstName())
                 .lastName(body.getLastName())
@@ -60,7 +73,8 @@ public class CaregiverService {
         caregiverDao.create(caregiver, body.getOrganizationId());
 
         return CreateCaregiverResponseBody.builder()
-                .caregiverId(caregiver.getPid())
+                .caregiverId(caregiverId)
+                .password(user.getPassword())
                 .build();
     }
 

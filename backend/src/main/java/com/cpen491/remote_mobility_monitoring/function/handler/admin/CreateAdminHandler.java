@@ -15,7 +15,7 @@ import java.util.Map;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processGenericRequest;
 
 @Slf4j
-public class CreateAdminHandler implements RequestHandler<Map<String, String>, Void> {
+public class CreateAdminHandler implements RequestHandler<Map<String, String>, String> {
     private final AdminService adminService;
     private final Gson gson;
 
@@ -26,9 +26,9 @@ public class CreateAdminHandler implements RequestHandler<Map<String, String>, V
     }
 
     @Override
-    public Void handleRequest(Map<String, String> event, Context context) {
+    public String handleRequest(Map<String, String> event, Context context) {
         log.info("Received Create Admin request with event {}", event);
-        processGenericRequest((request) -> {
+        return processGenericRequest((request) -> {
             CreateAdminRequestBody requestBody = CreateAdminRequestBody.builder()
                     .email(event.get(Const.EMAIL_NAME))
                     .firstName(event.get(Const.FIRST_NAME_NAME))
@@ -36,9 +36,8 @@ public class CreateAdminHandler implements RequestHandler<Map<String, String>, V
                     .organizationId(event.get(Const.ORGANIZATION_ID_NAME))
                     .build();
             CreateAdminResponseBody responseBody = adminService.createAdmin(requestBody);
-            log.info("Responding to Create Admin request with response body {}", responseBody);
+            log.info("Responding to Create Admin request with adminId {}", responseBody.getAdminId());
             return gson.toJson(responseBody);
         }, event);
-        return null;
     }
 }

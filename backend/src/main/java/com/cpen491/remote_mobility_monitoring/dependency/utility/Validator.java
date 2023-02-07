@@ -35,7 +35,6 @@ public class Validator {
     public static final String PID_BLANK_ERROR_MESSAGE = "pid must be present";
     public static final String SID_BLANK_ERROR_MESSAGE = "sid must be present";
     public static final String PID_NOT_EQUAL_SID_ERROR_MESSAGE = "pid must be the same as sid";
-    public static final String ID_BLANK_ERROR_MESSAGE = "id must be present";
     public static final String NAME_BLANK_ERROR_MESSAGE = "name must be present";
     public static final String EMAIL_BLANK_ERROR_MESSAGE = "email must be present";
     public static final String FIRST_NAME_BLANK_ERROR_MESSAGE = "first_name must be present";
@@ -85,10 +84,6 @@ public class Validator {
         if (!pid.equals(sid)) {
             throw new IllegalArgumentException(PID_NOT_EQUAL_SID_ERROR_MESSAGE);
         }
-    }
-
-    public static void validateId(String id) {
-        Validate.notBlank(id, ID_BLANK_ERROR_MESSAGE);
     }
 
     public static void validateName(String name) {
@@ -174,6 +169,8 @@ public class Validator {
 
     public static void validateAdmin(Admin admin) {
         Validate.notNull(admin, ADMIN_RECORD_NULL_ERROR_MESSAGE);
+        validatePidEqualsSid(admin.getPid(), admin.getSid());
+        validateAdminId(admin.getPid());
         validateEmail(admin.getEmail());
         validateFirstName(admin.getFirstName());
         validateLastName(admin.getLastName());
@@ -181,6 +178,8 @@ public class Validator {
 
     public static void validateCaregiver(Caregiver caregiver) {
         Validate.notNull(caregiver, CAREGIVER_RECORD_NULL_ERROR_MESSAGE);
+        validatePidEqualsSid(caregiver.getPid(), caregiver.getSid());
+        validateCaregiverId(caregiver.getPid());
         validateEmail(caregiver.getEmail());
         validateFirstName(caregiver.getFirstName());
         validateLastName(caregiver.getLastName());

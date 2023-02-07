@@ -2,11 +2,13 @@ import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 import { formResourceName } from "../utility";
 
 interface LambdaStackProps extends cdk.StackProps {
   readonly stage: string;
   readonly table: dynamodb.Table;
+  readonly userPool: cognito.UserPool;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -15,6 +17,7 @@ export class LambdaStack extends cdk.Stack {
   private static handlerPathPrefix = 'com.cpen491.remote_mobility_monitoring.function.handler.';
   private static timeout = cdk.Duration.seconds(300);
   private static memorySize = 512;
+  private readonly userPool: cognito.UserPool;
 
   public readonly lambdaRole: iam.Role
   public readonly dynamoDbTableName: string;
@@ -62,6 +65,7 @@ export class LambdaStack extends cdk.Stack {
     const roleName = `RemoteMobilityMonitoringLambdaRole-${props.stage}`
     this.lambdaRole = this.createLambdaRole(roleName, props.table);
     this.dynamoDbTableName = props.table.tableName;
+    this.userPool = props.userPool;
 
     // TODO: DLQs? Layers?
 
@@ -164,6 +168,14 @@ export class LambdaStack extends cdk.Stack {
       resources: ['*'],
     }));
 
+    // Adds Cognito policies to the lambda role
+    role.addManagedPolicy(
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCognitoPowerUser')
+    )
+    role.addManagedPolicy(
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCognitoDeveloperAuthenticatedIdentities')
+    )
+
     return role;
   }
 
@@ -250,6 +262,7 @@ export class LambdaStack extends cdk.Stack {
       role: this.lambdaRole,
       environment: {
         'DYNAMO_DB_TABLE_NAME': this.dynamoDbTableName,
+        'COGNITO_USERPOOL_ID': this.userPool.userPoolId,
       },
     });
     LambdaStack.enableSnapStart(lambdaFunction);
