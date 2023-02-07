@@ -60,11 +60,12 @@ public class HandlerUtils {
                 .withBody(body);
     }
 
-    public static void processGenericRequest(Function<Map<String, String>, String> func, Map<String, String> request) {
+    public static String processGenericRequest(Function<Map<String, String>, String> func, Map<String, String> request) {
         try {
-            func.apply(request);
+            return func.apply(request);
         } catch (Exception e) {
             log.error("Got {} error {} with cause{}", e.getClass(), e.getMessage(), e.getCause());
+            return null;
         }
     }
 }

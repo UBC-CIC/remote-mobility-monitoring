@@ -29,7 +29,7 @@ export class CognitoStack extends cdk.Stack {
       oAuth: {
         flows: {
             authorizationCodeGrant: true,
-            implicitCodeGrant: true
+            implicitCodeGrant: true // TODO: do we need this?
         },
         scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE, cognito.OAuthScope.PHONE],
         callbackUrls: CognitoStack.CALLBACK_URLS,

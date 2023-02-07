@@ -25,6 +25,7 @@ stages.forEach((stage) => {
   });
   const apigatewayStackProps: ApiGatewayStackProps = {
     stage: stage,
+    userPool: cognitoStack.userPool,
     defaultFunction: lambdaStack.defaultFunction,
     getOrganizationFunction: lambdaStack.getOrganizationAlias,
     getAdminFunction: lambdaStack.getAdminAlias,
