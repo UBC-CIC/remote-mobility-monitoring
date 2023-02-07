@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.AdminDao;
+import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
@@ -25,10 +26,12 @@ public class AdminService {
     @NonNull
     private AdminDao adminDao;
     @NonNull
+    private OrganizationDao organizationDao;
+    @NonNull
     private CognitoWrapper cognitoWrapper;
 
     /**
-     * Creates an Admin and adds it to an Organization.
+     * Creates an Admin in database and Cognito and adds it to an Organization.
      *
      * @param body The request body
      * @return {@link CreateAdminResponseBody}
@@ -42,6 +45,8 @@ public class AdminService {
     public CreateAdminResponseBody createAdmin(CreateAdminRequestBody body) {
         log.info("Creating Admin {}", body);
         Validator.validateCreateAdminRequestBody(body);
+
+        organizationDao.findById(body.getOrganizationId());
 
         CognitoUser user = cognitoWrapper.createUser(body.getEmail());
         String adminId = AdminTable.ID_PREFIX + user.getId();

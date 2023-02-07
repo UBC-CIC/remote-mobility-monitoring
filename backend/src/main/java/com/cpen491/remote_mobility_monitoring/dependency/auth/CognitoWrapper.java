@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminDeleteUserRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.DeliveryMediumType;
@@ -63,6 +64,30 @@ public class CognitoWrapper {
                     .stream().filter(attribute -> attribute.name().equals("sub")).findFirst().get().value();
             return new CognitoUser(id, password);
         } catch (CognitoIdentityProviderException | NoSuchElementException e) {
+            log.error("Encountered Cognito error", e);
+            throw new CognitoException(e);
+        }
+    }
+
+    /**
+     * Deletes a user in Cognito
+     *
+     * @param email The email of the user
+     * @throws CognitoException If Cognito delete user fails and throws an exception
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if email is empty
+     */
+    public void deleteUser(String email) {
+        log.info("Deleting user with email {} in Cognito", email);
+        Validator.validateEmail(email);
+
+        AdminDeleteUserRequest request = AdminDeleteUserRequest.builder()
+                .username(email)
+                .userPoolId(userpoolId)
+                .build();
+        try {
+            cognitoIdentityProviderClient.adminDeleteUser(request);
+        } catch (CognitoIdentityProviderException e) {
             log.error("Encountered Cognito error", e);
             throw new CognitoException(e);
         }

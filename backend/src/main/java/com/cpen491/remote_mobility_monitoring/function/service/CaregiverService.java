@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
+import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
@@ -40,10 +41,12 @@ public class CaregiverService {
     @NonNull
     private CaregiverDao caregiverDao;
     @NonNull
+    private OrganizationDao organizationDao;
+    @NonNull
     private CognitoWrapper cognitoWrapper;
 
     /**
-     * Creates a Caregiver and adds it to an Organization.
+     * Creates a Caregiver in database and Cognito and adds it to an Organization.
      *
      * @param body The request body
      * @return {@link CreateCaregiverResponseBody}
@@ -57,6 +60,8 @@ public class CaregiverService {
     public CreateCaregiverResponseBody createCaregiver(CreateCaregiverRequestBody body) {
         log.info("Creating Caregiver {}", body);
         Validator.validateCreateCaregiverRequestBody(body);
+
+        organizationDao.findById(body.getOrganizationId());
 
         CognitoUser user = cognitoWrapper.createUser(body.getEmail());
         String caregiverId = CaregiverTable.ID_PREFIX + user.getId();
@@ -171,10 +176,9 @@ public class CaregiverService {
      *
      * @param body The request body
      * @return {@link UpdateCaregiverResponseBody}
-     * @throws DuplicateRecordException If record with the given email already exists
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of caregiverId, email, firstName, lastName,
+     * @throws NullPointerException Above 2 exceptions are thrown if any of caregiverId, firstName, lastName,
      *                              title, or phoneNumber are empty
      */
     public UpdateCaregiverResponseBody updateCaregiver(UpdateCaregiverRequestBody body) {
@@ -182,7 +186,6 @@ public class CaregiverService {
         Validator.validateUpdateCaregiverRequestBody(body);
 
         Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
-        caregiver.setEmail(body.getEmail());
         caregiver.setFirstName(body.getFirstName());
         caregiver.setLastName(body.getLastName());
         caregiver.setTitle(body.getTitle());
@@ -205,6 +208,13 @@ public class CaregiverService {
     public DeleteCaregiverResponseBody deleteCaregiver(DeleteCaregiverRequestBody body) {
         log.info("Deleting Caregiver {}", body);
         Validator.validateDeleteCaregiverRequestBody(body);
+
+        try {
+            Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
+            cognitoWrapper.deleteUser(caregiver.getEmail());
+        } catch (Exception e) {
+            log.warn("Error {} thrown when trying to find and delete Caregiver {} in Cognito", e.getClass(), body);
+        }
 
         caregiverDao.delete(body.getCaregiverId());
 

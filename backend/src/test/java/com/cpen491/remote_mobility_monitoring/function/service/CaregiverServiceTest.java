@@ -1,11 +1,14 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
+import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
@@ -67,6 +70,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -95,13 +99,15 @@ public class CaregiverServiceTest {
     @Mock
     CaregiverDao caregiverDao;
     @Mock
+    OrganizationDao organizationDao;
+    @Mock
     CognitoWrapper cognitoWrapper;
     ArgumentCaptor<Caregiver> caregiverCaptor;
 
     @BeforeEach
     public void setup() {
         caregiverCaptor = ArgumentCaptor.forClass(Caregiver.class);
-        cut = new CaregiverService(caregiverDao, cognitoWrapper);
+        cut = new CaregiverService(caregiverDao, organizationDao, cognitoWrapper);
     }
 
     @Test
@@ -125,7 +131,16 @@ public class CaregiverServiceTest {
     }
 
     @Test
-    public void testCreateCaregiver_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
+    public void testCreateCaregiver_WHEN_OrganizationDaoFindByIdThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(organizationDao).findById(anyString());
+
+        CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
+        assertThatThrownBy(() -> cut.createCaregiver(requestBody)).isSameAs(toThrow);
+    }
+
+    @Test
+    public void testCreateCaregiver_WHEN_CognitoWrapperCreateUserThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(cognitoWrapper).createUser(anyString());
 
@@ -399,37 +414,61 @@ public class CaregiverServiceTest {
     private static Stream<Arguments> invalidInputsForUpdateCaregiver() {
         return Stream.of(
                 Arguments.of(null, UPDATE_CAREGIVER_NULL_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(null, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(null, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
                         CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody("", EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody("", FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
                         CAREGIVER_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(PATIENT_ID1, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(PATIENT_ID1, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
                         CAREGIVER_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, null, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
-                        EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, "", FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER),
-                        EMAIL_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, null, LAST_NAME, TITLE1, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, null, LAST_NAME, TITLE1, PHONE_NUMBER),
                         FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, "", LAST_NAME, TITLE1, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, "", LAST_NAME, TITLE1, PHONE_NUMBER),
                         FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, null, TITLE1, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, FIRST_NAME, null, TITLE1, PHONE_NUMBER),
                         LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, "", TITLE1, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, FIRST_NAME, "", TITLE1, PHONE_NUMBER),
                         LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER),
                         TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER),
                         TITLE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, null),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, FIRST_NAME, LAST_NAME, TITLE1, null),
                         PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, ""),
+                Arguments.of(buildUpdateCaregiverRequestBody(CAREGIVER_ID, FIRST_NAME, LAST_NAME, TITLE1, ""),
                         PHONE_NUMBER_BLANK_ERROR_MESSAGE)
         );
     }
 
     @Test
     public void testDeleteCaregiver_HappyCase() {
+        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
+
+        DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
+        DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
+
+        verify(cognitoWrapper, times(1)).deleteUser(eq(EMAIL));
+        verify(caregiverDao, times(1)).delete(eq(CAREGIVER_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testDeleteCaregiver_WHEN_CaregiverFindByIdThrows_THEN_NoThrow() {
+        Mockito.doThrow(RecordDoesNotExistException.class).when(caregiverDao).findById(anyString());
+
+        DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
+        DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
+
+        verify(cognitoWrapper, never()).deleteUser(anyString());
+        verify(caregiverDao, times(1)).delete(eq(CAREGIVER_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testDeleteCaregiver_WHEN_CognitoWrapperDeleteUserThrows_THEN_NoThrow() {
+        when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
+
+        Mockito.doThrow(CognitoException.class).when(cognitoWrapper).deleteUser(anyString());
+
         DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
         DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
 
@@ -520,14 +559,13 @@ public class CaregiverServiceTest {
     }
 
     private static UpdateCaregiverRequestBody buildUpdateCaregiverRequestBody() {
-        return buildUpdateCaregiverRequestBody(CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER);
+        return buildUpdateCaregiverRequestBody(CAREGIVER_ID, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER);
     }
 
-    private static UpdateCaregiverRequestBody buildUpdateCaregiverRequestBody(String caregiverId, String email, String firstName,
-                                                                              String lastName, String title, String phoneNumber) {
+    private static UpdateCaregiverRequestBody buildUpdateCaregiverRequestBody(String caregiverId, String firstName, String lastName,
+                                                                              String title, String phoneNumber) {
         return UpdateCaregiverRequestBody.builder()
                 .caregiverId(caregiverId)
-                .email(email)
                 .firstName(firstName)
                 .lastName(lastName)
                 .title(title)

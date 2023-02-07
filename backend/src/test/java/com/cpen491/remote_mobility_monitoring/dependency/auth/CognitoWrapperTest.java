@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminDeleteUserRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.UserType;
@@ -22,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +81,34 @@ class CognitoWrapperTest {
     @NullAndEmptySource
     public void testCreateUser_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String email) {
         assertInvalidInputExceptionThrown(() -> cut.createUser(email), EMAIL_BLANK_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void testDeleteUser_HappyCase() {
+        cut.deleteUser(EMAIL);
+
+        verify(cognitoIdentityProviderClient, times(1)).adminDeleteUser(any(AdminDeleteUserRequest.class));
+    }
+
+    @Test
+    public void testDeleteUser_WHEN_CognitoClientThrowsCognitoIdentityProviderException_THEN_ThrowCognitoException() {
+        Mockito.doThrow(CognitoIdentityProviderException.class).when(cognitoIdentityProviderClient).adminDeleteUser(any(AdminDeleteUserRequest.class));
+
+        assertThatThrownBy(() -> cut.deleteUser(EMAIL)).isInstanceOf(CognitoException.class);
+    }
+
+    @Test
+    public void testDeleteUser_WHEN_CognitoClientThrowsOtherException_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(cognitoIdentityProviderClient).adminDeleteUser(any(AdminDeleteUserRequest.class));
+
+        assertThatThrownBy(() -> cut.deleteUser(EMAIL)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    public void testDeleteUser_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String email) {
+        assertInvalidInputExceptionThrown(() -> cut.deleteUser(email), EMAIL_BLANK_ERROR_MESSAGE);
     }
 
     private static AdminCreateUserResponse buildAdminCreateUserResponse(String name, String value) {

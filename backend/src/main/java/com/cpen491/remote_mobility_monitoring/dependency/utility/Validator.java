@@ -256,7 +256,6 @@ public class Validator {
     public static void validateUpdateCaregiverRequestBody(UpdateCaregiverRequestBody body) {
         Validate.notNull(body, UPDATE_CAREGIVER_NULL_ERROR_MESSAGE);
         validateCaregiverId(body.getCaregiverId());
-        validateEmail(body.getEmail());
         validateFirstName(body.getFirstName());
         validateLastName(body.getLastName());
         validateTitle(body.getTitle());

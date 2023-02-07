@@ -1,6 +1,7 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.AdminDao;
+import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
@@ -60,13 +61,15 @@ public class AdminServiceTest {
     @Mock
     AdminDao adminDao;
     @Mock
+    OrganizationDao organizationDao;
+    @Mock
     CognitoWrapper cognitoWrapper;
     ArgumentCaptor<Admin> adminCaptor;
 
     @BeforeEach
     public void setup() {
         adminCaptor = ArgumentCaptor.forClass(Admin.class);
-        cut = new AdminService(adminDao, cognitoWrapper);
+        cut = new AdminService(adminDao, organizationDao, cognitoWrapper);
     }
 
     @Test
@@ -88,7 +91,16 @@ public class AdminServiceTest {
     }
 
     @Test
-    public void testCreateAdmin_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
+    public void testCreateAdmin_WHEN_OrganizationDaoFindByIdThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(organizationDao).findById(anyString());
+
+        CreateAdminRequestBody requestBody = buildCreateAdminRequestBody();
+        assertThatThrownBy(() -> cut.createAdmin(requestBody)).isSameAs(toThrow);
+    }
+
+    @Test
+    public void testCreateAdmin_WHEN_CognitoWrapperCreateUserThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(cognitoWrapper).createUser(anyString());
 

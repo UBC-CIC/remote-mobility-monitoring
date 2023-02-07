@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminDeleteUserRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.io.IOException;
@@ -46,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LambdaHandlersIntegrationTest {
     private static final String TABLE_NAME = "REMOTE_MOBILITY_MONITORING-dev";
+    private static final String COGNITO_USERPOOL_ID = "";
     private static final String BASE_URL = "";
     private static final String ORGANIZATION_ID = "org-1";
     private static final String NOT_EXISTS_ORGANIZATION_ID = "org-3535";
@@ -53,7 +56,6 @@ public class LambdaHandlersIntegrationTest {
     private static final String NOT_EXISTS_CAREGIVER_ID = "car-53135";
     private static final String CAREGIVER_EMAIL1 = "caregiverTest1@email.com";
     private static final String CAREGIVER_EMAIL2 = "caregiverTest2@email.com";
-    private static final String CAREGIVER_UPDATED_EMAIL = "caregiverTestOne@email.com";
     private static final String CAREGIVER_NAME1 = "CaregiverTest1";
     private static final String CAREGIVER_NAME2 = "CaregiverTest2";
     private static final String CAREGIVER_UPDATED_NAME1 = "CaregiverTestOne";
@@ -109,6 +111,21 @@ public class LambdaHandlersIntegrationTest {
 
     @AfterAll
     public static void teardown() {
+        CognitoIdentityProviderClient cognitoClient = CognitoIdentityProviderClient.builder()
+                .region(Region.US_WEST_2)
+                .build();
+        for (String email : new String[]{CAREGIVER_EMAIL1, CAREGIVER_EMAIL2}) {
+            AdminDeleteUserRequest request = AdminDeleteUserRequest.builder()
+                    .username(email)
+                    .userPoolId(COGNITO_USERPOOL_ID)
+                    .build();
+            try {
+                cognitoClient.adminDeleteUser(request);
+            } catch (Exception e) {
+                System.out.printf("User with email %s does not exist%n", email);
+            }
+        }
+
         genericDao.delete(ORGANIZATION_ID);
         for (String pid : idMap.values()) {
             genericDao.delete(pid);
@@ -325,19 +342,13 @@ public class LambdaHandlersIntegrationTest {
     public void testUpdateCaregiversInformation() throws IOException, InterruptedException {
         HttpResponse<String> response;
 
-        // Duplicate email as Caregiver 2, should fail
+        // Not exists caregiver ID, should fail
         UpdateCaregiverRequestBody updateCaregiver1RequestBody = UpdateCaregiverRequestBody.builder()
-                .email(CAREGIVER_EMAIL2)
                 .firstName(CAREGIVER_UPDATED_NAME1)
                 .lastName(CAREGIVER_UPDATED_NAME1)
                 .title(CAREGIVER_UPDATED_TITLE)
                 .phoneNumber(CAREGIVER_PHONE_NUMBER)
                 .build();
-        response = sendPutRequest(BASE_URL + "/caregivers/" + idMap.get(CAREGIVER_ID1_NAME), gson.toJson(updateCaregiver1RequestBody));
-        assertEquals(StatusCode.BAD_REQUEST.code, response.statusCode());
-
-        // Not exists caregiver ID, should fail
-        updateCaregiver1RequestBody.setEmail(CAREGIVER_UPDATED_EMAIL);
         response = sendPutRequest(BASE_URL + "/caregivers/" + NOT_EXISTS_CAREGIVER_ID, gson.toJson(updateCaregiver1RequestBody));
         assertEquals(StatusCode.NOT_FOUND.code, response.statusCode());
 
@@ -349,7 +360,7 @@ public class LambdaHandlersIntegrationTest {
         response = sendGetRequest(BASE_URL + "/caregivers/" + idMap.get(CAREGIVER_ID1_NAME));
         assertEquals(StatusCode.OK.code, response.statusCode());
         GetCaregiverResponseBody getCaregiverResponseBody = gson.fromJson(response.body(), GetCaregiverResponseBody.class);
-        assertEquals(CAREGIVER_UPDATED_EMAIL, getCaregiverResponseBody.getEmail());
+        assertEquals(CAREGIVER_EMAIL1, getCaregiverResponseBody.getEmail());
         assertEquals(CAREGIVER_UPDATED_NAME1, getCaregiverResponseBody.getFirstName());
         assertEquals(CAREGIVER_UPDATED_NAME1, getCaregiverResponseBody.getLastName());
         assertEquals(CAREGIVER_UPDATED_TITLE, getCaregiverResponseBody.getTitle());

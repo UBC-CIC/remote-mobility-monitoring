@@ -14,8 +14,6 @@ import lombok.NoArgsConstructor;
 public class UpdateCaregiverRequestBody {
     @SerializedName(Const.CAREGIVER_ID_NAME)
     private String caregiverId;
-    @SerializedName(Const.EMAIL_NAME)
-    private String email;
     @SerializedName(Const.FIRST_NAME_NAME)
     private String firstName;
     @SerializedName(Const.LAST_NAME_NAME)

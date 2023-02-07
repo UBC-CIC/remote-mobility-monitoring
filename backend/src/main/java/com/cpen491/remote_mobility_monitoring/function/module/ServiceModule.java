@@ -24,14 +24,14 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public static AdminService adminService(AdminDao adminDao, CognitoWrapper cognitoWrapper) {
-        return new AdminService(adminDao, cognitoWrapper);
+    public static AdminService adminService(AdminDao adminDao, OrganizationDao organizationDao, CognitoWrapper cognitoWrapper) {
+        return new AdminService(adminDao, organizationDao, cognitoWrapper);
     }
 
     @Provides
     @Singleton
-    public static CaregiverService caregiverService(CaregiverDao caregiverDao, CognitoWrapper cognitoWrapper) {
-        return new CaregiverService(caregiverDao, cognitoWrapper);
+    public static CaregiverService caregiverService(CaregiverDao caregiverDao, OrganizationDao organizationDao, CognitoWrapper cognitoWrapper) {
+        return new CaregiverService(caregiverDao, organizationDao, cognitoWrapper);
     }
 
     @Provides
