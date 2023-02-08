@@ -18,6 +18,36 @@
     margin-left: 20px;
 }
 
+.fancy-datepicker {
+  background-color: lightblue;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.fancy-datepicker .react-datepicker__input-container input {
+  border: none;
+  border-bottom: 2px solid rgb(208, 0, 255);
+  outline: none;
+  color: rgb(208, 0, 255);
+  font-weight: bold;
+}
+
+.fancy-datepicker .react-datepicker__calendar {
+  background-color: white;
+  border-radius: 10px;
+  border: 2px solid rgb(208, 0, 255);
+}
+
+.fancy-datepicker .react-datepicker__day--selected {
+  background-color: rgb(208, 0, 255);
+  color: white;
+}
+
+.fancy-datepicker .react-datepicker__day--keyboard-selected {
+  background-color: rgb(208, 0, 255);
+  color: white;
+}
+  
 .start-date-picker, .end-date-picker {
     display: flex;
     flex-direction: column;
@@ -35,11 +65,12 @@
     justify-content: space-between;
     width: 50%;
     margin-top: -35px;
-    margin-left: 1100px;
+    margin-left: 1000px;
 }
 
 button[name="export-button"] {
     background-color: rgb(44, 43, 43);
+    font-size: large;
     color: white;
     margin-right: 5px;
     border-radius: 8px;
@@ -47,6 +78,7 @@ button[name="export-button"] {
 
 button[name="update-button"] {
     background-color: rgb(69, 69, 228);
+    font-size: large;
     color: white;
     margin-right: 5px;
     border-radius: 8px;
@@ -54,6 +86,7 @@ button[name="update-button"] {
 
 button[name="share-button"] {
     background-color: rgb(62, 210, 62);
+    font-size: large;
     color: white;
     margin-right: 5px;
     border-radius: 8px;
@@ -61,6 +94,7 @@ button[name="share-button"] {
 
 button[name="remove-button"] {
     background-color: red;
+    font-size: large;
     color: white;
     margin-right: 5px;
     border-radius: 8px;

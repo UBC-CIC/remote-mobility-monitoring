@@ -1,0 +1,77 @@
+// dummy data
+const sampleData1 = [
+    {
+        date: "2023-01-01",
+        stepLength: 60,
+        doubleSupportTime: 10,
+        walkingSpeed: 1.5,
+        walkingAsymmetry: 5,
+        distanceWalked: 1000,
+    },
+    {
+        date: "2023-01-02",
+        stepLength: 55,
+        doubleSupportTime: 11,
+        walkingSpeed: 1.6,
+        walkingAsymmetry: 6,
+        distanceWalked: 900,
+    },
+    {
+        date: "2023-01-15",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 1100,
+    },
+    {
+        date: "2023-01-17",
+        stepLength: 30,
+        doubleSupportTime: 15,
+        walkingSpeed: 2.0,
+        walkingAsymmetry: 3,
+        distanceWalked: 1500,
+    },
+    {
+        date: "2023-01-18",
+        stepLength: 40,
+        doubleSupportTime: 11,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 4,
+        distanceWalked: 1800,
+    },
+    {
+        date: "2023-01-19",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 2100,
+    },
+    {
+        date: "2023-01-23",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 1500,
+    },
+    {
+        date: "2023-01-31",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 1900,
+    },
+    {
+        date: "2023-02-04",
+        stepLength: 65,
+        doubleSupportTime: 11,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 10,
+        distanceWalked: 1300,
+    },
+];
+
+export default sampleData1;
