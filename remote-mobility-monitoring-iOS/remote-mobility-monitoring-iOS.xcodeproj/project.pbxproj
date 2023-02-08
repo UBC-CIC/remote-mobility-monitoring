@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2259546A29930D1900879733 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 2259546929930D1900879733 /* CodeScanner */; };
 		227547B92980BD5100D12030 /* MobilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227547B82980BD5100D12030 /* MobilityView.swift */; };
 		228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */; };
 		228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49C7296CB6510046DFD4 /* Assets.xcassets */; };
@@ -33,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2259546A29930D1900879733 /* CodeScanner in Frameworks */,
 				22A771112989097600BB170A /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,6 +105,9 @@
 			dependencies = (
 			);
 			name = "remote-mobility-monitoring-iOS";
+			packageProductDependencies = (
+				2259546929930D1900879733 /* CodeScanner */,
+			);
 			productName = "remote-mobility-monitoring-iOS";
 			productReference = 228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */;
 			productType = "com.apple.product-type.application";
@@ -131,6 +136,9 @@
 				Base,
 			);
 			mainGroup = 228B49B7296CB64C0046DFD4;
+			packageReferences = (
+				2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */,
+			);
 			productRefGroup = 228B49C1296CB64C0046DFD4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -200,8 +208,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Apple Development: hunglnl01@gmail.com (PGRVNHX2WM)";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = U6XMW9P652;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -261,8 +272,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Apple Development: hunglnl01@gmail.com (PGRVNHX2WM)";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = U6XMW9P652;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -289,13 +303,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "remote-mobility-monitoring-iOS/remote-mobility-monitoring-iOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"remote-mobility-monitoring-iOS/Preview Content\"";
+				DEVELOPMENT_TEAM = U6XMW9P652;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to scan QR code";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your mobility metrics and share with your healthcare providers.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app needs access to your health data to monitor your mobility.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app requires access to HealthKit";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -308,6 +325,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -320,13 +338,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "remote-mobility-monitoring-iOS/remote-mobility-monitoring-iOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"remote-mobility-monitoring-iOS/Preview Content\"";
+				DEVELOPMENT_TEAM = U6XMW9P652;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to scan QR code";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your mobility metrics and share with your healthcare providers.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app needs access to your health data to monitor your mobility.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app requires access to HealthKit";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -339,6 +360,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -367,6 +389,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2259546929930D1900879733 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 228B49B8296CB64C0046DFD4 /* Project object */;
 }

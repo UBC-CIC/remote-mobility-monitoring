@@ -6,8 +6,23 @@
 //
 import SwiftUI
 import HealthKit
+import CodeScanner
 
 struct RegisterView: View {
+    @State private var isScanning = false
+    
+    func handleScanResult(result: Result<ScanResult, ScanError>) {
+        isScanning = false;
+        
+        switch result {
+        case .success(let result):
+            print(result)
+            
+        case .failure(let error):
+            print("Scanning failed: \(error.localizedDescription)")
+        }
+    }
+    
     var body: some View {
         NavigationView {
             VStack() {
@@ -20,6 +35,7 @@ struct RegisterView: View {
                         VStack {
                             Spacer()
                             Button(action: {
+                                self.isScanning = true
                             }) {
                                 Text("Scan QR Code")
                                     .font(ButtonStyling.font)
@@ -46,9 +62,14 @@ struct RegisterView: View {
                 }
             }
             .padding(.horizontal, 32)
+            .sheet(isPresented: $isScanning) {
+                CodeScannerView(codeTypes: [.qr], simulatedData: "Hachi dancing", completion: handleScanResult(result:))
+            }
         }
     }
 }
+
+
 
 struct RegisterView_Previews: PreviewProvider {
     static var previews: some View {
