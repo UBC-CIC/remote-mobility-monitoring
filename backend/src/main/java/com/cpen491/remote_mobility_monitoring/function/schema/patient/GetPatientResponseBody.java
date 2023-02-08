@@ -18,8 +18,6 @@ public class GetPatientResponseBody {
     private String firstName;
     @SerializedName(Const.LAST_NAME_NAME)
     private String lastName;
-    @SerializedName(Const.DATE_OF_BIRTH_NAME)
-    private String dateOfBirth;
     @SerializedName(Const.PHONE_NUMBER_NAME)
     private String phoneNumber;
     @SerializedName(Const.CREATED_AT_NAME)

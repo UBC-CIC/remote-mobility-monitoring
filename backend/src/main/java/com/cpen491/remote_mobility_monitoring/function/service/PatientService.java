@@ -55,8 +55,7 @@ public class PatientService {
      * @param body The request body
      * @return {@link CreatePatientResponseBody}
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of firstName, lastName,
-     *                              dateOfBirth, or phoneNumber are empty
+     * @throws NullPointerException Above 2 exceptions are thrown if any of firstName, lastName, or phoneNumber are empty
      */
     public CreatePatientResponseBody createPatient(CreatePatientRequestBody body) {
         log.info("Creating Patient {}", body);
@@ -66,7 +65,6 @@ public class PatientService {
                 .firstName(body.getFirstName())
                 .lastName(body.getLastName())
                 .phoneNumber(body.getPhoneNumber())
-                .dateOfBirth(body.getDateOfBirth())
                 .build();
 
         generateAuthCodeForPatient(newPatient);
@@ -157,7 +155,6 @@ public class PatientService {
                 .deviceId(patient.getDeviceId())
                 .firstName(patient.getFirstName())
                 .lastName(patient.getLastName())
-                .dateOfBirth(patient.getDateOfBirth())
                 .phoneNumber(patient.getPhoneNumber())
                 .createdAt(patient.getCreatedAt())
                 .build();

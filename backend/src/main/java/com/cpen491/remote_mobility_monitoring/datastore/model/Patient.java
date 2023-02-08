@@ -27,7 +27,6 @@ public class Patient extends BaseModel {
     private String deviceId;
     private String firstName;
     private String lastName;
-    private String dateOfBirth;
     private String phoneNumber;
     private String authCode;
     private String authCodeTimestamp;
@@ -40,7 +39,6 @@ public class Patient extends BaseModel {
         putInMap(map, PatientTable.DEVICE_ID_NAME, patient.getDeviceId());
         putInMap(map, PatientTable.FIRST_NAME_NAME, patient.getFirstName());
         putInMap(map, PatientTable.LAST_NAME_NAME, patient.getLastName());
-        putInMap(map, PatientTable.DATE_OF_BIRTH_NAME, patient.getDateOfBirth());
         putInMap(map, PatientTable.PHONE_NUMBER_NAME, patient.getPhoneNumber());
         putInMap(map, PatientTable.AUTH_CODE_NAME, patient.getAuthCode());
         putInMap(map, PatientTable.AUTH_CODE_TIMESTAMP_NAME, patient.getAuthCodeTimestamp());
@@ -57,7 +55,6 @@ public class Patient extends BaseModel {
                 .deviceId(getFromMap(map, PatientTable.DEVICE_ID_NAME))
                 .firstName(getFromMap(map, PatientTable.FIRST_NAME_NAME))
                 .lastName(getFromMap(map, PatientTable.LAST_NAME_NAME))
-                .dateOfBirth(getFromMap(map, PatientTable.DATE_OF_BIRTH_NAME))
                 .phoneNumber(getFromMap(map, PatientTable.PHONE_NUMBER_NAME))
                 .authCode(getFromMap(map, PatientTable.AUTH_CODE_NAME))
                 .authCodeTimestamp(getFromMap(map, PatientTable.AUTH_CODE_TIMESTAMP_NAME))

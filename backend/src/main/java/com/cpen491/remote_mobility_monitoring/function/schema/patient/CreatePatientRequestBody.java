@@ -18,6 +18,4 @@ public class CreatePatientRequestBody {
     private String lastName;
     @SerializedName(Const.PHONE_NUMBER_NAME)
     private String phoneNumber;
-    @SerializedName(Const.DATE_OF_BIRTH_NAME)
-    private String dateOfBirth;
 }

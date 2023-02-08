@@ -32,7 +32,7 @@ public class PatientDao {
      * @throws DuplicateRecordException If record with the given deviceId already exists
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of firstName, lastName,
-     *                              dateOfBirth, phoneNumber, authCode, authCodeTimestamp, or verified are empty
+     *                              phoneNumber, authCode, authCodeTimestamp, or verified are empty
      */
     public void create(Patient newRecord) {
         log.info("Creating new Patient record {}", newRecord);
@@ -143,7 +143,7 @@ public class PatientDao {
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of id, deviceId, firstName, lastName,
-     *                              dateOfBirth, or phoneNumber are empty
+     *                              or phoneNumber are empty
      */
     public void update(Patient updatedRecord) {
         log.info("Updating Patient record {}", updatedRecord);

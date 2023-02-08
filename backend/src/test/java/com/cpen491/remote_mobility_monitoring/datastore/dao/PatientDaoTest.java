@@ -25,7 +25,6 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Careg
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DATE_OF_BIRTH_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IDS_NULL_ERROR_MESSAGE;
@@ -55,7 +54,6 @@ public class PatientDaoTest extends DaoTestParent {
     private static final String DEVICE_ID2 = "device-id-2";
     private static final String FIRST_NAME = "Jack";
     private static final String LAST_NAME = "Jackson";
-    private static final String DATE_OF_BIRTH = "2000-12-31";
     private static final String PHONE_NUMBER = "1234567890";
     private static final String AUTH_CODE = "auth_code-123";
     private static final String AUTH_CODE_TIMESTAMP = "2020-01-01T05:00:00.000000";
@@ -91,7 +89,6 @@ public class PatientDaoTest extends DaoTestParent {
         assertEquals(DEVICE_ID1, newRecord.getDeviceId());
         assertEquals(FIRST_NAME, newRecord.getFirstName());
         assertEquals(LAST_NAME, newRecord.getLastName());
-        assertEquals(DATE_OF_BIRTH, newRecord.getDateOfBirth());
         assertEquals(PHONE_NUMBER, newRecord.getPhoneNumber());
         assertEquals(AUTH_CODE, newRecord.getAuthCode());
         assertEquals(AUTH_CODE_TIMESTAMP, newRecord.getAuthCodeTimestamp());
@@ -124,31 +121,27 @@ public class PatientDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
                 Arguments.of(null, PATIENT_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, null, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, null, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, "", LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, "", LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, null, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, null, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, "", DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, "", PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, null, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, null, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, "", AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, "", AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, null,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, null,
                         AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, "",
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, "",
                         AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         null, VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         "", VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, null), VERIFIED_NULL_ERROR_MESSAGE)
         );
     }
@@ -336,47 +329,43 @@ public class PatientDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForUpdate() {
         return Stream.of(
                 Arguments.of(null, PATIENT_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildPatient(null, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(null, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient("", SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient("", SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, null, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, null, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), SID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, "", DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, "", DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), SID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, null, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, "", FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, "", FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, null, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, null, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, "", LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, "", LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, null, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, null, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, "", DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, "", PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, null, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, "", PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), DATE_OF_BIRTH_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, null, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, null, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, "", AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, "", AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, null,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, null,
                         AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, "",
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, "",
                         AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         null, VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         "", VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, null), VERIFIED_NULL_ERROR_MESSAGE),
-                Arguments.of(buildPatient(CAREGIVER_ID1, CAREGIVER_ID1, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(CAREGIVER_ID1, CAREGIVER_ID1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PATIENT_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID + "1", DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER, AUTH_CODE,
+                Arguments.of(buildPatient(PID, SID + "1", DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
                         AUTH_CODE_TIMESTAMP, VERIFIED), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
@@ -429,8 +418,7 @@ public class PatientDaoTest extends DaoTestParent {
     }
 
     private static Patient buildPatientDefault() {
-        return buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER,
-                AUTH_CODE, AUTH_CODE_TIMESTAMP, VERIFIED);
+        return buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE, AUTH_CODE_TIMESTAMP, VERIFIED);
     }
 
     private static Caregiver buildCaregiverDefault() {

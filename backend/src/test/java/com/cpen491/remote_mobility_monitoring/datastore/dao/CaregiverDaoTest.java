@@ -253,7 +253,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         assertFalse(response2.hasItem());
 
         Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, DEVICE_ID2, null, null, null, null,
-                null, null, null);
+                null, null);
         createPatient(patient2);
         cut.addPatient(PATIENT_ID2, PID);
 
@@ -466,7 +466,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         Patient patient1 = buildPatientDefault();
         createPatient(patient1);
         Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, DEVICE_ID2, null, null, null, null,
-                null, null, null);
+                null, null);
         createPatient(patient2);
         Caregiver caregiver = buildCaregiverDefault();
         createCaregiver(caregiver);
@@ -600,7 +600,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         Patient patient1 = buildPatientDefault();
         createPatient(patient1);
         Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, DEVICE_ID2, null, null, null, null,
-                null, null, null);
+                null, null);
         createPatient(patient2);
 
         Caregiver newRecord = buildCaregiverDefault();
@@ -653,6 +653,6 @@ public class CaregiverDaoTest extends DaoTestParent {
 
     private static Patient buildPatientDefault() {
         return buildPatient(PATIENT_ID1, PATIENT_ID1, DEVICE_ID1, null, null, null, null,
-                null, null, null);
+                null, null);
     }
 }

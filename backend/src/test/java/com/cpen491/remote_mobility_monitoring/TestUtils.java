@@ -46,7 +46,7 @@ public class TestUtils {
                 .build();
     }
 
-    public static Patient buildPatient(String pid, String sid, String deviceId, String firstName, String lastName, String dateOfBirth,
+    public static Patient buildPatient(String pid, String sid, String deviceId, String firstName, String lastName,
                                        String phoneNumber, String authCode, String authCodeTimestamp, Boolean verified) {
         return Patient.builder()
                 .pid(pid)
@@ -54,7 +54,6 @@ public class TestUtils {
                 .deviceId(deviceId)
                 .firstName(firstName)
                 .lastName(lastName)
-                .dateOfBirth(dateOfBirth)
                 .phoneNumber(phoneNumber)
                 .authCode(authCode)
                 .authCodeTimestamp(authCodeTimestamp)

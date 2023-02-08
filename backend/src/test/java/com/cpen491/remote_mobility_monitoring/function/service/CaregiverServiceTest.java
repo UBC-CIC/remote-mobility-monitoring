@@ -91,7 +91,6 @@ public class CaregiverServiceTest {
     private static final String CREATED_AT = "2023-01-01";
     private static final String PATIENT_ID1 = "pat-1";
     private static final String PATIENT_ID2 = "pat-2";
-    private static final String DATE_OF_BIRTH = "2000-12-31";
     private static final String AUTH_CODE = "auth_code-123";
     private static final String AUTH_CODE_TIMESTAMP = getCurrentUtcTimeString();
 
@@ -594,7 +593,7 @@ public class CaregiverServiceTest {
     }
 
     private static Patient buildPatientDefault() {
-        return buildPatient(PATIENT_ID1, PATIENT_ID1, null, FIRST_NAME, LAST_NAME, DATE_OF_BIRTH, PHONE_NUMBER,
+        return buildPatient(PATIENT_ID1, PATIENT_ID1, null, FIRST_NAME, LAST_NAME, PHONE_NUMBER,
                 AUTH_CODE, AUTH_CODE_TIMESTAMP, false);
     }
 }
