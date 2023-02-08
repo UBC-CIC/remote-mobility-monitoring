@@ -4,6 +4,7 @@ import { Line } from "react-chartjs-2";
 import DatePicker from "react-datepicker";
 import "./Dashboard.css";
 import "react-datepicker/dist/react-datepicker.css";
+import LineGraph from "./LineGraph";
 
 
 interface Props {
@@ -35,6 +36,54 @@ const sampleData = [
         walkingSpeed: 1.6,
         walkingAsymmetry: 6,
         distanceWalked: 900,
+    },
+    {
+        date: "2023-01-15",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 1100,
+    },
+    {
+        date: "2023-01-17",
+        stepLength: 30,
+        doubleSupportTime: 15,
+        walkingSpeed: 2.0,
+        walkingAsymmetry: 3,
+        distanceWalked: 1500,
+    },
+    {
+        date: "2023-01-18",
+        stepLength: 40,
+        doubleSupportTime: 11,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 4,
+        distanceWalked: 1800,
+    },
+    {
+        date: "2023-01-19",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 2100,
+    },
+    {
+        date: "2023-01-23",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 1500,
+    },
+    {
+        date: "2023-01-31",
+        stepLength: 40,
+        doubleSupportTime: 12,
+        walkingSpeed: 1.7,
+        walkingAsymmetry: 5,
+        distanceWalked: 1900,
     },
     {
         date: "2023-02-04",
@@ -97,21 +146,8 @@ function Dashboard() {
         //console.log("");
     };
 
-    
+    const graph = LineGraph(dateData, distanceWalkedData);
     /*   
-    const graphData = {
-        labels: dateData,
-        datasets: [
-            {
-                label: "Distance Walked",
-                data: distanceWalkedData,
-                backgroundColor: "white",
-                borderColor: "blue",
-                fill: false,
-            },
-        ],
-    };
-
     // table colmns and data
     const columns = [
         {
@@ -207,6 +243,9 @@ function Dashboard() {
                     <h3>Walking Asymmetry</h3>
                     <p>{Math.round(averageWalkingAsymmetry)}%</p>
                 </div>
+            </div>
+            <div className="graph">
+                {graph}
             </div>
 
 

@@ -92,3 +92,11 @@ button[name="remove-button"] {
     color: #4D47C3;
     text-align: center;
 }
+
+.graph{
+    display: flex;
+    margin-left: 35%;
+    margin-top: 40px;
+    height: auto;
+    width: auto;
+}
