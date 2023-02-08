@@ -8,6 +8,7 @@ import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoExcept
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -55,8 +56,13 @@ public class HandlerUtils {
     }
 
     private static APIGatewayProxyResponseEvent generateApiGatewayResponse(StatusCode statusCode, String body) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD");
         return new APIGatewayProxyResponseEvent()
                 .withStatusCode(statusCode.code)
+                .withHeaders(headers)
                 .withBody(body);
     }
 
