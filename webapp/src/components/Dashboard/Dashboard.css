@@ -77,7 +77,7 @@ button[name="export-button"] {
 }
 
 button[name="update-button"] {
-    background-color: rgb(69, 69, 228);
+    background-color: rgb(85, 85, 213);
     font-size: large;
     color: white;
     margin-right: 5px;
@@ -85,7 +85,7 @@ button[name="update-button"] {
 }
 
 button[name="share-button"] {
-    background-color: rgb(62, 210, 62);
+    background-color: rgb(90, 208, 90);
     font-size: large;
     color: white;
     margin-right: 5px;
@@ -93,7 +93,7 @@ button[name="share-button"] {
 }
 
 button[name="remove-button"] {
-    background-color: red;
+    background-color: rgb(223, 59, 59);
     font-size: large;
     color: white;
     margin-right: 5px;
