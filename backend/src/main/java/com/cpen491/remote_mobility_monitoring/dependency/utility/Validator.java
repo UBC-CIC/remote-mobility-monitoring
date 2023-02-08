@@ -2,6 +2,7 @@ package com.cpen491.remote_mobility_monitoring.dependency.utility;
 
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
@@ -53,12 +54,17 @@ public class Validator {
     public static final String ADMIN_ID_INVALID_ERROR_MESSAGE = "admin_id invalid";
     public static final String AUTH_CODE_BLANK_ERROR_MESSAGE = "auth_code must be present";
     public static final String AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE = "auth_code_timestamp must be present";
+    public static final String MEASURE_NAME_BLANK_ERROR_MESSAGE = "measure_name must be present";
+    public static final String MEASURE_VALUE_BLANK_ERROR_MESSAGE = "measure_value must be present";
+    public static final String TIMESTAMP_BLANK_ERROR_MESSAGE = "timestamp must be present";
     public static final String VERIFIED_NULL_ERROR_MESSAGE = "verified must not be null";
     public static final String IDS_NULL_ERROR_MESSAGE = "IDs must not be null";
     public static final String ORGANIZATION_RECORD_NULL_ERROR_MESSAGE = "Organization record must not be null";
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
     public static final String CAREGIVER_RECORD_NULL_ERROR_MESSAGE = "Caregiver record must not be null";
     public static final String PATIENT_RECORD_NULL_ERROR_MESSAGE = "Patient record must not be null";
+    public static final String METRICS_LIST_NULL_ERROR_MESSAGE = "Metrics list must not be null";
+    public static final String METRICS_NULL_ERROR_MESSAGE = "Metrics must not be null";
     public static final String CREATE_ORGANIZATION_NULL_ERROR_MESSAGE = "Create organization request body must not be null";
     public static final String GET_ORGANIZATION_NULL_ERROR_MESSAGE = "Get organization request body must not be null";
     public static final String CREATE_ADMIN_NULL_ERROR_MESSAGE = "Create admin request body must not be null";
@@ -154,6 +160,18 @@ public class Validator {
         Validate.notBlank(authCodeTimestamp, AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE);
     }
 
+    public static void validateMeasureName(String measureName) {
+        Validate.notBlank(measureName, MEASURE_NAME_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validateMeasureValue(String measureValue) {
+        Validate.notBlank(measureValue, MEASURE_VALUE_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validateTimestamp(String timestamp) {
+        Validate.notBlank(timestamp, TIMESTAMP_BLANK_ERROR_MESSAGE);
+    }
+
     public static void validateVerified(Boolean verified) {
         Validate.notNull(verified, VERIFIED_NULL_ERROR_MESSAGE);
     }
@@ -196,6 +214,19 @@ public class Validator {
         validateAuthCode(patient.getAuthCode());
         validateAuthCodeTimestamp(patient.getAuthCodeTimestamp());
         validateVerified(patient.getVerified());
+    }
+
+    public static void validateMetricsList(List<Metrics> metrics) {
+        Validate.notNull(metrics, METRICS_LIST_NULL_ERROR_MESSAGE);
+    }
+
+    public static void validateMetrics(Metrics metrics) {
+        Validate.notNull(metrics, METRICS_NULL_ERROR_MESSAGE);
+        validatePatientId(metrics.getPatientId());
+        validateDeviceId(metrics.getDeviceId());
+        validateMeasureName(metrics.getMeasureName());
+        validateMeasureValue(metrics.getMeasureValue());
+        validateTimestamp(metrics.getTimestamp());
     }
 
     public static void validateCreateOrganizationRequestBody(CreateOrganizationRequestBody body) {

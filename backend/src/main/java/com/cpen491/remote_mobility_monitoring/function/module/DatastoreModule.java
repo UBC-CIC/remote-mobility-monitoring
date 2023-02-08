@@ -20,14 +20,12 @@ public class DatastoreModule {
     // This creates DynamoDbClient and significantly reduces cold start time
     static {
         try {
-            System.out.println("THREE");
             DynamoDbClient ddbClient = AwsModule.dynamoDbClient(AwsModule.httpClient());
             DaoFactory daoFactory = daoFactory(EnvironmentModule.dynamoDbTableName(), ddbClient);
             OrganizationDao organizationDao = organizationDao(daoFactory);
             PatientDao patientDao = patientDao(daoFactory);
             CaregiverDao caregiverDao = caregiverDao(daoFactory, organizationDao, patientDao);
             caregiverDao.hasPatient("pat-123", "car-123");
-            System.out.println("FOUR");
         } catch (Exception e) {
             // Expects exception
         }

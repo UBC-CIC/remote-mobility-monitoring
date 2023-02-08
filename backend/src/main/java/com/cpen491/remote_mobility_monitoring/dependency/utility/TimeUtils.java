@@ -13,6 +13,15 @@ public class TimeUtils {
         return getCurrentUtcTime().toString();
     }
 
+    public static long getCurrentUtcTimeMillis() {
+        return getTimeMillis(getCurrentUtcTime(), ZoneOffset.UTC);
+    }
+
+    public static long getTimeMillis(LocalDateTime localDateTime, ZoneOffset zoneOffset) {
+        return localDateTime.toInstant(zoneOffset).toEpochMilli();
+
+    }
+
     public static LocalDateTime parseTime(String time) {
         return LocalDateTime.parse(time);
     }

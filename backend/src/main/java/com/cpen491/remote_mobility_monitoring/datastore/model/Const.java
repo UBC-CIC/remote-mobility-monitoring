@@ -68,4 +68,12 @@ public final class Const {
                 new ImmutablePair<>(DEVICE_ID_INDEX_NAME, DEVICE_ID_NAME)
         );
     }
+
+    public static class MetricsTable {
+        public static final String PATIENT_ID_NAME = "patient_id";
+        public static final String DEVICE_ID_NAME = "device_id";
+        public static final String MEASURE_NAME_NAME = "measure_name";
+        public static final String MEASURE_VALUE_NAME = "measure_value";
+        public static final String TIME_NAME = "time";
+    }
 }
