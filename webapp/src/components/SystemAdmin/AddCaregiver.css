@@ -1,30 +1,49 @@
 p, div {
     font-family: Lato;
-  
 }
     
 .sysadmin .wrapper {
-    height: 97vh;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     background-color: rgb(255, 255, 255);
   }
+
+.sysadmin .icon {
+    margin-top: 1%;
+    text-align: left;
+    margin-bottom: -2%;
+    margin-left: 1%;
+    font-size: 20px;
+    width: 10%;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 2px;
+}
+
+.sysadmin .icon:hover {
+    cursor: pointer;
+    color: #4D47C3;
+}
+
+.sysadmin .text-wrapper {
+    margin-top: 5%;
+    text-align: left;
+    margin-left: 27%;
+}
+.sysadmin .text-wrapper .desc {
+    width: 55%;
+    text-align: left;
+    border-left: 3px solid #4D47C3;
+    padding-left: 8px;
+    font-size: 0.9em;
+}
   
  .sysadmin .form-wrapper {
-    margin-right: -40%;
     display: flex;
     flex-direction: column;
-    width: 280px;
-    max-width: 80%;
-    min-width: 100px;
-    min-height: 400px;
+    width: 25%;
     padding: 20px 40px;
     border-radius: 6px;
-    box-shadow: 0px 8px 36px #222;
-    background-color: #fefefe;
+    margin-left: 28%;
   }
   
  .sysadmin .form-wrapper > h2 {
@@ -55,10 +74,11 @@ p, div {
     outline: none;
     border:#f0efff;
     background-color: #f0efff;
+    font-size: 0.62em;
   }
   
  .sysadmin input::placeholder {
-    font-size: 0.7em;
+    font-size: 0.92em;
     font-weight: lighter;
     color: #A7A3FF;
   }
@@ -73,9 +93,10 @@ p, div {
     border-radius: 4px;
     background-color: #4D47C3;
     color: #FFFFFF;
+    font-size: 0.62em;
   }
  .sysadmin button:hover {
-    background-color: rgb(166, 214, 24);
+     background-color: #554FCA;
     color: #FFFFFF;
   }
    
@@ -94,4 +115,10 @@ p, div {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
+  }
+
+ .sysadmin .err {
+     color: red;
+     margin-top: 2%;
+     font-size: 0.95em;
   }

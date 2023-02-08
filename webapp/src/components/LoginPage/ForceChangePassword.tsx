@@ -3,7 +3,10 @@ import "./ForceChangePassword.css";
 import { useNavigate} from "react-router-dom";
 import {FaArrowLeft} from "react-icons/fa";
 import { useSelector } from "react-redux";
-import {State} from "../../store";
+import {userTypes, strObjMap} from "../../helpers/types";
+import {State} from "../../helpers/store";
+import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
+import jwt_decode from "jwt-decode";
 
 function ForceChangePassword() {
     const [password, setPassword] = useState("");
@@ -17,25 +20,27 @@ function ForceChangePassword() {
         }
     };
     const handleSubmit = ()=> {
+        // First check if password meets minimum requirements. 
         if(! (password.length >= 8)) return;
         if(! /\d/.test(password)) return;
         if(! /[a-z]/.test(password)) return;
         if(! /[A-Z]/.test(password)) return;
         if(! /[`!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~]/.test(password)) return;
         if (password !== confirmPassword) return;
-        const username = localStorage.getItem("username");
-        if (!username) {
-            alert("An error occured. Please log in again");
-            nav("/login");
-            return;
-        }
+
         const callback = {
             onSuccess: function() {
+                setError("");
+
+                // Remove current username and sub from storage if exists
+                
                 if (localStorage.getItem("username")) {
                     localStorage.removeItem("username");
                 }
-                localStorage.setItem("username", cognitoUser.getUsername());
-                nav("/");
+                if (localStorage.getItem("sub")) {
+                    localStorage.removeItem("sub");
+                }
+                nav("/login");
             },
             onFailure: function(err: any) {
                 let errMsg = err.message || JSON.stringify(err);
@@ -45,7 +50,6 @@ function ForceChangePassword() {
                 else if (errMsg.includes("Incorrect username")) {
                     errMsg = "Incorrect email or password";
                 }
-                console.log(errMsg);
             },
             newPasswordRequired: function() {
                 nav("/login");
@@ -56,7 +60,7 @@ function ForceChangePassword() {
     return (
         <div className="force-pwd">
             <div className="icon" onClick={() => nav("/login")}><FaArrowLeft size="15px"/> Login Page</div>
-            <div className="title"><h2> Update password</h2>
+            <div className="title"><h2>Update password</h2>
                 <p className="desc">Since this is the first time you&#39;re logging in, you must change your password to continue</p>
             </div>
             <div></div>

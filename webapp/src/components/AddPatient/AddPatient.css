@@ -1,0 +1,151 @@
+p, div {
+    font-family: Lato;
+}
+    
+.add-patient .wrapper {
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+  }
+
+.add-patient .icon {
+    margin-top: 1%;
+    text-align: left;
+    margin-bottom: -2%;
+    margin-left: 1%;
+    font-size: 20px;
+    width: 10%;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 2px;
+}
+
+.add-patient .icon:hover {
+    cursor: pointer;
+    color: #4D47C3;
+}
+
+.add-patient .text-wrapper {
+    margin-top: 5%;
+    text-align: left;
+    margin-left: 31.5%;
+}
+.add-patient .text-wrapper .desc {
+    width: 60%;
+    text-align: left;
+    border-left: 3px solid #4D47C3;
+    padding-left: 8px;
+    font-size: 0.9em;
+}
+  
+ .add-patient .qr-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 25%;
+    padding: 20px 40px;
+    border-radius: 6px;
+    margin-left: 37%;
+  }
+
+ .add-patient .or {
+     text-align: center;
+     margin-left: -16%;
+  }
+ .add-patient #or-button {
+    text-align: center;
+    width: 82%;
+    cursor: pointer;
+    margin-right: 0.25em;
+    margin-top: 0.5em;
+    padding:  0.938em;
+    border: none;
+    border-radius: 4px;
+    background-color: #4D47C3;
+    color: #FFFFFF;
+    font-size: 0.62em;
+  }
+
+ .add-patient .form-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 25%;
+    padding: 20px 40px;
+    border-radius: 6px;
+    margin-left: 35%;
+  }
+  
+ .add-patient .form-wrapper > h2 {
+    display: flex;
+    justify-content: center;
+    font-family: "Segoe UI", "Ubuntu", "Roboto", "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 0.25em;
+    color: #222;
+  }
+  
+ .add-patient form {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }  
+  
+ .add-patient label {
+    margin-bottom: 0.5em;
+    color: #444;
+    font-weight: lighter;
+  }
+  
+ .add-patient input {
+    padding: 10px 10px;
+    border-radius: 5px;
+    outline: none;
+    border:#f0efff;
+    background-color: #f0efff;
+    font-size: 0.62em;
+  }
+  
+ .add-patient input::placeholder {
+    font-size: 0.92em;
+    font-weight: lighter;
+    color: #A7A3FF;
+  }
+  
+ .add-patient .add-button {
+    min-width: 100%;
+    cursor: pointer;
+    margin-right: 0.25em;
+    margin-top: 0.5em;
+    padding:  0.938em;
+    border: none;
+    border-radius: 4px;
+    background-color: #4D47C3;
+    color: #FFFFFF;
+    font-size: 0.62em;
+  }
+ .add-patient button:hover {
+     background-color: #554FCA;
+    color: #FFFFFF;
+  }
+   
+ .add-patient .username,
+ .add-patient .email,
+ .add-patient .contact_number,
+ .add-patient .Confirm_Password,
+.add-patient  .password {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    width: 100%;
+  }
+   
+ .add-patient .submit {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+ .add-patient .err {
+     color: red;
+     margin-top: 2%;
+     font-size: 0.95em;
+  }

@@ -1,8 +1,12 @@
 import React, {useState} from "react";
 import "./LoginPage.css";
 import { useNavigate} from "react-router-dom";
-import {createUser, login} from "../../Cognito";
+import {createUser, login} from "../../helpers/Cognito";
 import { useDispatch } from "react-redux";
+import {userTypes, strObjMap}  from "../../helpers/types";
+import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
+import jwt_decode from "jwt-decode";
+
 
 function LoginPage() {
     const [loginType, setLoginType] = useState("caregiver");
@@ -23,13 +27,38 @@ function LoginPage() {
         handleLogin();
     };
     const handleLogin = () => {
-        const cognitoUser = createUser(email);
+        const cognitoUser = createUser(email, false);
+        if (!cognitoUser) {
+            setError("An unexpected error occured. Please try again later");
+            return;
+        }
         const callback = {
-            onSuccess: function() {
+            onSuccess: function(result: AmazonCognitoIdentity.CognitoUserSession) {
+                /*
+                 * on success, we store the username of the user. This is stored as
+                 * the sub in the access token. Therefore, we first decode the access
+                 * token and then access the sub field. 
+                 * */
+
+                setError("");
+
+                // Remove current username from storage if exists
+                
                 if (localStorage.getItem("username")) {
                     localStorage.removeItem("username");
                 }
-                localStorage.setItem("username", cognitoUser.getUsername());
+                if (localStorage.getItem("sub")) {
+                    localStorage.removeItem("sub");
+                }
+                const decodedToken: strObjMap = jwt_decode(result.getAccessToken().getJwtToken());
+                let sub = decodedToken["sub"];
+                const userType = userTypes[loginType];
+                console.log(sub);
+
+                sub = userType.concat(sub);
+                const username = userType.concat(cognitoUser.getUsername());
+                localStorage.setItem("sub", sub);
+                localStorage.setItem("username", username);
                 nav("/");
             },
             onFailure: function(err: any) {
@@ -46,7 +75,10 @@ function LoginPage() {
                 if (localStorage.getItem("username")) {
                     localStorage.removeItem("username");
                 }
-                localStorage.setItem("username", cognitoUser.getUsername());
+                if (localStorage.getItem("sub")) {
+                    localStorage.removeItem("sub");
+                }
+                localStorage.setItem("username", userTypes["caregiver"]);
                 dispatch({ type: "USER", payload: cognitoUser });
                 nav("/newuserpwd");
             }
@@ -63,7 +95,7 @@ function LoginPage() {
         <div className='login-page'>
             <div className='login'>
                 <h1>Sign in to</h1>
-                <h2>Mobility Monitor</h2>
+                <h2>Mobility Monitor {loginType === "caregiver" ? "": "as admin"}</h2>
                 <p>{loginType === "caregiver" ? "Organization administrators can ": "Caregivers can\n"}
                     <span className='alternate' onClick={toggleLoginType}>Login here</span></p>
             </div>
@@ -74,8 +106,8 @@ function LoginPage() {
                     <br />
                     <input type='password' placeholder='Password'onKeyDown={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
                     <div className='forgot'>Forgot password?</div>
-                    {error === ("")? null: <p className="err">{error}</p>}
                     <button type='submit' onClick={(e) => { handleSubmit(e); }}>Login</button>
+                    {error === ("")? null: <p className="err">{error}</p>}
                 </div>
             </div>
         </div>

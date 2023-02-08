@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import "./ChangePassword.css";
 import { useNavigate} from "react-router-dom";
-import {createUser} from "../../Cognito";
+import {createUser, createUserAndGetSession} from "../../helpers/Cognito";
 import {FaArrowLeft} from "react-icons/fa";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 
@@ -12,18 +12,13 @@ function ChangePassword() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const nav = useNavigate();
-    const username = localStorage.getItem("username");
-    if (!username) {
-        nav("/login");
-    }
-    const cognitoUser = createUser(username? username: "");
+    let cognitoUser: AmazonCognitoIdentity.CognitoUser | null;
+
     useEffect(() => {
-        cognitoUser.getSession((err: Error) => {
-            if (err) {
-                console.log("err");
-                nav("/login");
-                return;
-            }
+        const username = localStorage.getItem("username");
+        cognitoUser = createUserAndGetSession(username, true,() => {
+            nav("/login");
+        }, () => {
             setLoading(false);
         });
     });
@@ -41,7 +36,7 @@ function ChangePassword() {
         if(! /[A-Z]/.test(password)) return;
         if(! /[`!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~]/.test(password)) return;
         if (password !== confirmPassword) return;
-        cognitoUser.changePassword(oldPassword, password, (err) => {
+        cognitoUser?.changePassword(oldPassword, password, (err) => {
             if (err) {
                 alert(err.message || JSON.stringify(err));
             }
@@ -53,7 +48,7 @@ function ChangePassword() {
     return (
         <div className="force-pwd">
             <div className="icon" onClick={() => nav("/")}><FaArrowLeft size="15px"/> Home Page</div>
-            <div className="title"><h2> Change password</h2>
+            <div className="title"><h2>Change password</h2>
                 <p className="desc">Please enter your old password for verification along with your new desired password</p>
             </div>
             <div></div>

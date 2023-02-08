@@ -4,11 +4,12 @@ import LoginPage from "./components/LoginPage/LoginPage";
 import ForceChangePassword from "./components/LoginPage/ForceChangePassword";
 import ChangePassword from "./components/ChangePassword/ChangePassword";
 import Home from "./Home";
-import SystemAdmin from "./components/SystemAdmin/SystemAdmin";
-import ProtectedRoute from "./ProtectedRoute";
+import AddCaregiver from "./components/SystemAdmin/AddCaregiver";
+import AddPatient from "./components/AddPatient/AddPatient";
+import ProtectedRoute from "./helpers/ProtectedRoute";
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import { Provider } from "react-redux";
-import store from "./store";
+import store from "./helpers/store";
 
 
 function App() {
@@ -17,17 +18,20 @@ function App() {
             <Router>
                 <Routes>
                     <Route path="/" element={
-                        <ProtectedRoute><Home/></ProtectedRoute>
+                        <ProtectedRoute type="caregiver"><Home/></ProtectedRoute>
                     }/>
                     <Route path="/login" element={<LoginPage/>}/>
-                    <Route path="/sysadmin" element={
-                        <ProtectedRoute><SystemAdmin/></ProtectedRoute>
+                    <Route path="/addcaregiver" element={
+                        <ProtectedRoute type="admin"><AddCaregiver/></ProtectedRoute>
                     }/>
                     <Route path="/newuserpwd" element={
-                        <ProtectedRoute><ForceChangePassword/></ProtectedRoute>
+                        <ProtectedRoute type="caregiver"><ForceChangePassword/></ProtectedRoute>
                     }/>
                     <Route path="/changepwd" element={
-                        <ProtectedRoute><ChangePassword/></ProtectedRoute>
+                        <ProtectedRoute type="caregiver"><ChangePassword/></ProtectedRoute>
+                    }/>
+                    <Route path="/addpatient" element={
+                        <ProtectedRoute type="caregiver"><AddPatient/></ProtectedRoute>
                     }/>
                 </Routes>
             </Router>
