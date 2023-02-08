@@ -25,11 +25,11 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Patie
 @AllArgsConstructor
 public class CaregiverDao {
     @NonNull
-    GenericDao genericDao;
+    private GenericDao genericDao;
     @NonNull
-    OrganizationDao organizationDao;
+    private OrganizationDao organizationDao;
     @NonNull
-    PatientDao patientDao;
+    private PatientDao patientDao;
 
     /**
      * Creates a new Caregiver record and adds it to an organization. Record with the given email must not already exist.

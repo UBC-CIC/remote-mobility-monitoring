@@ -25,7 +25,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Organ
 @AllArgsConstructor
 public class OrganizationDao {
     @NonNull
-    GenericDao genericDao;
+    private GenericDao genericDao;
 
     /**
      * Creates a new Organization record. Record with the given name must not already exist.

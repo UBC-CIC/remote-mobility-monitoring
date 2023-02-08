@@ -23,7 +23,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Patie
 @AllArgsConstructor
 public class PatientDao {
     @NonNull
-    GenericDao genericDao;
+    private GenericDao genericDao;
 
     /**
      * Creates a new Patient record. If deviceId is provided, record with the deviceId must not already exist.

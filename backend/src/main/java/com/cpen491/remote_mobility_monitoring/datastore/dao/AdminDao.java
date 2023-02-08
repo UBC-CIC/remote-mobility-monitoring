@@ -21,9 +21,9 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Organ
 @AllArgsConstructor
 public class AdminDao {
     @NonNull
-    GenericDao genericDao;
+    private GenericDao genericDao;
     @NonNull
-    OrganizationDao organizationDao;
+    private OrganizationDao organizationDao;
 
     /**
      * Creates a new Admin record and adds it to an organization. Record with the given email must not already exist.
