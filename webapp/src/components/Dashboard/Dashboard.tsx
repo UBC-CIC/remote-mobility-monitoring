@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import { Table } from "antd";
 import DatePicker from "react-datepicker";
 import "./Dashboard.css";
 import "react-datepicker/dist/react-datepicker.css";
 import LineGraph from "./LineGraph";
 import sampleData1 from "./sampleData";
-
 
 interface Props {
   patientName: string;
@@ -55,70 +53,26 @@ function Dashboard() {
 
     const handleExportData = () => {
         // implement logic to export data as a csv file
-        //console.log("");
+        //entire data to csv
     };
    
     const handleUpdateDevice = () => {
         // implement logic to update the device used to collect data
-        //console.log("");
+        //call device update api
     };
    
     const handleShareData = () => {
         // implement logic to share data with another caregiver
-        //console.log("");
+        //call share api
     };
    
     const handleRemoveRecord = () => {
         // implement logic to remove this patient's record
-        //console.log("");
+        //call delete api
     };
 
     const graph = LineGraph(dateData, distanceWalkedData);
-    /*   
-    // table colmns and data
-    const columns = [
-        {
-            title: "Date",
-            dataIndex: "date",
-            key: "date",
-        },
-        {
-            title: "Step Length",
-            dataIndex: "stepLength",
-            key: "stepLength",
-        },
-        {
-            title: "Double Support Time",
-            dataIndex: "doubleSupportTime",
-            key: "doubleSupportTime",
-        },
-        {
-            title: "Walking Speed",
-            dataIndex: "walkingSpeed",
-            key: "walkingSpeed",
-        },
-        {
-            title: "Walking Asymmetry",
-            dataIndex: "walkingAsymmetry",
-            key: "walkingAsymmetry",
-        },
-        {
-            title: "Distance Walked",
-            dataIndex: "distanceWalked",
-            key: "distanceWalked",
-        },
-    ];
-   
-    const tableData = filteredData.map((d, i) => ({
-        key: i,
-        date: d.date,
-        stepLength: d.stepLength,
-        doubleSupportTime: d.doubleSupportTime,
-        walkingSpeed: d.walkingSpeed,
-        walkingAsymmetry: d.walkingAsymmetry,
-        distanceWalked: d.distanceWalked,
-    }));
-*/   
+ 
     return (
         <div className="Dashboard">
             <h1>{dummyProp.patientName}</h1>
@@ -176,44 +130,34 @@ function Dashboard() {
             <div className="graph">
                 {graph}
             </div>
-
-
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Step Length</th>
+                        <th>Double Support Time</th>
+                        <th>Walking Speed</th>
+                        <th>Walking Asymmetry</th>
+                        <th>Distance Walked</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {filteredData.map((data, index) => (
+                        <tr key={index}>
+                            <td>{dateData[index]}</td>
+                            <td>{stepLengthData[index]}</td>
+                            <td>{doubleSupportTimeData[index]}</td>
+                            <td>{walkingSpeedData[index]}</td>
+                            <td>{walkingAsymmetryData[index]}</td>
+                            <td>{distanceWalkedData[index]}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 }
 
 export default Dashboard;
 
-/*
-            <h1>{dummyProp.patientName}</h1>
-            <div className="date-picker">
-                <span>Start Date </span>
-                <DatePicker onChange={handleStartDateChange} />
-                <span>End Date </span>
-                <DatePicker onChange={handleEndDateChange} />
-            </div>
-            <div className="buttons" style={{ display: "flex", justifyContent: "space-between" }}>
-                <Button className="export-button" onClick={handleExportData}>Export Data</Button>
-                <Button className="update-button" onClick={handleUpdateDevice}>Update Device</Button>
-                <Button className="share-button" onClick={handleShareData}>Share</Button>
-                <Button className="remove-button" onClick={handleRemoveRecord}>Remove</Button>
-            </div>
-                        <div className="cards" >
-                <Card title="Step Length">{averageStepLength}</Card>
-                <Card title="Double Support Time">{averageDoubleSupportTime}</Card>
-                <Card title="Walking Speed">{averageWalkingSpeed}</Card>
-                <Card title="Walking Asymmetry">{averageWalkingAsymmetry}</Card>
-            </div>
-            <div className="cards" style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
-                <Card title="Step Length" style={{ width: 300, display: "inline-block" }}> {averageStepLength}</Card>
-                <Card title="Double Support Time" style={{ width: 300, display: "inline-block" }}> {averageDoubleSupportTime}</Card>
-                <Card title="Walking Speed" style={{ width: 300, display: "inline-block" }}> {averageWalkingSpeed}</Card>
-                <Card title="Walking Asymmetry" style={{ width: 300, display: "inline-block" }}> {averageWalkingAsymmetry}</Card>
-            </div>
-            <div className='graph' style={{ marginTop: 16 }}>
-                <Line data={graphData} />
-            </div>
-            <div className = 'table' style={{ marginTop: 16 }}>
-                <Table columns={columns} dataSource={tableData} />
-            </div>
-*/
