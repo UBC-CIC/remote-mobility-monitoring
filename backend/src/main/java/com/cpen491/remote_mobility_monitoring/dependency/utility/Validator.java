@@ -18,11 +18,12 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCa
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.CreateOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.MetricsSerialization;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.AddMetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
@@ -98,6 +99,7 @@ public class Validator {
     public static final String GET_PATIENT_NULL_ERROR_MESSAGE = "Get patient request body must not be null";
     public static final String GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE = "Get all caregivers request body must not be null";
     public static final String ADD_METRICS_NULL_ERROR_MESSAGE = "Add metrics request body must not be null";
+    public static final String QUERY_METRICS_NULL_ERROR_MESSAGE = "Query metrics request body must not be null";
     public static final String UPDATE_PATIENT_NULL_ERROR_MESSAGE = "Update patient request body must not be null";
     public static final String DELETE_PATIENT_NULL_ERROR_MESSAGE = "Delete patient request body must not be null";
 
@@ -275,7 +277,7 @@ public class Validator {
         validateTimestamp(metrics.getTimestamp());
     }
 
-    public static void validateMetricsSerialization(MetricsSerialization metrics) {
+    public static void validateAddMetricsSerialization(AddMetricsSerialization metrics) {
         Validate.notNull(metrics, METRICS_NULL_ERROR_MESSAGE);
         validateStepLength(metrics.getStepLength());
         validateDoubleSupportTime(metrics.getDoubleSupportTime());
@@ -388,6 +390,16 @@ public class Validator {
         Validate.notNull(body, ADD_METRICS_NULL_ERROR_MESSAGE);
         validateDeviceId(body.getDeviceId());
         Validate.notNull(body.getMetrics(), METRICS_NULL_ERROR_MESSAGE);
+    }
+
+    public static void validateQueryMetricsRequestBody(QueryMetricsRequestBody body) {
+        Validate.notNull(body, QUERY_METRICS_NULL_ERROR_MESSAGE);
+        validateIds(body.getPatientIds());
+        for (String patientId : body.getPatientIds()) {
+            validatePatientId(patientId);
+        }
+        validateTimestamp(body.getStart());
+        validateTimestamp(body.getEnd());
     }
 
     public static void validateUpdatePatientRequestBody(UpdatePatientRequestBody body) {

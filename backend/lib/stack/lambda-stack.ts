@@ -62,6 +62,8 @@ export class LambdaStack extends cdk.Stack {
   public readonly getAllCaregiversAlias: lambda.Alias;
   public readonly addMetricsFunction: lambda.Function;
   public readonly addMetricsAlias: lambda.Alias;
+  public readonly queryMetricsFunction: lambda.Function;
+  public readonly queryMetricsAlias: lambda.Alias;
   public readonly updatePatientFunction: lambda.Function;
   public readonly updatePatientAlias: lambda.Alias;
   public readonly deletePatientFunction: lambda.Function;
@@ -145,6 +147,9 @@ export class LambdaStack extends cdk.Stack {
     const addMetricsFunctionName = formResourceName('AddMetricsFunction', props.stage);
     this.addMetricsFunction = this.createAddMetricsFunction(addMetricsFunctionName);
     this.addMetricsAlias = this.createLambdaAlias(addMetricsFunctionName, this.addMetricsFunction);
+    const queryMetricsFunctionName = formResourceName('QueryMetricsFunction', props.stage);
+    this.queryMetricsFunction = this.createQueryMetricsFunction(queryMetricsFunctionName);
+    this.queryMetricsAlias = this.createLambdaAlias(queryMetricsFunctionName, this.queryMetricsFunction);
     const updatePatientFunctionName = formResourceName('UpdatePatientFunction', props.stage);
     this.updatePatientFunction = this.createUpdatePatientFunction(updatePatientFunctionName);
     this.updatePatientAlias = this.createLambdaAlias(updatePatientFunctionName, this.updatePatientFunction);
@@ -272,6 +277,10 @@ export class LambdaStack extends cdk.Stack {
 
   private createAddMetricsFunction(functionName: string): lambda.Function {
     return this.createLambdaFunction(functionName, 'patient.AddMetricsHandler');
+  }
+
+  private createQueryMetricsFunction(functionName: string): lambda.Function {
+    return this.createLambdaFunction(functionName, 'patient.QueryMetricsHandler');
   }
 
   private createUpdatePatientFunction(functionName: string): lambda.Function {

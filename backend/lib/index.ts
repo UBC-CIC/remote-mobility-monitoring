@@ -44,6 +44,7 @@ stages.forEach((stage) => {
     getPatientFunction: lambdaStack.getPatientAlias,
     getAllCaregiversFunction: lambdaStack.getAllCaregiversAlias,
     addMetricsFunction: lambdaStack.addMetricsAlias,
+    queryMetricsFunction: lambdaStack.queryMetricsAlias,
     updatePatientFunction: lambdaStack.updatePatientAlias,
     deletePatientFunction: lambdaStack.deletePatientAlias,
   }

@@ -22,5 +22,10 @@ public final class Const {
     public static final String ADMINS_NAME = "admins";
     public static final String CAREGIVERS_NAME = "caregivers";
     public static final String METRICS_NAME = "metrics";
+    public static final String START_NAME = "start";
+    public static final String END_NAME = "end";
+    public static final String METRIC_NAME_NAME = "metric_name";
+    public static final String METRIC_VALUE_NAME = "metric_value";
+    public static final String TIMESTAMP_NAME = "timestamp";
     public static final String MESSAGE_NAME = "message";
 }

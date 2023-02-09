@@ -26,7 +26,7 @@ public class AddMetricsRequestBody {
     @Builder
     @ToString
     @EqualsAndHashCode
-    public static class MetricsSerialization {
+    public static class AddMetricsSerialization {
         @SerializedName(MetricsTable.STEP_LENGTH_NAME)
         private String stepLength;
         @SerializedName(MetricsTable.DOUBLE_SUPPORT_TIME_NAME)
@@ -40,7 +40,7 @@ public class AddMetricsRequestBody {
         @SerializedName(MetricsTable.TIMESTAMP_NAME)
         private String timestamp;
 
-        public static List<Metrics> convertToMetrics(String patientId, String deviceId, MetricsSerialization serialization) {
+        public static List<Metrics> convertToMetrics(String patientId, String deviceId, AddMetricsSerialization serialization) {
             List<Metrics> metricsList = new ArrayList<>();
 
             metricsList.add(Metrics.builder().measureName(MeasureName.STEP_LENGTH).measureValue(serialization.getStepLength()).build());
@@ -61,5 +61,5 @@ public class AddMetricsRequestBody {
     @SerializedName(Const.DEVICE_ID_NAME)
     private String deviceId;
     @SerializedName(Const.METRICS_NAME)
-    private List<MetricsSerialization> metrics;
+    private List<AddMetricsSerialization> metrics;
 }

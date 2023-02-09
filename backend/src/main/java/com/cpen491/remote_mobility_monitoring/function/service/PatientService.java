@@ -12,7 +12,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.MetricsSerialization;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.AddMetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
@@ -23,6 +23,9 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCare
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversResponseBody.CaregiverSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsResponseBody.QueryMetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
@@ -211,16 +214,35 @@ public class PatientService {
         String patientId = patient.getPid();
 
         List<Metrics> metricsList = new ArrayList<>();
-        for (MetricsSerialization serialization : body.getMetrics()) {
-            Validator.validateMetricsSerialization(serialization);
+        for (AddMetricsSerialization serialization : body.getMetrics()) {
+            Validator.validateAddMetricsSerialization(serialization);
 
-            metricsList.addAll(MetricsSerialization.convertToMetrics(patientId, deviceId, serialization));
+            metricsList.addAll(AddMetricsSerialization.convertToMetrics(patientId, deviceId, serialization));
         }
 
         metricsDao.add(metricsList);
 
         return AddMetricsResponseBody.builder()
                 .message("OK")
+                .build();
+    }
+
+    /**
+     * Queries for Metrics for one or more Patients at specified time range.
+     *
+     * @param body The request body
+     * @return {@link QueryMetricsResponseBody}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if any of patientIds, start, or end are empty or invalid
+     */
+    public QueryMetricsResponseBody queryMetrics(QueryMetricsRequestBody body) {
+        log.info("Querying Metrics {}", body);
+        Validator.validateQueryMetricsRequestBody(body);
+
+        List<Metrics> metrics = metricsDao.query(body.getPatientIds(), body.getStart(), body.getEnd());
+
+        return QueryMetricsResponseBody.builder()
+                .metrics(QueryMetricsSerialization.convertFromMetrics(metrics))
                 .build();
     }
 
