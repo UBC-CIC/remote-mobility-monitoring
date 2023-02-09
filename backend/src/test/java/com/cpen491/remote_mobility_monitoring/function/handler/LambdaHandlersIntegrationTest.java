@@ -72,7 +72,6 @@ public class LambdaHandlersIntegrationTest {
     private static final String DEVICE_ID_UPDATED2 = "device-testTwo";
     private static final String DEVICE_ID3 = "device-test3";
     private static final String PATIENT_PHONE_NUMBER = "+1010101010";
-    private static final String PATIENT_DATE_OF_BIRTH = "2000-01-01";
     private static final String INVALID_AUTH_CODE = "invalid";
     private static final String ORGANIZATION_NAME = "INTEGRATION_TEST_ORGANIZATION";
     private static final String CREATED_AT = getCurrentUtcTimeString();
@@ -581,24 +580,22 @@ public class LambdaHandlersIntegrationTest {
     }
 
     private static CreatePatientRequestBody buildCreatePatient1RequestBody() {
-        return buildCreatePatientRequestBody(PATIENT_NAME1, PATIENT_NAME1, PATIENT_PHONE_NUMBER, PATIENT_DATE_OF_BIRTH);
+        return buildCreatePatientRequestBody(PATIENT_NAME1, PATIENT_NAME1, PATIENT_PHONE_NUMBER);
     }
 
     private static CreatePatientRequestBody buildCreatePatient2RequestBody() {
-        return buildCreatePatientRequestBody(PATIENT_NAME2, PATIENT_NAME2, PATIENT_PHONE_NUMBER, PATIENT_DATE_OF_BIRTH);
+        return buildCreatePatientRequestBody(PATIENT_NAME2, PATIENT_NAME2, PATIENT_PHONE_NUMBER);
     }
 
     private static CreatePatientRequestBody buildCreatePatient3RequestBody() {
-        return buildCreatePatientRequestBody(PATIENT_NAME3, PATIENT_NAME3, PATIENT_PHONE_NUMBER, PATIENT_DATE_OF_BIRTH);
+        return buildCreatePatientRequestBody(PATIENT_NAME3, PATIENT_NAME3, PATIENT_PHONE_NUMBER);
     }
 
-    private static CreatePatientRequestBody buildCreatePatientRequestBody(String firstName, String lastName, String phoneNumber,
-                                                                          String dateOfBirth) {
+    private static CreatePatientRequestBody buildCreatePatientRequestBody(String firstName, String lastName, String phoneNumber) {
         return CreatePatientRequestBody.builder()
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber(phoneNumber)
-                .dateOfBirth(dateOfBirth)
                 .build();
     }
 

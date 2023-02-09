@@ -9,7 +9,6 @@ public final class Const {
     public static final String LAST_NAME_NAME = "last_name";
     public static final String TITLE_NAME = "title";
     public static final String PHONE_NUMBER_NAME = "phone_number";
-    public static final String DATE_OF_BIRTH_NAME = "date_of_birth";
     public static final String ORGANIZATION_ID_NAME = "organization_id";
     public static final String ORGANIZATION_NAME_NAME = "organization_name";
     public static final String ADMIN_ID_NAME = "admin_id";

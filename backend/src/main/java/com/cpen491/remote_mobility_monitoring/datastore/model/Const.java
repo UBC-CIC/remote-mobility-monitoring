@@ -58,7 +58,6 @@ public final class Const {
         public static final String DEVICE_ID_NAME = ID_PREFIX + "device_id";
         public static final String FIRST_NAME_NAME = ID_PREFIX + "first_name";
         public static final String LAST_NAME_NAME = ID_PREFIX + "last_name";
-        public static final String DATE_OF_BIRTH_NAME = ID_PREFIX + "date_of_birth";
         public static final String PHONE_NUMBER_NAME = ID_PREFIX + "phone_number";
         public static final String AUTH_CODE_NAME = ID_PREFIX + "auth_code";
         public static final String AUTH_CODE_TIMESTAMP_NAME = ID_PREFIX + "auth_code_timestamp";

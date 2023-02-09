@@ -48,7 +48,6 @@ public class Validator {
     public static final String ORGANIZATION_ID_BLANK_ERROR_MESSAGE = "organization_id must be present";
     public static final String ORGANIZATION_ID_INVALID_ERROR_MESSAGE = "organization_id invalid";
     public static final String DEVICE_ID_BLANK_ERROR_MESSAGE = "device_id must be present";
-    public static final String DATE_OF_BIRTH_BLANK_ERROR_MESSAGE = "date_of_birth must be present";
     public static final String CAREGIVER_ID_BLANK_ERROR_MESSAGE = "caregiver_id must be present";
     public static final String CAREGIVER_ID_INVALID_ERROR_MESSAGE = "caregiver_id invalid";
     public static final String PATIENT_ID_BLANK_ERROR_MESSAGE = "patient_id must be present";
@@ -130,10 +129,6 @@ public class Validator {
 
     public static void validateDeviceId(String deviceId) {
         Validate.notBlank(deviceId, DEVICE_ID_BLANK_ERROR_MESSAGE);
-    }
-
-    public static void validateDateOfBirth(String dateOfBirth) {
-        Validate.notBlank(dateOfBirth, DATE_OF_BIRTH_BLANK_ERROR_MESSAGE);
     }
 
     public static void validateCaregiverId(String caregiverId) {
@@ -224,7 +219,6 @@ public class Validator {
         Validate.notNull(patient, PATIENT_RECORD_NULL_ERROR_MESSAGE);
         validateFirstName(patient.getFirstName());
         validateLastName(patient.getLastName());
-        validateDateOfBirth(patient.getDateOfBirth());
         validatePhoneNumber(patient.getPhoneNumber());
         validateAuthCode(patient.getAuthCode());
         validateAuthCodeTimestamp(patient.getAuthCodeTimestamp());
@@ -318,7 +312,6 @@ public class Validator {
         validateFirstName(body.getFirstName());
         validateLastName(body.getLastName());
         validatePhoneNumber(body.getPhoneNumber());
-        validateDateOfBirth(body.getDateOfBirth());
     }
 
     public static void validateUpdatePatientDeviceRequestBody(UpdatePatientDeviceRequestBody body) {
