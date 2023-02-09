@@ -11,7 +11,7 @@ export class TimestreamStack extends cdk.Stack {
   public static TABLE_NAME = 'METRICS';
 
   public readonly database: timestream.CfnDatabase;
-  public readonly mobilityData: timestream.CfnTable;
+  public readonly metricsTable: timestream.CfnTable;
 
   constructor(scope: cdk.App, id: string, props: TimestreamStackProp) {
     super(scope, id, props);
@@ -22,9 +22,13 @@ export class TimestreamStack extends cdk.Stack {
     });
 
     const tableName = formResourceName(TimestreamStack.TABLE_NAME, props.stage);
-    this.mobilityData = new timestream.CfnTable(this, 'RemoteMobilityMonitoringTimestreamTable', {
+    this.metricsTable = new timestream.CfnTable(this, 'RemoteMobilityMonitoringTimestreamTable', {
       databaseName: this.database.ref,
       tableName: tableName,
+      retentionProperties: {
+        MemoryStoreRetentionPeriodInHours: "72", // 3 days
+        MagneticStoreRetentionPeriodInDays: "36500", // 100 years
+      },
     });
   }
 }

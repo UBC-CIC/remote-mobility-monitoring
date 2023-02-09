@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrganizationService {
     @NonNull
-    OrganizationDao organizationDao;
+    private OrganizationDao organizationDao;
 
     /**
      * Creates an Organization.

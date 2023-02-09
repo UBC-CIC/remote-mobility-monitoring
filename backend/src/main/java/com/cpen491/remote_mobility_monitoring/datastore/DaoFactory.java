@@ -7,12 +7,13 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
+/**
+ * Factory class for DAOs for DynamoDB, which includes OrganizationDao, AdminDao, CaregiverDao, and PatientDao.
+ */
 public class DaoFactory {
-    DynamoDbClient ddbClient;
-    GenericDao genericDao;
+    private final GenericDao genericDao;
 
     public DaoFactory(String tableName, DynamoDbClient ddbClient) {
-        this.ddbClient = ddbClient;
         this.genericDao = new GenericDao(tableName, ddbClient);
     }
 

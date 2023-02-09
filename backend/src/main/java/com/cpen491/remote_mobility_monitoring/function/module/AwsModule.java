@@ -8,6 +8,8 @@ import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.timestreamquery.TimestreamQueryClient;
+import software.amazon.awssdk.services.timestreamwrite.TimestreamWriteClient;
 
 import javax.inject.Singleton;
 import java.net.URI;
@@ -38,8 +40,28 @@ public class AwsModule {
         // retry policy https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/using.html
         return DynamoDbClient.builder()
                 .httpClient(httpClient)
-                .region(Region.US_WEST_2)
+                .region(REGION)
                 .endpointOverride(URI.create("https://dynamodb.us-west-2.amazonaws.com"))
+                .overrideConfiguration(ClientOverrideConfiguration.builder().build())
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public static TimestreamWriteClient timestreamWriteClient(SdkHttpClient httpClient) {
+        return TimestreamWriteClient.builder()
+                .httpClient(httpClient)
+                .region(REGION)
+                .overrideConfiguration(ClientOverrideConfiguration.builder().build())
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public static TimestreamQueryClient timestreamQueryClient(SdkHttpClient httpClient) {
+        return TimestreamQueryClient.builder()
+                .httpClient(httpClient)
+                .region(REGION)
                 .overrideConfiguration(ClientOverrideConfiguration.builder().build())
                 .build();
     }

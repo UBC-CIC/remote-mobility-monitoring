@@ -9,6 +9,8 @@ import javax.inject.Singleton;
 @Module
 public class EnvironmentModule {
     public static final String DYNAMO_DB_TABLE_NAME = "DYNAMO_DB_TABLE_NAME";
+    public static final String TIMESTREAM_DATABASE_NAME = "TIMESTREAM_DATABASE_NAME";
+    public static final String TIMESTREAM_TABLE_NAME = "TIMESTREAM_TABLE_NAME";
     public static final String COGNITO_USERPOOL_ID = "COGNITO_USERPOOL_ID";
 
     @Provides
@@ -16,6 +18,20 @@ public class EnvironmentModule {
     @Singleton
     public static String dynamoDbTableName() {
         return System.getenv(DYNAMO_DB_TABLE_NAME);
+    }
+
+    @Provides
+    @Named(TIMESTREAM_DATABASE_NAME)
+    @Singleton
+    public static String timestreamDatabaseName() {
+        return System.getenv(TIMESTREAM_DATABASE_NAME);
+    }
+
+    @Provides
+    @Named(TIMESTREAM_TABLE_NAME)
+    @Singleton
+    public static String timestreamTableName() {
+        return System.getenv(TIMESTREAM_TABLE_NAME);
     }
 
     @Provides
