@@ -8,10 +8,10 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotE
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
-import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.MetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;

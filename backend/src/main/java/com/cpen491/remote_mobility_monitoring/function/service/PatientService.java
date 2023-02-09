@@ -8,11 +8,11 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidMetrics
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
-import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.MetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
@@ -214,7 +214,7 @@ public class PatientService {
         for (MetricsSerialization serialization : body.getMetrics()) {
             Validator.validateMetricsSerialization(serialization);
 
-            metricsList.addAll(Metrics.convertFromSerialization(patientId, deviceId, serialization));
+            metricsList.addAll(MetricsSerialization.convertToMetrics(patientId, deviceId, serialization));
         }
 
         metricsDao.add(metricsList);
