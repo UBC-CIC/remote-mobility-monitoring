@@ -1,15 +1,25 @@
 
-.login-page p, div {
-   font-size: 1.08em ;
-   font-family: Arial !important;
-  }
+@media (max-width: 450px) {
+    .login-page p, div {
+        font-size: 0.95em ;
+        font-family: Arial !important;
+    }
+}
 
-.login-page {
-    display:grid;
-    grid-template-columns: 48% 48%;
-    padding: 20px;
-    padding-top: 10%;
-    gap: 4%;
+@media (min-width: 450px) {
+    .login-page p, div {
+        font-size: 1.1em ;
+        font-family: Arial !important;
+    }
+
+    .login-page {
+        display:grid;
+        grid-template-columns: 48% 48%;
+        padding: 20px;
+        padding-top: 10%;
+        gap: 4%;
+    }
+
 }
 
 .login-page .login {
@@ -69,4 +79,10 @@
 
 .login-page .alternate:hover {
     cursor: pointer;
+}
+.login-page .err {
+    font-size: 0.75em;
+    margin-top: -9%;
+    margin-bottom: -0.1%;
+    color: red;
 }
