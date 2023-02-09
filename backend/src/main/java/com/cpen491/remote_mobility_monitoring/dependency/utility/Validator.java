@@ -3,6 +3,7 @@ package com.cpen491.remote_mobility_monitoring.dependency.utility;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
@@ -25,6 +26,8 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import org.apache.commons.lang3.Validate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
@@ -54,9 +57,11 @@ public class Validator {
     public static final String ADMIN_ID_INVALID_ERROR_MESSAGE = "admin_id invalid";
     public static final String AUTH_CODE_BLANK_ERROR_MESSAGE = "auth_code must be present";
     public static final String AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE = "auth_code_timestamp must be present";
-    public static final String MEASURE_NAME_BLANK_ERROR_MESSAGE = "measure_name must be present";
+    public static final String MEASURE_NAME_NULL_ERROR_MESSAGE = "measure_name must not be null";
     public static final String MEASURE_VALUE_BLANK_ERROR_MESSAGE = "measure_value must be present";
+    public static final String MEASURE_VALUE_INVALID_ERROR_MESSAGE = "measure_value is not a double";
     public static final String TIMESTAMP_BLANK_ERROR_MESSAGE = "timestamp must be present";
+    public static final String TIMESTAMP_INVALID_ERROR_MESSAGE = "timestamp is not an in iso8601 format";
     public static final String VERIFIED_NULL_ERROR_MESSAGE = "verified must not be null";
     public static final String IDS_NULL_ERROR_MESSAGE = "IDs must not be null";
     public static final String ORGANIZATION_RECORD_NULL_ERROR_MESSAGE = "Organization record must not be null";
@@ -160,16 +165,26 @@ public class Validator {
         Validate.notBlank(authCodeTimestamp, AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE);
     }
 
-    public static void validateMeasureName(String measureName) {
-        Validate.notBlank(measureName, MEASURE_NAME_BLANK_ERROR_MESSAGE);
+    public static void validateMeasureName(MeasureName measureName) {
+        Validate.notNull(measureName, MEASURE_NAME_NULL_ERROR_MESSAGE);
     }
 
     public static void validateMeasureValue(String measureValue) {
         Validate.notBlank(measureValue, MEASURE_VALUE_BLANK_ERROR_MESSAGE);
+        try {
+            Double.parseDouble(measureValue);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(MEASURE_VALUE_INVALID_ERROR_MESSAGE);
+        }
     }
 
     public static void validateTimestamp(String timestamp) {
         Validate.notBlank(timestamp, TIMESTAMP_BLANK_ERROR_MESSAGE);
+        try {
+            LocalDateTime.parse(timestamp);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(TIMESTAMP_INVALID_ERROR_MESSAGE);
+        }
     }
 
     public static void validateVerified(Boolean verified) {

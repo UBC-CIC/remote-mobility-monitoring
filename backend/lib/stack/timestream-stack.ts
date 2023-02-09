@@ -25,6 +25,10 @@ export class TimestreamStack extends cdk.Stack {
     this.mobilityData = new timestream.CfnTable(this, 'RemoteMobilityMonitoringTimestreamTable', {
       databaseName: this.database.ref,
       tableName: tableName,
+      retentionProperties: {
+        MemoryStoreRetentionPeriodInHours: "72", // 3 days
+        MagneticStoreRetentionPeriodInDays: "36500", // 100 years
+      },
     });
   }
 }
