@@ -1,11 +1,18 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
+import com.cpen491.remote_mobility_monitoring.datastore.dao.MetricsDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
@@ -28,36 +35,52 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildMetrics;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADD_METRICS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DISTANCE_WALKED_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DISTANCE_WALKED_INVALID_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DOUBLE_SUPPORT_TIME_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DOUBLE_SUPPORT_TIME_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.METRICS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PATIENT_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PHONE_NUMBER_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.STEP_LENGTH_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.STEP_LENGTH_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.VERIFY_PATIENT_NULL_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.WALKING_ASYMMETRY_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.WALKING_ASYMMETRY_INVALID_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.WALKING_SPEED_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.WALKING_SPEED_INVALID_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -67,6 +90,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -87,6 +111,11 @@ class PatientServiceTest {
     private static final String AUTH_CODE = "auth_code-123";
     private static final String AUTH_CODE_TIMESTAMP = getCurrentUtcTimeString();
     private static final String DEVICE_ID = "device-id-1";
+    private static final String METRIC_VALUE = "0.0";
+    private static final String INVALID_METRIC_VALUE = "0.0%";
+    private static final String[] METRIC_VALUES1 = new String[]{"1.0", "2.0", "3.0", "4.0", "5.0"};
+    private static final String[] METRIC_VALUES2 = new String[]{"6.0", "7.0", "8.0", "9.0", "10.0"};
+    private static final String TIMESTAMP = getCurrentUtcTimeString();
     private static final String CREATED_AT = "2023-01-01";
 
     PatientService cut;
@@ -94,14 +123,18 @@ class PatientServiceTest {
     PatientDao patientDao;
     @Mock
     CaregiverDao caregiverDao;
+    @Mock
+    MetricsDao metricsDao;
     ArgumentCaptor<Patient> patientCaptor;
     ArgumentCaptor<Caregiver> caregiverCaptor;
+    @Captor
+    ArgumentCaptor<List<Metrics>> metricsListCaptor;
 
     @BeforeEach
     public void setup() {
         patientCaptor = ArgumentCaptor.forClass(Patient.class);
         caregiverCaptor = ArgumentCaptor.forClass(Caregiver.class);
-        cut = new PatientService(patientDao, caregiverDao);
+        cut = new PatientService(patientDao, caregiverDao, metricsDao);
     }
 
     @Test
@@ -373,6 +406,130 @@ class PatientServiceTest {
     }
 
     @Test
+    public void testAddMetrics_HappyCase() {
+        when(patientDao.findByDeviceId(anyString())).thenReturn(buildPatientDefault());
+
+        MetricsSerialization serialization1 = buildMetricsSerialization(METRIC_VALUES1);
+        MetricsSerialization serialization2 = buildMetricsSerialization(METRIC_VALUES2);
+        List<MetricsSerialization> serializations = Arrays.asList(serialization1, serialization2);
+        AddMetricsRequestBody requestBody = buildAddMetricsRequestBody(serializations);
+        AddMetricsResponseBody responseBody = cut.addMetrics(requestBody);
+
+        List<Metrics> expected = new ArrayList<>();
+        expected.add(buildMetricsDefault(MeasureName.STEP_LENGTH, METRIC_VALUES1[0]));
+        expected.add(buildMetricsDefault(MeasureName.DOUBLE_SUPPORT_TIME, METRIC_VALUES1[1]));
+        expected.add(buildMetricsDefault(MeasureName.WALKING_SPEED, METRIC_VALUES1[2]));
+        expected.add(buildMetricsDefault(MeasureName.WALKING_ASYMMETRY, METRIC_VALUES1[3]));
+        expected.add(buildMetricsDefault(MeasureName.DISTANCE_WALKED, METRIC_VALUES1[4]));
+        expected.add(buildMetricsDefault(MeasureName.STEP_LENGTH, METRIC_VALUES2[0]));
+        expected.add(buildMetricsDefault(MeasureName.DOUBLE_SUPPORT_TIME, METRIC_VALUES2[1]));
+        expected.add(buildMetricsDefault(MeasureName.WALKING_SPEED, METRIC_VALUES2[2]));
+        expected.add(buildMetricsDefault(MeasureName.WALKING_ASYMMETRY, METRIC_VALUES2[3]));
+        expected.add(buildMetricsDefault(MeasureName.DISTANCE_WALKED, METRIC_VALUES2[4]));
+
+        verify(metricsDao, times(1)).add(metricsListCaptor.capture());
+        List<Metrics> metricsList = metricsListCaptor.getValue();
+        assertThat(metricsList).containsExactlyInAnyOrderElementsOf(expected);
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testAddMetrics_WHEN_PatientDaoFindByDeviceIdReturnsNull_THEN_ThrowRecordDoesNotExistException() {
+        List<MetricsSerialization> serializations = Arrays.asList(buildMetricsSerialization(METRIC_VALUES1));
+        AddMetricsRequestBody requestBody = buildAddMetricsRequestBody(serializations);
+        assertThatThrownBy(() -> cut.addMetrics(requestBody)).isInstanceOf(RecordDoesNotExistException.class);
+    }
+
+    @Test
+    public void testAddMetrics_WHEN_MetricsDaoAddThrows_THEN_ThrowSameException() {
+        when(patientDao.findByDeviceId(anyString())).thenReturn(buildPatientDefault());
+
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(metricsDao).add(anyList());
+
+        List<MetricsSerialization> serializations = Arrays.asList(buildMetricsSerialization(METRIC_VALUES1));
+        AddMetricsRequestBody requestBody = buildAddMetricsRequestBody(serializations);
+        assertThatThrownBy(() -> cut.addMetrics(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForAddMetrics1")
+    public void testAddMetrics_WHEN_InvalidInput1_THEN_ThrowInvalidInputException(AddMetricsRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.addMetrics(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForAddMetrics1() {
+        MetricsSerialization validSerialization = buildMetricsSerialization(METRIC_VALUES1);
+        List<MetricsSerialization> serializations = Collections.singletonList(validSerialization);
+        return Stream.of(
+                Arguments.of(null, ADD_METRICS_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(null), METRICS_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(null, serializations), DEVICE_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody("", serializations), DEVICE_ID_BLANK_ERROR_MESSAGE)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForAddMetrics2")
+    public void testAddMetrics_WHEN_InvalidInput2_THEN_ThrowInvalidInputException(AddMetricsRequestBody body, String errorMessage) {
+        when(patientDao.findByDeviceId(anyString())).thenReturn(buildPatientDefault());
+
+        assertInvalidInputExceptionThrown(() -> cut.addMetrics(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForAddMetrics2() {
+        MetricsSerialization invalidSerialization1 = buildMetricsSerialization(null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations1 = Collections.singletonList(invalidSerialization1);
+        MetricsSerialization invalidSerialization2 = buildMetricsSerialization("", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations2 = Collections.singletonList(invalidSerialization2);
+        MetricsSerialization invalidSerialization3 = buildMetricsSerialization(INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations3 = Collections.singletonList(invalidSerialization3);
+        MetricsSerialization invalidSerialization4 = buildMetricsSerialization(METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations4 = Collections.singletonList(invalidSerialization4);
+        MetricsSerialization invalidSerialization5 = buildMetricsSerialization(METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations5 = Collections.singletonList(invalidSerialization5);
+        MetricsSerialization invalidSerialization6 = buildMetricsSerialization(METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations6 = Collections.singletonList(invalidSerialization6);
+        MetricsSerialization invalidSerialization7 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations7 = Collections.singletonList(invalidSerialization7);
+        MetricsSerialization invalidSerialization8 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations8 = Collections.singletonList(invalidSerialization8);
+        MetricsSerialization invalidSerialization9 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations9 = Collections.singletonList(invalidSerialization9);
+        MetricsSerialization invalidSerialization10 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE);
+        List<MetricsSerialization> serializations10 = Collections.singletonList(invalidSerialization10);
+        MetricsSerialization invalidSerialization11 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE);
+        List<MetricsSerialization> serializations11 = Collections.singletonList(invalidSerialization11);
+        MetricsSerialization invalidSerialization12 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE);
+        List<MetricsSerialization> serializations12 = Collections.singletonList(invalidSerialization12);
+        MetricsSerialization invalidSerialization13 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null);
+        List<MetricsSerialization> serializations13 = Collections.singletonList(invalidSerialization13);
+        MetricsSerialization invalidSerialization14 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "");
+        List<MetricsSerialization> serializations14 = Collections.singletonList(invalidSerialization14);
+        MetricsSerialization invalidSerialization15 = buildMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE);
+        List<MetricsSerialization> serializations15 = Collections.singletonList(invalidSerialization15);
+        List<MetricsSerialization> serializations16 = Collections.singletonList(null);
+        return Stream.of(
+                Arguments.of(buildAddMetricsRequestBody(serializations1), STEP_LENGTH_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations2), STEP_LENGTH_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations3), STEP_LENGTH_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations4), DOUBLE_SUPPORT_TIME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations5), DOUBLE_SUPPORT_TIME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations6), DOUBLE_SUPPORT_TIME_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations7), WALKING_SPEED_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations8), WALKING_SPEED_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations9), WALKING_SPEED_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations10), WALKING_ASYMMETRY_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations11), WALKING_ASYMMETRY_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations12), WALKING_ASYMMETRY_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations13), DISTANCE_WALKED_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations14), DISTANCE_WALKED_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations15), DISTANCE_WALKED_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(serializations16), METRICS_NULL_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
     public void testUpdatePatient_HappyCase() {
         when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
 
@@ -526,6 +683,17 @@ class PatientServiceTest {
                 .build();
     }
 
+    private static AddMetricsRequestBody buildAddMetricsRequestBody(List<MetricsSerialization> metrics) {
+        return buildAddMetricsRequestBody(DEVICE_ID, metrics);
+    }
+
+    private static AddMetricsRequestBody buildAddMetricsRequestBody(String deviceId, List<MetricsSerialization> metrics) {
+        return AddMetricsRequestBody.builder()
+                .deviceId(deviceId)
+                .metrics(metrics)
+                .build();
+    }
+
     private static UpdatePatientRequestBody buildUpdatePatientRequestBody() {
         return buildUpdatePatientRequestBody(PATIENT_ID, FIRST_NAME, LAST_NAME, PHONE_NUMBER1);
     }
@@ -559,5 +727,25 @@ class PatientServiceTest {
 
     private static Caregiver buildCaregiverDefault() {
         return buildCaregiver(CAREGIVER_ID1, CAREGIVER_ID1, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER1);
+    }
+
+    private static Metrics buildMetricsDefault(MeasureName measureName, String measureValue) {
+        return buildMetrics(PATIENT_ID, DEVICE_ID, measureName, measureValue, TIMESTAMP);
+    }
+
+    private static MetricsSerialization buildMetricsSerialization(String[] metricsValues) {
+        return buildMetricsSerialization(metricsValues[0], metricsValues[1], metricsValues[2], metricsValues[3], metricsValues[4]);
+    }
+
+    private static MetricsSerialization buildMetricsSerialization(String stepLength, String doubleSupportTime, String walkingSpeed,
+                                                                  String walkingAsymmetry, String distanceWalked) {
+        return MetricsSerialization.builder()
+                .stepLength(stepLength)
+                .doubleSupportTime(doubleSupportTime)
+                .walkingSpeed(walkingSpeed)
+                .walkingAsymmetry(walkingAsymmetry)
+                .distanceWalked(distanceWalked)
+                .timestamp(TIMESTAMP)
+                .build();
     }
 }

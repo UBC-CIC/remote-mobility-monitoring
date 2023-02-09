@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
+import static com.cpen491.remote_mobility_monitoring.TestUtils.buildMetrics;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IDS_NULL_ERROR_MESSAGE;
@@ -63,7 +64,7 @@ class MetricsDaoTest {
         Mockito.doThrow(RejectedRecordsException.class).when(writeClient).writeRecords(any(WriteRecordsRequest.class));
 
         List<Metrics> metricsList = new ArrayList<>();
-        metricsList.add(buildMetrics(MeasureName.DOUBLE_SUPPORT_TIME, "0.3"));
+        metricsList.add(buildMetricsDefault(MeasureName.DOUBLE_SUPPORT_TIME, "0.3"));
         assertThatThrownBy(() -> cut.add(metricsList)).isInstanceOf(InvalidMetricsException.class);
     }
 
@@ -147,17 +148,7 @@ class MetricsDaoTest {
         );
     }
 
-    private static Metrics buildMetrics(MeasureName measureName, String measureValue) {
+    private static Metrics buildMetricsDefault(MeasureName measureName, String measureValue) {
         return buildMetrics(PATIENT_ID, DEVICE_ID, measureName, measureValue, getCurrentUtcTimeString());
-    }
-
-    private static Metrics buildMetrics(String patientId, String deviceId, MeasureName measureName, String measureValue, String timestamp) {
-        return Metrics.builder()
-                .patientId(patientId)
-                .deviceId(deviceId)
-                .measureName(measureName)
-                .measureValue(measureValue)
-                .timestamp(timestamp)
-                .build();
     }
 }

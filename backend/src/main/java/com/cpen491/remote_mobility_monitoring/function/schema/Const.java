@@ -21,5 +21,6 @@ public final class Const {
     public static final String PATIENTS_NAME = "patients";
     public static final String ADMINS_NAME = "admins";
     public static final String CAREGIVERS_NAME = "caregivers";
+    public static final String METRICS_NAME = "metrics";
     public static final String MESSAGE_NAME = "message";
 }

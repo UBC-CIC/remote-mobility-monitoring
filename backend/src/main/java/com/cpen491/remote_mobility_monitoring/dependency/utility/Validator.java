@@ -4,6 +4,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
@@ -17,6 +18,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePa
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.UpdateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.CreateOrganizationRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.organization.GetOrganizationRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversRequestBody;
@@ -59,6 +61,16 @@ public class Validator {
     public static final String MEASURE_NAME_NULL_ERROR_MESSAGE = "measure_name must not be null";
     public static final String MEASURE_VALUE_BLANK_ERROR_MESSAGE = "measure_value must be present";
     public static final String MEASURE_VALUE_INVALID_ERROR_MESSAGE = "measure_value is not a double";
+    public static final String STEP_LENGTH_BLANK_ERROR_MESSAGE = "step_length must be present";
+    public static final String STEP_LENGTH_INVALID_ERROR_MESSAGE = "step_length is not a double";
+    public static final String DOUBLE_SUPPORT_TIME_BLANK_ERROR_MESSAGE = "double_support_time must be present";
+    public static final String DOUBLE_SUPPORT_TIME_INVALID_ERROR_MESSAGE = "double_support_time is not a double";
+    public static final String WALKING_SPEED_BLANK_ERROR_MESSAGE = "walking_speed must be present";
+    public static final String WALKING_SPEED_INVALID_ERROR_MESSAGE = "walking_speed is not a double";
+    public static final String WALKING_ASYMMETRY_BLANK_ERROR_MESSAGE = "walking_asymmetry must be present";
+    public static final String WALKING_ASYMMETRY_INVALID_ERROR_MESSAGE = "walking_asymmetry is not a double";
+    public static final String DISTANCE_WALKED_BLANK_ERROR_MESSAGE = "distance_walked must be present";
+    public static final String DISTANCE_WALKED_INVALID_ERROR_MESSAGE = "distance_walked is not a double";
     public static final String TIMESTAMP_BLANK_ERROR_MESSAGE = "timestamp must be present";
     public static final String TIMESTAMP_INVALID_ERROR_MESSAGE = "timestamp is not an in iso8601 format";
     public static final String VERIFIED_NULL_ERROR_MESSAGE = "verified must not be null";
@@ -85,6 +97,7 @@ public class Validator {
     public static final String VERIFY_PATIENT_NULL_ERROR_MESSAGE = "Verify patient request body must not be null";
     public static final String GET_PATIENT_NULL_ERROR_MESSAGE = "Get patient request body must not be null";
     public static final String GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE = "Get all caregivers request body must not be null";
+    public static final String ADD_METRICS_NULL_ERROR_MESSAGE = "Add metrics request body must not be null";
     public static final String UPDATE_PATIENT_NULL_ERROR_MESSAGE = "Update patient request body must not be null";
     public static final String DELETE_PATIENT_NULL_ERROR_MESSAGE = "Delete patient request body must not be null";
 
@@ -165,11 +178,35 @@ public class Validator {
     }
 
     public static void validateMeasureValue(String measureValue) {
-        Validate.notBlank(measureValue, MEASURE_VALUE_BLANK_ERROR_MESSAGE);
+        validateMetricsValue(measureValue, MEASURE_VALUE_BLANK_ERROR_MESSAGE, MEASURE_VALUE_INVALID_ERROR_MESSAGE);
+    }
+
+    public static void validateStepLength(String stepLength) {
+        validateMetricsValue(stepLength, STEP_LENGTH_BLANK_ERROR_MESSAGE, STEP_LENGTH_INVALID_ERROR_MESSAGE);
+    }
+
+    public static void validateDoubleSupportTime(String doubleSupportTime) {
+        validateMetricsValue(doubleSupportTime, DOUBLE_SUPPORT_TIME_BLANK_ERROR_MESSAGE, DOUBLE_SUPPORT_TIME_INVALID_ERROR_MESSAGE);
+    }
+
+    public static void validateWalkingSpeed(String walkingSpeed) {
+        validateMetricsValue(walkingSpeed, WALKING_SPEED_BLANK_ERROR_MESSAGE, WALKING_SPEED_INVALID_ERROR_MESSAGE);
+    }
+
+    public static void validateWalkingAsymmetry(String walkingAsymmetry) {
+        validateMetricsValue(walkingAsymmetry, WALKING_ASYMMETRY_BLANK_ERROR_MESSAGE, WALKING_ASYMMETRY_INVALID_ERROR_MESSAGE);
+    }
+
+    public static void validateDistanceWalked(String distanceWalked) {
+        validateMetricsValue(distanceWalked, DISTANCE_WALKED_BLANK_ERROR_MESSAGE, DISTANCE_WALKED_INVALID_ERROR_MESSAGE);
+    }
+
+    private static void validateMetricsValue(String metricsValue, String blankErrorMessage, String invalidErrorMessage) {
+        Validate.notBlank(metricsValue, blankErrorMessage);
         try {
-            Double.parseDouble(measureValue);
+            Double.parseDouble(metricsValue);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(MEASURE_VALUE_INVALID_ERROR_MESSAGE);
+            throw new IllegalArgumentException(invalidErrorMessage);
         }
     }
 
@@ -235,6 +272,16 @@ public class Validator {
         validateDeviceId(metrics.getDeviceId());
         validateMeasureName(metrics.getMeasureName());
         validateMeasureValue(metrics.getMeasureValue());
+        validateTimestamp(metrics.getTimestamp());
+    }
+
+    public static void validateMetricsSerialization(MetricsSerialization metrics) {
+        Validate.notNull(metrics, METRICS_NULL_ERROR_MESSAGE);
+        validateStepLength(metrics.getStepLength());
+        validateDoubleSupportTime(metrics.getDoubleSupportTime());
+        validateWalkingSpeed(metrics.getWalkingSpeed());
+        validateWalkingAsymmetry(metrics.getWalkingAsymmetry());
+        validateDistanceWalked(metrics.getDistanceWalked());
         validateTimestamp(metrics.getTimestamp());
     }
 
@@ -335,6 +382,12 @@ public class Validator {
     public static void validateGetAllCaregiversRequestBody(GetAllCaregiversRequestBody body) {
         Validate.notNull(body, GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE);
         validatePatientId(body.getPatientId());
+    }
+
+    public static void validateAddMetricsRequestBody(AddMetricsRequestBody body) {
+        Validate.notNull(body, ADD_METRICS_NULL_ERROR_MESSAGE);
+        validateDeviceId(body.getDeviceId());
+        Validate.notNull(body.getMetrics(), METRICS_NULL_ERROR_MESSAGE);
     }
 
     public static void validateUpdatePatientRequestBody(UpdatePatientRequestBody body) {

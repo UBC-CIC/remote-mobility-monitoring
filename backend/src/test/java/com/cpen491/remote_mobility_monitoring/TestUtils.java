@@ -2,6 +2,8 @@ package com.cpen491.remote_mobility_monitoring;
 
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import org.assertj.core.api.ThrowableAssert;
@@ -58,6 +60,16 @@ public class TestUtils {
                 .authCode(authCode)
                 .authCodeTimestamp(authCodeTimestamp)
                 .verified(verified)
+                .build();
+    }
+
+    public static Metrics buildMetrics(String patientId, String deviceId, MeasureName measureName, String measureValue, String timestamp) {
+        return Metrics.builder()
+                .patientId(patientId)
+                .deviceId(deviceId)
+                .measureName(measureName)
+                .measureValue(measureValue)
+                .timestamp(timestamp)
                 .build();
     }
 }

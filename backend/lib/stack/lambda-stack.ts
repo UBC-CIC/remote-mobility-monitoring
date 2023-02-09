@@ -3,11 +3,14 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as timestream from "aws-cdk-lib/aws-timestream";
 import { formResourceName } from "../utility";
 
 interface LambdaStackProps extends cdk.StackProps {
   readonly stage: string;
-  readonly table: dynamodb.Table;
+  readonly ddbTable: dynamodb.Table;
+  readonly timestreamDatabase: timestream.CfnDatabase;
+  readonly timestreamTable: timestream.CfnTable;
   readonly userPool: cognito.UserPool;
 }
 
@@ -21,6 +24,9 @@ export class LambdaStack extends cdk.Stack {
 
   public readonly lambdaRole: iam.Role
   public readonly dynamoDbTableName: string;
+  public readonly timestreamDatabaseName: string;
+  public readonly timestreamTableName: string;
+
   public readonly defaultFunction: lambda.Function;
   public readonly createOrganizationFunction: lambda.Function;
   public readonly createOrganizationAlias: lambda.Alias;
@@ -54,6 +60,8 @@ export class LambdaStack extends cdk.Stack {
   public readonly getPatientAlias: lambda.Alias;
   public readonly getAllCaregiversFunction: lambda.Function;
   public readonly getAllCaregiversAlias: lambda.Alias;
+  public readonly addMetricsFunction: lambda.Function;
+  public readonly addMetricsAlias: lambda.Alias;
   public readonly updatePatientFunction: lambda.Function;
   public readonly updatePatientAlias: lambda.Alias;
   public readonly deletePatientFunction: lambda.Function;
@@ -63,8 +71,10 @@ export class LambdaStack extends cdk.Stack {
     super(scope, id, props);
 
     const roleName = `RemoteMobilityMonitoringLambdaRole-${props.stage}`
-    this.lambdaRole = this.createLambdaRole(roleName, props.table);
-    this.dynamoDbTableName = props.table.tableName;
+    this.lambdaRole = this.createLambdaRole(roleName, props.ddbTable);
+    this.dynamoDbTableName = props.ddbTable.tableName;
+    this.timestreamDatabaseName = props.timestreamDatabase.databaseName!;
+    this.timestreamTableName = props.timestreamTable.tableName!;
     this.userPool = props.userPool;
 
     // TODO: DLQs? Layers?
@@ -132,6 +142,9 @@ export class LambdaStack extends cdk.Stack {
     const getAllCaregiversFunctionName = formResourceName('GetAllCaregiversFunction', props.stage);
     this.getAllCaregiversFunction = this.createGetAllCaregiversFunction(getAllCaregiversFunctionName);
     this.getAllCaregiversAlias = this.createLambdaAlias(getAllCaregiversFunctionName, this.getAllCaregiversFunction);
+    const addMetricsFunctionName = formResourceName('AddMetricsFunction', props.stage);
+    this.addMetricsFunction = this.createAddMetricsFunction(addMetricsFunctionName);
+    this.addMetricsAlias = this.createLambdaAlias(addMetricsFunctionName, this.addMetricsFunction);
     const updatePatientFunctionName = formResourceName('UpdatePatientFunction', props.stage);
     this.updatePatientFunction = this.createUpdatePatientFunction(updatePatientFunctionName);
     this.updatePatientAlias = this.createLambdaAlias(updatePatientFunctionName, this.updatePatientFunction);
@@ -140,7 +153,7 @@ export class LambdaStack extends cdk.Stack {
     this.deletePatientAlias = this.createLambdaAlias(deletePatientFunctionName, this.deletePatientFunction);
   }
 
-  private createLambdaRole(roleName: string, table: dynamodb.Table): iam.Role {
+  private createLambdaRole(roleName: string, ddbTable: dynamodb.Table): iam.Role {
     const role = new iam.Role(this, roleName, {
       roleName: roleName,
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -158,10 +171,24 @@ export class LambdaStack extends cdk.Stack {
         'dynamodb:BatchGetItem',
       ],
       resources: [
-        table.tableArn,
-        table.tableArn + '/index/*',
+        ddbTable.tableArn,
+        ddbTable.tableArn + '/index/*',
       ],
     }));
+    role.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'timestream:WriteRecords',
+        'timestream:DescribeEndpoints',
+        'timestream:DescribeTable',
+        'timestream:ListDatabases',
+        'timestream:ListMeasures',
+        'timestream:ListTables',
+        'timestream:Select',
+        'timestream:SelectValues',
+      ],
+      resources: ['*'],
+    }))
     role.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ['logs:*'],
@@ -243,6 +270,10 @@ export class LambdaStack extends cdk.Stack {
     return this.createLambdaFunction(functionName, 'patient.GetAllCaregiversHandler');
   }
 
+  private createAddMetricsFunction(functionName: string): lambda.Function {
+    return this.createLambdaFunction(functionName, 'patient.AddMetricsHandler');
+  }
+
   private createUpdatePatientFunction(functionName: string): lambda.Function {
     return this.createLambdaFunction(functionName, 'patient.UpdatePatientHandler');
   }
@@ -262,6 +293,8 @@ export class LambdaStack extends cdk.Stack {
       role: this.lambdaRole,
       environment: {
         'DYNAMO_DB_TABLE_NAME': this.dynamoDbTableName,
+        'TIMESTREAM_DATABASE_NAME': this.timestreamDatabaseName,
+        'TIMESTREAM_TABLE_NAME': this.timestreamTableName,
         'COGNITO_USERPOOL_ID': this.userPool.userPoolId,
       },
     });

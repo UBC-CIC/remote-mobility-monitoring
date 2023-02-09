@@ -74,5 +74,11 @@ public final class Const {
         public static final String MEASURE_NAME_NAME = "measure_name";
         public static final String MEASURE_VALUE_NAME = "measure_value";
         public static final String TIME_NAME = "time";
+        public static final String STEP_LENGTH_NAME = "step_length";
+        public static final String DOUBLE_SUPPORT_TIME_NAME = "double_support_time";
+        public static final String WALKING_SPEED_NAME = "walking_speed";
+        public static final String WALKING_ASYMMETRY_NAME = "walking_asymmetry";
+        public static final String DISTANCE_WALKED_NAME = "distance_walked";
+        public static final String TIMESTAMP_NAME = "timestamp";
     }
 }

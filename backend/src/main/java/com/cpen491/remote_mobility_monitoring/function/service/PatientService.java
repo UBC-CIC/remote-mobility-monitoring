@@ -1,13 +1,19 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
+import com.cpen491.remote_mobility_monitoring.datastore.dao.MetricsDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidMetricsException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.CreatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePatientRequestBody;
@@ -28,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -47,6 +54,8 @@ public class PatientService {
     private PatientDao patientDao;
     @NonNull
     private CaregiverDao caregiverDao;
+    @NonNull
+    private MetricsDao metricsDao;
 
     /**
      * Creates a Patient. Generates an authCode which will expire after a short time and returns it.
@@ -177,6 +186,41 @@ public class PatientService {
 
         return GetAllCaregiversResponseBody.builder()
                 .caregivers(caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList()))
+                .build();
+    }
+
+    /**
+     * Add Metrics to Patient.
+     *
+     * @param body The request body
+     * @return {@link AddMetricsResponseBody}
+     * @throws RecordDoesNotExistException If Patient record with the given deviceId does not exist
+     * @throws InvalidMetricsException If the metrics already exists or if timestamp is out of Timestream range
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if deviceId or metrics are empty or invalid
+     */
+    public AddMetricsResponseBody addMetrics(AddMetricsRequestBody body) {
+        log.info("Adding Metrics {}", body);
+        Validator.validateAddMetricsRequestBody(body);
+
+        String deviceId = body.getDeviceId();
+        Patient patient = patientDao.findByDeviceId(deviceId);
+        if (patient == null) {
+            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), deviceId);
+        }
+        String patientId = patient.getPid();
+
+        List<Metrics> metricsList = new ArrayList<>();
+        for (MetricsSerialization serialization : body.getMetrics()) {
+            Validator.validateMetricsSerialization(serialization);
+
+            metricsList.addAll(Metrics.convertFromSerialization(patientId, deviceId, serialization));
+        }
+
+        metricsDao.add(metricsList);
+
+        return AddMetricsResponseBody.builder()
+                .message("OK")
                 .build();
     }
 

@@ -22,6 +22,7 @@ export interface ApiGatewayStackProps extends cdk.StackProps {
   readonly verifyPatientFunction: lambda.Alias;
   readonly getPatientFunction: lambda.Alias;
   readonly getAllCaregiversFunction: lambda.Alias;
+  readonly addMetricsFunction: lambda.Alias;
   readonly updatePatientFunction: lambda.Alias;
   readonly deletePatientFunction: lambda.Alias;
 }
@@ -72,6 +73,7 @@ export class ApiGatewayStack extends cdk.Stack {
     const verifyPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.verifyPatientFunction);
     const getPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getPatientFunction);
     const getAllCaregiversFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getAllCaregiversFunction);
+    const addMetricsFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.addMetricsFunction);
     const updatePatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.updatePatientFunction);
     const deletePatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.deletePatientFunction);
 
@@ -104,6 +106,9 @@ export class ApiGatewayStack extends cdk.Stack {
     patient_id.addMethod('GET', getPatientFunctionIntegration); // GET /patients/{patient_id}
     patient_id.addMethod('PUT', updatePatientFunctionIntegration); // PUT /patients/{patient_id}
     patient_id.addMethod('DELETE', deletePatientFunctionIntegration); // DELETE /patients/{patient_id}
+
+    const metrics = api.root.addResource('metrics');
+    metrics.addMethod('POST', addMetricsFunctionIntegration); // POST /metrics
   }
 
   private static createLambdaIntegration(lambdaFunction: lambda.Alias | lambda.Function) {

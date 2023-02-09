@@ -12,7 +12,7 @@ stages.forEach((stage) => {
   const cognitoStack = new CognitoStack(app, `RemoteMobilityMonitoringCognitoStack-${stage}`, {
     stage: stage,
   });
-  new TimestreamStack(app, `RemoteMobilityMonitoringTimestreamStack-${stage}`, {
+  const timestreamStack = new TimestreamStack(app, `RemoteMobilityMonitoringTimestreamStack-${stage}`, {
     stage: stage,
   });
   const dynamoDbStack = new DynamoDbStack(app, `RemoteMobilityMonitoringDynamoStack-${stage}`, {
@@ -20,7 +20,9 @@ stages.forEach((stage) => {
   });
   const lambdaStack = new LambdaStack(app, `RemoteMobilityMonitoringLambdaStack-${stage}`, {
     stage: stage,
-    table: dynamoDbStack.remoteMobilityMonitoringTable,
+    ddbTable: dynamoDbStack.remoteMobilityMonitoringTable,
+    timestreamDatabase: timestreamStack.database,
+    timestreamTable: timestreamStack.metricsTable,
     userPool: cognitoStack.userPool
   });
   const apigatewayStackProps: ApiGatewayStackProps = {
@@ -41,6 +43,7 @@ stages.forEach((stage) => {
     verifyPatientFunction: lambdaStack.verifyPatientAlias,
     getPatientFunction: lambdaStack.getPatientAlias,
     getAllCaregiversFunction: lambdaStack.getAllCaregiversAlias,
+    addMetricsFunction: lambdaStack.addMetricsAlias,
     updatePatientFunction: lambdaStack.updatePatientAlias,
     deletePatientFunction: lambdaStack.deletePatientAlias,
   }

@@ -3,9 +3,11 @@ package com.cpen491.remote_mobility_monitoring.dependency.utility;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidMetricsException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
+import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -28,6 +30,7 @@ public class HandlerUtils {
         }
     }
 
+    private static final String MALFORMED_REQUEST_ERROR_MESSAGE = "Request is malformed";
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "Sorry something went wrong";
 
     public static APIGatewayProxyResponseEvent processApiGatewayRequest(Function<APIGatewayProxyRequestEvent, String> func,
@@ -38,9 +41,12 @@ public class HandlerUtils {
         } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
             log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, e.getMessage());
-        } catch (CognitoException e) {
+        } catch (JsonSyntaxException e) {
+            log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());
+            return generateApiGatewayResponse(StatusCode.BAD_REQUEST, MALFORMED_REQUEST_ERROR_MESSAGE);
+        } catch (InvalidMetricsException | CognitoException e) {
             Throwable cause = e.getCause();
-            log.error("Got CognitoException due to {} with message {}, responding with bad request", cause.getClass(), cause.getMessage());
+            log.error("Got {} due to {} with message {}, responding with bad request", e.getClass(), cause.getClass(), cause.getMessage());
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, cause.getMessage());
         } catch (RecordDoesNotExistException e) {
             log.error("Got {} error {}, responding with not found", e.getClass(), e.getMessage());
