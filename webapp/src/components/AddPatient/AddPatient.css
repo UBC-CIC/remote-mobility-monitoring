@@ -43,12 +43,12 @@ p, div {
     width: 25%;
     padding: 20px 40px;
     border-radius: 6px;
-    margin-left: 37%;
+    margin-left: 40%;
   }
 
  .add-patient .or {
      text-align: center;
-     margin-left: -16%;
+     margin-left: -26%;
   }
  .add-patient #or-button {
     text-align: center;
@@ -62,6 +62,7 @@ p, div {
     background-color: #4D47C3;
     color: #FFFFFF;
     font-size: 0.62em;
+    margin-left: -6%;
   }
 
  .add-patient .form-wrapper {
@@ -147,5 +148,5 @@ p, div {
  .add-patient .err {
      color: red;
      margin-top: 2%;
-     font-size: 0.95em;
+     font-size: 0.9em;
   }

@@ -10,3 +10,14 @@ export interface strObjMap {
 
 export const userTypesLength = 4;
 
+export const getCaregiverId = () => {
+    const sub = localStorage.getItem("sub");
+    if (! sub) {
+        return "";
+    }
+    if (!sub.startsWith(userTypes["caregiver"])) {
+        return "";
+    }
+    return sub;
+};
+

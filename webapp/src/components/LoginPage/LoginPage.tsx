@@ -59,7 +59,12 @@ function LoginPage() {
                 const username = userType.concat(cognitoUser.getUsername());
                 localStorage.setItem("sub", sub);
                 localStorage.setItem("username", username);
-                nav("/");
+                if (loginType === "caregiver") {
+                    nav("/dashboard");
+                }
+                else {
+                    nav("/admindashboard");
+                }
             },
             onFailure: function(err: any) {
                 let errMsg = err.message || JSON.stringify(err);

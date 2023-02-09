@@ -4,6 +4,7 @@ import { useNavigate} from "react-router-dom";
 import {createUser, createUserAndGetSession} from "../../helpers/Cognito";
 import {FaArrowLeft} from "react-icons/fa";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
+import CaregiverNavbar from "../Navbar/CaregiverNavbar";
 
 function ChangePassword() {
     const [password, setPassword] = useState("");
@@ -46,35 +47,39 @@ function ChangePassword() {
         });
     };
     return (
-        <div className="force-pwd">
-            <div className="icon" onClick={() => nav("/")}><FaArrowLeft size="15px"/> Home Page</div>
-            <div className="title"><h2>Change password</h2>
-                <p className="desc">Please enter your old password for verification along with your new desired password</p>
-            </div>
-            <div></div>
-            <div></div>
-            <div className="wrapper">
-                <div className='login-input'>
-                    <input type='password' placeholder='Old Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setOldPassword(e.target.value)}></input>
-                    <input type='password' placeholder='New Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
-                    <input type='password' placeholder='Confirm Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setConfirmPassword(e.target.value)}></input>
-                    {loading === true? 
-                        <button type='submit' onClick={(e) => {return;}}>Loading</button>:
-                        <button type='submit' onClick={(e) => handleSubmit()}>Change Password</button>}
-                    {error === ("")? null: <p className="err">{error}</p>}
+        <>
+            <CaregiverNavbar/>
+            <div className="force-pwd">
+                <div className="icon" onClick={() => nav("/")}><FaArrowLeft size="15px"/> Home Page</div>
+                <div className="title"><h2>Change password</h2>
+                    <p className="desc">Please enter your old password for verification along with your new desired password</p>
+                </div>
+                <div></div>
+                <div></div>
+                <div className="wrapper">
+                    <div className='login-input'>
+                        <input type='password' placeholder='Old Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setOldPassword(e.target.value)}></input>
+                        <input type='password' placeholder='New Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
+                        <input type='password' placeholder='Confirm Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setConfirmPassword(e.target.value)}></input>
+                        {loading === true? 
+                            <button type='submit' onClick={(e) => {return;}}>Loading</button>:
+                            <button type='submit' onClick={(e) => handleSubmit()}>Change Password</button>}
+                        {error === ("")? null: <p className="err">{error}</p>}
+                    </div>
+                </div>
+                <div className="compare-wrapper">
+                    <div className="compare">
+                        <p className={password.length >= 8 ? "green": "red"}> Minimum length should be 8 characters</p><br/>
+                        <p className={/\d/.test(password) ? "green": "red"}> Must contain at least one number</p><br/>
+                        <p className={/[a-z]/.test(password) ? "green": "red"}> Must contain at least one lowercase letter</p><br/>
+                        <p className={/[A-Z]/.test(password) ? "green": "red"}> Must contain at least one uppercase letter</p><br/>
+                        <p className={/[`!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~]/.test(password)? "green": "red"}> Must contain at least one special character</p><br/>
+                        <p className={password === confirmPassword && password.length > 0 ? "green":"red"}> Passwords must match</p><br/>
+                    </div>
                 </div>
             </div>
-            <div className="compare-wrapper">
-                <div className="compare">
-                    <p className={password.length >= 8 ? "green": "red"}> Minimum length should be 8 characters</p><br/>
-                    <p className={/\d/.test(password) ? "green": "red"}> Must contain at least one number</p><br/>
-                    <p className={/[a-z]/.test(password) ? "green": "red"}> Must contain at least one lowercase letter</p><br/>
-                    <p className={/[A-Z]/.test(password) ? "green": "red"}> Must contain at least one uppercase letter</p><br/>
-                    <p className={/[`!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~]/.test(password)? "green": "red"}> Must contain at least one special character</p><br/>
-                    <p className={password === confirmPassword && password.length > 0 ? "green":"red"}> Passwords must match</p><br/>
-                </div>
-            </div>
-        </div>
+
+        </>
     );
 }
 

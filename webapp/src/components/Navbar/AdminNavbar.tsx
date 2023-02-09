@@ -3,20 +3,17 @@ import "./Navbar.css";
 import { useNavigate} from "react-router-dom";
 import {logout} from "../../helpers/Cognito";
 
-function CaregiverNavbar() {
+function AdminNavbar() {
     const nav = useNavigate();
     return (
         <div className="navbar">
             Mobility Monitor
             <span className="navbar-items" onClick={(e) => {
-                nav("/dashboard");
+                nav("/admindashboard");
             }}>Dashboard</span>
             <span className="navbar-items" onClick={(e) => {
-                nav("/addpatient");
-            }}>Add Patients</span>
-            <span className="navbar-items" onClick={(e) => {
-                nav("/changepwd");
-            }}>Change Password</span>
+                nav("/addcaregiver");
+            }}>Add Caregivers</span>
             <span className="navbar-items" onClick={(e) => {
                 logout();
                 nav("/login");
@@ -25,4 +22,4 @@ function CaregiverNavbar() {
     );
 } 
 
-export default CaregiverNavbar;
+export default AdminNavbar;
