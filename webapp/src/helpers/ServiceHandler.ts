@@ -137,6 +137,7 @@ export const ServiceHandler = {
  * error if the env variable API_URL is not defined. 
 * */
 const createBaseUrl = (loginType: string) => {
+    // TODO: Don't throw errors
     const base_url = process.env.REACT_APP_API_URL;
     if (!base_url) {
         const errMsg = "API URL is invalid";
