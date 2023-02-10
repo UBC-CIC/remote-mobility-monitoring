@@ -1,0 +1,89 @@
+
+@media (max-width: 450px) {
+    .login-page p, div {
+        font-size: 0.95em ;
+        font-family: Arial !important;
+    }
+}
+
+@media (min-width: 450px) {
+    .login-page p, div {
+        font-size: 1.1em ;
+        font-family: Arial !important;
+    }
+
+    .login-page {
+        display:grid;
+        grid-template-columns: 48% 48%;
+        padding: 20px;
+        padding-top: 10%;
+        gap: 4%;
+    }
+
+}
+
+.login-page .login {
+    padding: 5%;
+    padding-left: 30%;
+    padding-right: 30%;
+}
+
+.login-page .user {
+    padding-bottom: 20%;
+    padding-left: 3%;
+}
+
+.login-page .login-input{
+    padding: 0.5%;
+    width: 60%;
+}
+
+.login-page .login-input input {
+    height: 30px;
+    width: 93%;
+    padding-left: 12px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: #F0EFFF;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 0.7em ;
+}
+.login-page .login-input input::placeholder {
+    color: #A7A3FF;
+}
+
+.login-page .forgot {
+    margin-top: -2%;
+    text-align: right;
+    padding-bottom: 25px;
+    font-size: 70%;
+}
+
+.login-page .login-input button {
+    height: 32px;
+    width: 100%;
+    border-radius: 5px;
+    background-color: #4D47C3;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 0.8em ;
+}
+
+.login-page .login-input button:hover {
+    cursor: pointer;
+    background-color: #554FCA;
+}
+
+.login-page .alternate {
+    color: #4D47C3;
+}
+
+.login-page .alternate:hover {
+    cursor: pointer;
+}
+.login-page .err {
+    font-size: 0.75em;
+    margin-top: 4%;
+    margin-bottom: -0.1%;
+    color: red;
+}
