@@ -20,6 +20,9 @@ function App() {
         <Provider store={store}>
             <Router>
                 <Routes>
+                    <Route path="/" element={
+                        <ProtectedRoute type="caregiver"><Home/></ProtectedRoute>
+                    }/>
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="/addcaregiver" element={
                         <ProtectedRoute type="admin"><AddCaregiver/></ProtectedRoute>

@@ -16,14 +16,21 @@ function AdminDashboard() {
     const nav = useNavigate();
     const [caregivers, setCaregivers]:React.SetStateAction<any> = useState([]);
 
-    const updateCaregivers = () => {
+    const getOrg = () => {
         ServiceHandler.getOrg()
             .then((data: any) => {
                 const caregiverArray = data.caregivers;
                 setCaregivers(caregiverArray);
                 setFilteredCaregivers(caregiverArray);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                console.log(err);
+                getOrg();
+            });
+    };
+
+    const updateCaregivers = () => {
+        getOrg();
     };
 
     useEffect(() => {

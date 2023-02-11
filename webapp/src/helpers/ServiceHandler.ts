@@ -158,16 +158,6 @@ const createBaseUrl = (loginType: string) => {
         alert(errMsg);
         throw new Error(errMsg);
     }
-    if (!sub) {
-        const errMsg = "Please log in first";
-        alert(errMsg);
-        throw new Error(errMsg);
-    }
-    if (!sub.startsWith(userTypes[loginType])) {
-        const errMsg = "Please log in first";
-        alert(errMsg);
-        throw new Error(errMsg);
-    }
     return base_url;
 };
 

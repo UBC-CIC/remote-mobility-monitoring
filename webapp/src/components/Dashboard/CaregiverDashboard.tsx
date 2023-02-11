@@ -15,14 +15,21 @@ function CaregiverDashboard() {
     const nav = useNavigate();
     const [patients, setPatients]:React.SetStateAction<any> = useState([]);
 
-    useEffect(() => {
+    const getPatients = () => {
         ServiceHandler.getAllPatients()
             .then((data: any) => {
                 console.log(patients);
                 setPatients(data.patients);
                 setFilteredPatients(data.patients);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                console.log(err);
+                getPatients();
+            });
+
+    };
+    useEffect(() => {
+        getPatients();
     }, []);
 
 
