@@ -14,9 +14,11 @@ struct RegisterView: View {
     @State private var patientId: String = ""
     @State private var authCode: String = ""
     @State private var caregiverId: String = ""
-    @State private var deviceIdDebug: String = ""
-    @State private var errorMessage: String = ""
+    @State private var deviceId: String = ""
+    @State private var scanningMessage: String = ""
     @State private var errorScanning: Bool = false
+    @State private var isShowingScanningResult: Bool = false
+    @State private var verified: Bool = false
     let keychain = Keychain(service: "com.example.remote-mobility-monitoring-iOS")
     
     func getDeviceId() -> String {
@@ -25,7 +27,7 @@ struct RegisterView: View {
         } else {
             guard let newDeviceId = UIDevice.current.identifierForVendor?.uuidString else {
                 errorScanning = true
-                errorMessage = "Failed to retrieve deviceId from UIDevice, please contact developers"
+                scanningMessage = "Failed to retrieve deviceId from UIDevice, please contact developers"
                 return ""
             }
             
@@ -33,10 +35,23 @@ struct RegisterView: View {
                 try keychain.set("deviceId", key: newDeviceId)
             } catch {
                 errorScanning = true
-                errorMessage = "Failed to persist deviceId, please contact developers"
+                scanningMessage = "Failed to persist deviceId, please contact developers"
             }
             
             return newDeviceId
+        }
+    }
+    
+    func displayScanningResult() {
+        self.isShowingScanningResult = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            if(self.scanningMessage == "Success") {
+                self.verified = true
+                
+            }
+            self.isShowingScanningResult = false
+            self.errorScanning = false
+            self.scanningMessage = ""
         }
     }
     
@@ -54,48 +69,53 @@ struct RegisterView: View {
                 patientId = jsonObject?["patient_id"] ?? ""
                 authCode = jsonObject?["auth_code"] ?? ""
                 caregiverId = jsonObject?["caregiver_id"] ?? ""
-                let deviceId = getDeviceId()
+                deviceId = getDeviceId()
                 
                 if (errorScanning == false && patientId != "" && authCode != "" && caregiverId != "" && deviceId != "") {
                     verifyPatient(patientId: patientId, caregiverId: caregiverId, authCode: authCode, deviceId: deviceId) { result in
                         switch result {
                             case .success(let response):
+                                self.scanningMessage = "Success"
+                                self.displayScanningResult()
                                 print(response)
                             case .failure(let error):
-                                errorScanning = true
-                                errorMessage = "Failed to verify patient: \(error.localizedDescription)"
+                                self.errorScanning = true
+                                self.scanningMessage = "Failed to verify new patient!"
+                                self.displayScanningResult()
                                 print("Verification failed: \(error.localizedDescription)")
                         }
                     }
                 } else {
-                    errorScanning = true
+                    self.errorScanning = true
                     if patientId == "" {
-                        errorMessage = "Failed to get patientId from QR code. Failed to verify."
+                        self.scanningMessage = "Failed to get patientId from QR code. Failed to verify."
                     } else if authCode == "" {
-                        errorMessage = "Failed to get authCode from QR code. Failed to verify."
+                        self.scanningMessage = "Failed to get authCode from QR code. Failed to verify."
                     } else if caregiverId == "" {
-                        errorMessage = "Failed to get caregiverId from QR code. Failed to verify."
+                        self.scanningMessage = "Failed to get caregiverId from QR code. Failed to verify."
                     } else if deviceId == "" {
-                        errorMessage = "Failed to get deviceId from. Failed to verify."
+                        self.scanningMessage = "Failed to get deviceId from. Failed to verify."
                     } else {
-                        errorMessage = "Unknown error occurred. Failed to verify."
+                        self.scanningMessage = "Unknown error occurred. Failed to verify."
                     }
+                    
+                    self.displayScanningResult()
                 }
             } catch {
                 errorScanning = true
-                errorMessage = "Failed to read QR code: \(error.localizedDescription)"
+                scanningMessage = "Failed to read QR code: \(error.localizedDescription)"
                 print("Error while parsing JSON: \(error.localizedDescription)")
             }
             
         case .failure(let error):
             errorScanning = true
-            errorMessage = "Scanning failed: \(error.localizedDescription)"
+            scanningMessage = "Scanning failed: \(error.localizedDescription)"
             print("Scanning failed: \(error.localizedDescription)")
         }
     }
 
     var body: some View {
-        NavigationView {
+        if !verified {
             VStack() {
                 Text("Register")
                     .font(.largeTitle)
@@ -129,29 +149,30 @@ struct RegisterView: View {
                         .font(.headline)
                     Text("Caregiver ID: \(caregiverId)")
                         .font(.headline)
-                    Text("Device Id: \(deviceIdDebug)")
+                    Text("Device Id: \(deviceId)")
                         .font(.headline)
-                    if errorScanning {
-                        Text(errorMessage)
-                            .font(.body)
-                            .foregroundColor(.red)
+                    if isShowingScanningResult {
+                        if scanningMessage == "Success" {
+                            Text(scanningMessage)
+                                .font(.body)
+                                .foregroundColor(.green)
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                        } else {
+                            Text(scanningMessage)
+                                .font(.body)
+                                .foregroundColor(.red)
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                        }
                     }
                 }
                 .padding()
-                NavigationLink(destination: MobilityView()) {
-                    Text("Submit")
-                        .font(ButtonStyling.font)
-                        .foregroundColor(ButtonStyling.foreGroundColor)
-                        .padding()
-                        .frame(minWidth: 0, maxWidth: .infinity)
-                        .background(ButtonStyling.color)
-                        .cornerRadius(ButtonStyling.cornerRadius)
-                }
             }
             .padding(.horizontal, 32)
             .sheet(isPresented: $isScanning) {
                 CodeScannerView(codeTypes: [.qr], completion: handleScanResult(result:))
             }
+        } else {
+            MobilityView()
         }
     }
 }

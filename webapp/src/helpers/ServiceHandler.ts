@@ -68,6 +68,20 @@ export const ServiceHandler = {
         });
         return addCallbacks(req);
     },
+    deletePatient: (patientId: string) => {
+        const base_url = createBaseUrl("caregiver");
+        const url = base_url.concat("/patients/").concat(patientId);
+        const req = fetch(url, {
+            method: "DELETE", 
+            mode: "cors", 
+            cache: "no-cache", 
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+        });
+        return addCallbacks(req);
+    },
     getAllPatients: () => {
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();

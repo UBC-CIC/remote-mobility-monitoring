@@ -14,7 +14,7 @@ enum ApiError: Error {
 }
 
 func verifyPatient(patientId: String, caregiverId: String, authCode: String, deviceId: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
-    let endpoint = "https://api_endpoint/patients/\(patientId)/verify"
+    let endpoint = "https://th8lr56bvd.execute-api.us-west-2.amazonaws.com/prod/patients/\(patientId)/verify"
     let body: [String: Any] = [
         "caregiver_id": caregiverId,
         "auth_code": authCode,

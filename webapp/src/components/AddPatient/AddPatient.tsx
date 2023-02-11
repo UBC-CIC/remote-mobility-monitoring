@@ -100,7 +100,7 @@ function AddCaregiver() {
                                     value={JSON.stringify({
                                         "caregiver_id": caregiverId,
                                         "auth_code": authCode,
-                                        "patient-id": patientId
+                                        "patient_id": patientId
                                     })}
                                 />
                                 <p className="or">or</p>
