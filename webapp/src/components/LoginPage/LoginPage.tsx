@@ -53,7 +53,6 @@ function LoginPage() {
                 const decodedToken: strObjMap = jwt_decode(result.getAccessToken().getJwtToken());
                 let sub = decodedToken["sub"];
                 const userType = userTypes[loginType];
-                console.log(sub);
 
                 sub = userType.concat(sub);
                 const username = userType.concat(cognitoUser.getUsername());

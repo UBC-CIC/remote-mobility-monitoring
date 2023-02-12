@@ -10,7 +10,8 @@ import CaregiverNavbar from "../Navbar/CaregiverNavbar";
 
 type response = {
     patient_id: string,
-    auth_code: string
+    auth_code: string,
+    device_id: string
 }
 
 function AddCaregiver() {
@@ -74,6 +75,21 @@ function AddCaregiver() {
                 console.log(res);
                 console.log(caregiverId);
                 setSubmitted(true);
+                let succ = false;
+                const interval = setInterval(() => {
+                    ServiceHandler.getPatient(res.patient_id)
+                        .then((val: any) => {
+                            if (val.device_id && !succ) {
+                                succ = true;
+                                alert("Patient added");
+                                clearTimeout(interval);
+                                nav("/dashboard");
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
+                }, 500);
             })
             .catch((err: Error) => setError(err.message));
     };

@@ -59,7 +59,6 @@ export const createUserAndGetSession = (username: string | null, trim: boolean,
         return createUser("", false);
     } 
     else {
-        console.log(cognitoUser.getUsername());
         cognitoUser.getSession((err: Error) => {
             if (err) {
                 console.log(err);

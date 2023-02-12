@@ -44,7 +44,11 @@ function AddCaregiver() {
         }
         setError("");
         ServiceHandler.addCaregiver(firstName, lastName, email, contact)
-            .then((data: any) => console.log(data))
+            .then((data: any) => {
+                console.log(data);
+                alert("Caregiver sucessfully added. They have received an email with further instructions.");
+                nav("/admindashboard");
+            })
             .catch((err: Error) => setError(err.message.split("(")[0]));
     };
 

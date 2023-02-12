@@ -170,6 +170,7 @@ const createBaseUrl = (loginType: string) => {
 * */
 const addCallbacks = (p: Promise<response>) => {
     return p.then((res: response) => {
+        console.log(res.status);
         if (res.status === 200) {
             return res.json();
         }

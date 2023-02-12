@@ -18,12 +18,10 @@ function CaregiverDashboard() {
     const getPatients = () => {
         ServiceHandler.getAllPatients()
             .then((data: any) => {
-                console.log(patients);
                 setPatients(data.patients);
                 setFilteredPatients(data.patients);
             })
             .catch((err) => {
-                console.log(err);
                 getPatients();
             });
 
