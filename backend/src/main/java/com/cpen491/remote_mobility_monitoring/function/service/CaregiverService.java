@@ -222,4 +222,17 @@ public class CaregiverService {
                 .message("OK")
                 .build();
     }
+
+    /**
+     * Primes the CaregiverService to reduce cold start time.
+     */
+    public void prime() {
+        log.info("Priming CaregiverService");
+        try {
+            caregiverDao.findById("car-prime");
+        } catch (Exception e) {
+            // Expected
+        }
+        log.info("Done priming CaregiverService");
+    }
 }

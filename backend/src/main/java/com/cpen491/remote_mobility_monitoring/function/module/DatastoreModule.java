@@ -22,21 +22,6 @@ import static com.cpen491.remote_mobility_monitoring.function.module.Environment
 
 @Module
 public class DatastoreModule {
-    // Prevent lazy loading DynamoDbClient by using static initializer
-    // This creates DynamoDbClient and significantly reduces cold start time
-    static {
-        try {
-            DynamoDbClient ddbClient = AwsModule.dynamoDbClient(AwsModule.httpClient());
-            DaoFactory daoFactory = daoFactory(EnvironmentModule.dynamoDbTableName(), ddbClient);
-            OrganizationDao organizationDao = organizationDao(daoFactory);
-            PatientDao patientDao = patientDao(daoFactory);
-            CaregiverDao caregiverDao = caregiverDao(daoFactory, organizationDao, patientDao);
-            caregiverDao.hasPatient("pat-123", "car-123");
-        } catch (Exception e) {
-            // Expects exception
-        }
-    }
-
     @Provides
     @Singleton
     public static DaoFactory daoFactory(@Named(DYNAMO_DB_TABLE_NAME) String tableName, DynamoDbClient ddbClient) {

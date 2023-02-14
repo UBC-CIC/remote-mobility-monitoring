@@ -72,4 +72,17 @@ public class OrganizationService {
                 .caregivers(caregivers.stream().map(CaregiverSerialization::fromCaregiver).collect(Collectors.toList()))
                 .build();
     }
+
+    /**
+     * Primes the OrganizationService to reduce cold start time.
+     */
+    public void prime() {
+        log.info("Priming OrganizationService");
+        try {
+            organizationDao.findById("org-prime");
+        } catch (Exception e) {
+            // Expected
+        }
+        log.info("Done priming OrganizationService");
+    }
 }

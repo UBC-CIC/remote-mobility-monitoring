@@ -19,7 +19,7 @@ export class LambdaStack extends cdk.Stack {
   private static codeAssetPath = './assets/function.jar';
   private static handlerPathPrefix = 'com.cpen491.remote_mobility_monitoring.function.handler.';
   private static timeout = cdk.Duration.seconds(300);
-  private static memorySize = 512;
+  private static memorySize = 1024;
   private readonly userPool: cognito.UserPool;
 
   public readonly lambdaRole: iam.Role

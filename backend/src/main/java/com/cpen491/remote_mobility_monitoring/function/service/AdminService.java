@@ -94,4 +94,17 @@ public class AdminService {
 
     public void deleteAdmin() {
     }
+
+    /**
+     * Primes the AdminService to reduce cold start time.
+     */
+    public void prime() {
+        log.info("Priming AdminService");
+        try {
+            adminDao.findById("adm-prime");
+        } catch (Exception e) {
+            // Expected
+        }
+        log.info("Done priming AdminService");
+    }
 }

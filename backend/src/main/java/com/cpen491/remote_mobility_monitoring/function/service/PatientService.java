@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -289,6 +290,24 @@ public class PatientService {
         return DeletePatientResponseBody.builder()
                 .message("OK")
                 .build();
+    }
+
+    /**
+     * Primes the PatientService to reduce cold start time.
+     */
+    public void prime() {
+        log.info("Priming PatientService");
+        try {
+            patientDao.findById("pat-prime");
+        } catch (Exception e) {
+            // Expected
+        }
+        try {
+            metricsDao.query(Collections.singletonList("pat-prime"), "2023-01-01T00:00:00", "2023-01-02T00:00:00");
+        } catch (Exception e) {
+            // Expected
+        }
+        log.info("Done priming PatientService");
     }
 
     private static void generateAuthCodeForPatient(Patient patient) {
