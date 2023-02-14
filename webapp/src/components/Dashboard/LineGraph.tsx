@@ -1,8 +1,34 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import React, {useState, useEffect} from "react";
 
 function LineGraph(dates:string[], distances:number[]) {
     const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
+    const [hoverIndex, setHoverIndex] = useState(-1);
+
+    // Find max and min distance
+    const maxDistance = Math.max(...distances);
+    const minDistance = Math.min(...distances);
+
+    const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        if (!canvas) return;
+
+        // Calculate the mouse position relative to the canvas
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Check if the mouse is within a certain range of a datapoint
+        for (let i = 0; i < distances.length; i++) {
+            const pointX = 50 + (i / (distances.length - 1)) * 400;
+            const pointY = 450 - (distances[i] - minDistance) * 400 / (maxDistance - minDistance);
+            if (Math.abs(x - pointX) <= 10 && Math.abs(y - pointY) <= 10) {
+                setHoverIndex(i);
+                return;
+            }
+        }
+
+        setHoverIndex(-1);
+    };
 
     useEffect(() => {
         if (!canvas) return;
@@ -13,10 +39,6 @@ function LineGraph(dates:string[], distances:number[]) {
         canvas.width = 500;
         canvas.height = 500;
 
-        // Find max and min distance
-        const maxDistance = Math.max(...distances);
-        const minDistance = Math.min(...distances);
-  
         // Draw the x and y axis
         ctx.beginPath();
         ctx.moveTo(50, 50);
@@ -32,6 +54,14 @@ function LineGraph(dates:string[], distances:number[]) {
         for (let i = 0; i < yAxisLabelCount; i++) {
             const y = 450 - i * 400 / (yAxisLabelCount - 1);
             ctx.fillText((minDistance + i * yAxisInterval).toFixed(1), 15, y + 5);
+
+            // Draw gray horizontal lines for the y-axis labels
+            ctx.beginPath();
+            ctx.moveTo(50, y);
+            ctx.lineTo(450, y);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "lightgray";
+            ctx.stroke();
         }
 
         // Draw x axis labels
@@ -42,19 +72,25 @@ function LineGraph(dates:string[], distances:number[]) {
             const dateIndex = Math.round(i * xAxisInterval);
             ctx.fillText(dates[dateIndex], x - 15, 470);
         }
-  
-        // Draw line graph
-        ctx.beginPath();
-        ctx.moveTo(50, 450 - (distances[0] - minDistance) * 400 / (maxDistance - minDistance));
-        for (let i = 1; i < distances.length; i++) {
+
+        // Draw data points
+        ctx.fillStyle = "blue";
+        
+        for (let i = 0; i < distances.length; i++) {
             const x = 50 + (i / (distances.length - 1)) * 400;
             const y = 450 - (distances[i] - minDistance) * 400 / (maxDistance - minDistance);
-            ctx.lineTo(x, y);
+            if (hoverIndex === i) {
+                ctx.fillStyle = "red";
+                ctx.fillText(`${dates[i]} - ${distances[i].toFixed(1)} km`, x + 10, y - 10);
+            } else {
+                ctx.fillStyle = "blue";
+            }
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
         }
-        ctx.strokeStyle = "blue";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-  
+
         // Add x-axis label
         ctx.font = "14px Arial";
         ctx.fillStyle = "black";
@@ -73,9 +109,12 @@ function LineGraph(dates:string[], distances:number[]) {
 
     return (
         <div style={{ display: "flex", justifyContent: "center" }}>
-            <canvas ref={(el) => setCanvas(el)} />
+            <canvas ref={(el) => setCanvas(el)} onMouseMove={handleMouseMove}/>
         </div>
     );
 }
+
+
+
 
 export default LineGraph;

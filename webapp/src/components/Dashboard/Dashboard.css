@@ -75,6 +75,7 @@ button[name="export-button"] {
     color: white;
     margin-right: 5px;
     border-radius: 8px;
+    border: none;
     cursor: pointer;
 }
 
@@ -84,6 +85,7 @@ button[name="update-button"] {
     color: white;
     margin-right: 5px;
     border-radius: 8px;
+    border: none;
     cursor: pointer;
 }
 
@@ -93,6 +95,7 @@ button[name="share-button"] {
     color: white;
     margin-right: 5px;
     border-radius: 8px;
+    border: none;
     cursor: pointer;
 }
 
@@ -102,6 +105,7 @@ button[name="remove-button"] {
     color: white;
     margin-right: 5px;
     border-radius: 8px;
+    border: none;
     cursor: pointer;
 }
 
@@ -148,15 +152,19 @@ table{
     width: 80%;
     margin-top: 40px;
     margin-left: 10%;
+    
 }
-  
+​​
+
 th, td{
-    border: 1px solid black;
     padding: 8px;
     text-align: center;
+    border-bottom: 1px solid #5f5e5e;
 }
   
 th{
     background-color: lightgray;
+    border-bottom: 1px solid #5f5e5e;
 }
+
   
