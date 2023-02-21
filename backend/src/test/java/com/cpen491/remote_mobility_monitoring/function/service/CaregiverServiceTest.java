@@ -344,6 +344,15 @@ public class CaregiverServiceTest {
     }
 
     @Test
+    public void testGetAllPatients_WHEN_CaregiverDaoFindByIdThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(caregiverDao).findById(anyString());
+
+        GetAllPatientsRequestBody requestBody = buildGetAllPatientsRequestBody();
+        assertThatThrownBy(() -> cut.getAllPatients(requestBody)).isSameAs(toThrow);
+    }
+
+    @Test
     public void testGetAllPatients_WHEN_CaregiverDaoFindAllPatientsThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(caregiverDao).findAllPatients(anyString());

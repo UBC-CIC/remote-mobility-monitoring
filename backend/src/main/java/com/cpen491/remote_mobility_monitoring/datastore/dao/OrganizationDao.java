@@ -115,15 +115,12 @@ public class OrganizationDao {
      *
      * @param organizationId The id of the Organization record
      * @return {@link List}
-     * @throws RecordDoesNotExistException If record with the given organizationId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty or invalid
      */
     public List<Admin> findAllAdmins(String organizationId) {
         log.info("Finding all Admin records belonging to Organization [{}]", organizationId);
         Validator.validateOrganizationId(organizationId);
-
-        findById(organizationId);
 
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociations(organizationId, AdminTable.ID_PREFIX).items();
@@ -139,15 +136,12 @@ public class OrganizationDao {
      *
      * @param organizationId The id of the Organization record
      * @return {@link List}
-     * @throws RecordDoesNotExistException If record with the given organizationId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if organizationId is empty or invalid
      */
     public List<Caregiver> findAllCaregivers(String organizationId) {
         log.info("Finding all Caregiver records belonging to Organization [{}]", organizationId);
         Validator.validateOrganizationId(organizationId);
-
-        findById(organizationId);
 
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociations(organizationId, CaregiverTable.ID_PREFIX).items();
@@ -157,6 +151,8 @@ public class OrganizationDao {
             return caregiver;
         }).collect(Collectors.toList());
     }
+
+    // TODO: find all patients
 
     /**
      * Updates an Organization record. Record with given id must already exist.

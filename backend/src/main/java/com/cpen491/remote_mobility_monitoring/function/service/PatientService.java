@@ -138,11 +138,7 @@ public class PatientService {
         patient.setDeviceId(body.getDeviceId());
         patient.setVerified(true);
         patientDao.update(patient);
-        try {
-            caregiverDao.addPatient(body.getPatientId(), body.getCaregiverId());
-        } catch (DuplicateRecordException e) {
-            // log.info("Patient [{}] already associated with Caregiver [{}]", patientId, caregiverId);
-        }
+        caregiverDao.addPatient(body.getPatientId(), body.getCaregiverId());
 
         return VerifyPatientResponseBody.builder()
                 .message("OK")
@@ -186,6 +182,7 @@ public class PatientService {
         log.info("Getting all Caregivers {}", body);
         Validator.validateGetAllCaregiversRequestBody(body);
 
+        patientDao.findById(body.getPatientId());
         List<Caregiver> caregivers = patientDao.findAllCaregivers(body.getPatientId());
 
         return GetAllCaregiversResponseBody.builder()

@@ -196,8 +196,9 @@ class AdminDaoTest extends DaoTestParent {
     }
 
     @Test
-    public void testFindOrganization_WHEN_AdminRecordDoesNotExist_THEN_ThrowRecordDoesNotExistException() {
-        assertThatThrownBy(() -> cut.findOrganization(PID)).isInstanceOf(RecordDoesNotExistException.class);
+    public void testFindOrganization_WHEN_AdminRecordDoesNotExist_THEN_ReturnNull() {
+        Organization organization = cut.findOrganization(PID);
+        assertNull(organization);
     }
 
     @Test

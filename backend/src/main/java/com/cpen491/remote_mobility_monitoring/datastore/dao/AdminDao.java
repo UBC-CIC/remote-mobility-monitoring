@@ -103,15 +103,12 @@ public class AdminDao {
      *
      * @param adminId The id of the Admin record
      * @return {@link Organization}
-     * @throws RecordDoesNotExistException If record with the given adminId does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if adminId is empty or invalid
      */
     public Organization findOrganization(String adminId) {
         log.info("Finding Organization of Admin [{}]", adminId);
         Validator.validateAdminId(adminId);
-
-        findById(adminId);
 
         QueryResponse response = genericDao
                 .findAllAssociationsOnSidIndex(adminId, OrganizationTable.ID_PREFIX);

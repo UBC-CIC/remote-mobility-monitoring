@@ -145,7 +145,7 @@ public class GenericDao {
     }
 
     /**
-     * Finds all records with sid matching input sid and sid starting with pidPrefix.
+     * Finds all records with sid matching input sid and pid starting with pidPrefix.
      * Query will be executed on sid GSI.
      *
      * @param sid The GSI partition key value

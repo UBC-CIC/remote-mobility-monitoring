@@ -89,7 +89,6 @@ public class CaregiverService {
      * @param body The request body
      * @return {@link AddPatientResponseBody}
      * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist
-     * @throws DuplicateRecordException If Patient/Caregiver association already exists
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
      */
@@ -164,6 +163,7 @@ public class CaregiverService {
         log.info("Getting all Patients {}", body);
         Validator.validateGetAllPatientsRequestBody(body);
 
+        caregiverDao.findById(body.getCaregiverId());
         List<Patient> patients = caregiverDao.findAllPatients(body.getCaregiverId());
 
         return GetAllPatientsResponseBody.builder()
