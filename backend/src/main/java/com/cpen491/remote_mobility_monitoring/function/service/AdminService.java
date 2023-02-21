@@ -12,6 +12,8 @@ import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoExcept
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.DeleteAdminRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.DeleteAdminResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminResponseBody;
 import lombok.NonNull;
@@ -92,7 +94,30 @@ public class AdminService {
                 .build();
     }
 
-    public void deleteAdmin() {
+    /**
+     * Deletes a Admin.
+     *
+     * @param body The request body
+     * @return {@link DeleteAdminResponseBody}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if adminId is empty
+     */
+    public DeleteAdminResponseBody deleteAdmin(DeleteAdminRequestBody body) {
+        log.info("Deleting Admin {}", body);
+        Validator.validateDeleteAdminRequestBody(body);
+
+        try {
+            Admin admin = adminDao.findById(body.getAdminId());
+            cognitoWrapper.deleteUser(admin.getEmail());
+        } catch (Exception e) {
+            log.warn("Error {} thrown when trying to find and delete Admin {} in Cognito", e.getClass(), body);
+        }
+
+        adminDao.delete(body.getAdminId());
+
+        return DeleteAdminResponseBody.builder()
+                .message("OK")
+                .build();
     }
 
     /**

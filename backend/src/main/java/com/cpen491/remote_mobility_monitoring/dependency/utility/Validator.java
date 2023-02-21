@@ -7,6 +7,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureNam
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.DeleteAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
@@ -86,6 +87,7 @@ public class Validator {
     public static final String GET_ORGANIZATION_NULL_ERROR_MESSAGE = "Get organization request body must not be null";
     public static final String CREATE_ADMIN_NULL_ERROR_MESSAGE = "Create admin request body must not be null";
     public static final String GET_ADMIN_NULL_ERROR_MESSAGE = "Get admin request body must not be null";
+    public static final String DELETE_ADMIN_NULL_ERROR_MESSAGE = "Delete admin request body must not be null";
     public static final String CREATE_CAREGIVER_NULL_ERROR_MESSAGE = "Create caregiver request body must not be null";
     public static final String ADD_PATIENT_NULL_ERROR_MESSAGE = "Add patient request body must not be null";
     public static final String REMOVE_PATIENT_NULL_ERROR_MESSAGE = "Remove patient request body must not be null";
@@ -307,6 +309,11 @@ public class Validator {
 
     public static void validateGetAdminRequestBody(GetAdminRequestBody body) {
         Validate.notNull(body, GET_ADMIN_NULL_ERROR_MESSAGE);
+        validateAdminId(body.getAdminId());
+    }
+
+    public static void validateDeleteAdminRequestBody(DeleteAdminRequestBody body) {
+        Validate.notNull(body, DELETE_ADMIN_NULL_ERROR_MESSAGE);
         validateAdminId(body.getAdminId());
     }
 

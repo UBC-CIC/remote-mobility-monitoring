@@ -2,12 +2,16 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.AdminDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
+import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Admin;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.DeleteAdminRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.admin.DeleteAdminResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminResponseBody;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +33,7 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_ADMIN_NULL_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_ADMIN_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GET_ADMIN_NULL_ERROR_MESSAGE;
@@ -41,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -180,6 +186,67 @@ public class AdminServiceTest {
         assertInvalidInputExceptionThrown(() -> cut.getAdmin(body), errorMessage);
     }
 
+    @Test
+    public void testDeleteAdmin_HappyCase() {
+        when(adminDao.findById(anyString())).thenReturn(buildAdminDefault());
+
+        DeleteAdminRequestBody requestBody = buildDeleteAdminRequestBody();
+        DeleteAdminResponseBody responseBody = cut.deleteAdmin(requestBody);
+
+        verify(cognitoWrapper, times(1)).deleteUser(eq(EMAIL));
+        verify(adminDao, times(1)).delete(eq(ADMIN_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testDeleteAdmin_WHEN_AdminDaoFindByIdThrows_THEN_NoThrow() {
+        Mockito.doThrow(RecordDoesNotExistException.class).when(adminDao).findById(anyString());
+
+        DeleteAdminRequestBody requestBody = buildDeleteAdminRequestBody();
+        DeleteAdminResponseBody responseBody = cut.deleteAdmin(requestBody);
+
+        verify(cognitoWrapper, never()).deleteUser(anyString());
+        verify(adminDao, times(1)).delete(eq(ADMIN_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testDeleteAdmin_WHEN_CognitoWrapperDeleteUserThrows_THEN_NoThrow() {
+        when(adminDao.findById(anyString())).thenReturn(buildAdminDefault());
+
+        Mockito.doThrow(CognitoException.class).when(cognitoWrapper).deleteUser(anyString());
+
+        DeleteAdminRequestBody requestBody = buildDeleteAdminRequestBody();
+        DeleteAdminResponseBody responseBody = cut.deleteAdmin(requestBody);
+
+        verify(adminDao, times(1)).delete(eq(ADMIN_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testDeleteAdmin_WHEN_AdminDaoDeleteThrows_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(adminDao).delete(anyString());
+
+        DeleteAdminRequestBody requestBody = buildDeleteAdminRequestBody();
+        assertThatThrownBy(() -> cut.deleteAdmin(requestBody)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForDeleteAdmin")
+    public void testDeleteAdmin_WHEN_InvalidInput_THEN_ThrowInvalidInputException(DeleteAdminRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.deleteAdmin(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForDeleteAdmin() {
+        return Stream.of(
+                Arguments.of(null, DELETE_ADMIN_NULL_ERROR_MESSAGE),
+                Arguments.of(buildDeleteAdminRequestBody(null), ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildDeleteAdminRequestBody(""), ADMIN_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildDeleteAdminRequestBody(ORGANIZATION_ID), ADMIN_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
     private static Stream<Arguments> invalidInputsForGetAdmin() {
         return Stream.of(
                 Arguments.of(null, GET_ADMIN_NULL_ERROR_MESSAGE),
@@ -208,6 +275,16 @@ public class AdminServiceTest {
 
     private static GetAdminRequestBody buildGetAdminRequestBody(String adminId) {
         return GetAdminRequestBody.builder()
+                .adminId(adminId)
+                .build();
+    }
+
+    private static DeleteAdminRequestBody buildDeleteAdminRequestBody() {
+        return buildDeleteAdminRequestBody(ADMIN_ID);
+    }
+
+    private static DeleteAdminRequestBody buildDeleteAdminRequestBody(String adminId) {
+        return DeleteAdminRequestBody.builder()
                 .adminId(adminId)
                 .build();
     }

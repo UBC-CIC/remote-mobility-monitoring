@@ -460,7 +460,7 @@ public class CaregiverServiceTest {
     }
 
     @Test
-    public void testDeleteCaregiver_WHEN_CaregiverFindByIdThrows_THEN_NoThrow() {
+    public void testDeleteCaregiver_WHEN_CaregiverDaoFindByIdThrows_THEN_NoThrow() {
         Mockito.doThrow(RecordDoesNotExistException.class).when(caregiverDao).findById(anyString());
 
         DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();

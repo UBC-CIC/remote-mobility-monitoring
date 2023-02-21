@@ -31,6 +31,7 @@ stages.forEach((stage) => {
     defaultFunction: lambdaStack.defaultFunction,
     getOrganizationFunction: lambdaStack.getOrganizationAlias,
     getAdminFunction: lambdaStack.getAdminAlias,
+    deleteAdminFunction: lambdaStack.deleteAdminAlias,
     createCaregiverFunction: lambdaStack.createCaregiverAlias,
     addPatientFunction: lambdaStack.addPatientAlias,
     removePatientFunction: lambdaStack.removePatientAlias,

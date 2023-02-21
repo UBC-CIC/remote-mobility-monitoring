@@ -36,6 +36,8 @@ export class LambdaStack extends cdk.Stack {
   public readonly createAdminAlias: lambda.Alias;
   public readonly getAdminFunction: lambda.Function;
   public readonly getAdminAlias: lambda.Alias;
+  public readonly deleteAdminFunction: lambda.Function;
+  public readonly deleteAdminAlias: lambda.Alias;
   public readonly createCaregiverFunction: lambda.Function;
   public readonly createCaregiverAlias: lambda.Alias;
   public readonly addPatientFunction: lambda.Function;
@@ -106,6 +108,9 @@ export class LambdaStack extends cdk.Stack {
     const getAdminFunctionName = formResourceName('GetAdminFunction', props.stage);
     this.getAdminFunction = this.createGetAdminFunction(getAdminFunctionName);
     this.getAdminAlias = this.createLambdaAlias(getAdminFunctionName, this.getAdminFunction);
+    const deleteAdminFunctionName = formResourceName('DeleteAdminFunction', props.stage);
+    this.deleteAdminFunction = this.createLambdaFunction(deleteAdminFunctionName, 'admin.DeleteAdminHandler');
+    this.deleteAdminAlias = this.createLambdaAlias(deleteAdminFunctionName, this.deleteAdminFunction);
 
     const createCaregiverFunctionName = formResourceName('CreateCaregiverFunction', props.stage);
     this.createCaregiverFunction = this.createCreateCaregiverFunction(createCaregiverFunctionName);

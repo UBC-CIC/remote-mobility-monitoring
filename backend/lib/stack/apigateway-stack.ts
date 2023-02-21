@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import { formResourceName } from "../utility";
 
@@ -10,6 +11,7 @@ export interface ApiGatewayStackProps extends cdk.StackProps {
   readonly defaultFunction: lambda.Function;
   readonly getOrganizationFunction: lambda.Alias;
   readonly getAdminFunction: lambda.Alias;
+  readonly deleteAdminFunction: lambda.Alias;
   readonly createCaregiverFunction: lambda.Alias;
   readonly addPatientFunction: lambda.Alias;
   readonly removePatientFunction: lambda.Alias;
@@ -46,6 +48,12 @@ export class ApiGatewayStack extends cdk.Stack {
       }
     }
 
+    const logGroupName = formResourceName('RemoteMobilityMonitoringApiLogs', props.stage);
+    const logGroup = new logs.LogGroup(this, logGroupName, {
+      logGroupName: logGroupName,
+      retention: logs.RetentionDays.INFINITE,
+    });
+
     const restApiName = formResourceName('RemoteMobilityMonitoringApi', props.stage);
     const api = new apigateway.LambdaRestApi(this, restApiName, {
       restApiName: restApiName,
@@ -54,11 +62,16 @@ export class ApiGatewayStack extends cdk.Stack {
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
       },
+      deployOptions: {
+        accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
+        accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
+      },
     });
 
     const getOrganizationFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getOrganizationFunction);
 
     const getAdminFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.getAdminFunction);
+    const deleteAdminFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.deleteAdminFunction);
 
     const createCaregiverFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.createCaregiverFunction);
     const addPatientFunctionIntegration = ApiGatewayStack.createLambdaIntegration(props.addPatientFunction);
@@ -85,6 +98,7 @@ export class ApiGatewayStack extends cdk.Stack {
     const admins = api.root.addResource('admins');
     const admin_id = admins.addResource('{admin_id}');
     admin_id.addMethod('GET', getAdminFunctionIntegration, methodOptions); // GET /admins/{admin_id}
+    admin_id.addMethod('DELETE', deleteAdminFunctionIntegration, methodOptions); // DELETE /admins/{admin_id}
 
     const caregivers = api.root.addResource('caregivers');
     caregivers.addMethod('POST', createCaregiverFunctionIntegration, methodOptions); // POST /caregivers
