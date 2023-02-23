@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildAdmin;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.ADMIN_GROUP_NAME;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADMIN_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_ADMIN_NULL_ERROR_MESSAGE;
@@ -80,7 +81,8 @@ public class AdminServiceTest {
 
     @Test
     public void testCreateAdmin_HappyCase() {
-        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(ADMIN_ID_NO_PREFIX, PASSWORD));
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+                .thenReturn(new CognitoUser(ADMIN_ID_NO_PREFIX, PASSWORD));
 
         CreateAdminRequestBody requestBody = buildCreateAdminRequestBody();
         CreateAdminResponseBody responseBody = cut.createAdmin(requestBody);
@@ -106,9 +108,9 @@ public class AdminServiceTest {
     }
 
     @Test
-    public void testCreateAdmin_WHEN_CognitoWrapperCreateUserThrows_THEN_ThrowSameException() {
+    public void testCreateAdmin_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
-        Mockito.doThrow(toThrow).when(cognitoWrapper).createUser(anyString());
+        Mockito.doThrow(toThrow).when(cognitoWrapper).createUserIfNotExistAndAddToGroup(anyString(), anyString());
 
         CreateAdminRequestBody requestBody = buildCreateAdminRequestBody();
         assertThatThrownBy(() -> cut.createAdmin(requestBody)).isSameAs(toThrow);
@@ -116,7 +118,8 @@ public class AdminServiceTest {
 
     @Test
     public void testCreateAdmin_WHEN_AdminDaoCreateThrows_THEN_ThrowSameException() {
-        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(ADMIN_ID_NO_PREFIX, PASSWORD));
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+                .thenReturn(new CognitoUser(ADMIN_ID_NO_PREFIX, PASSWORD));
 
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(adminDao).create(any(Admin.class), anyString());
@@ -193,7 +196,7 @@ public class AdminServiceTest {
         DeleteAdminRequestBody requestBody = buildDeleteAdminRequestBody();
         DeleteAdminResponseBody responseBody = cut.deleteAdmin(requestBody);
 
-        verify(cognitoWrapper, times(1)).deleteUser(eq(EMAIL));
+        verify(cognitoWrapper, times(1)).removeUserFromGroupAndDeleteUser(eq(EMAIL), eq(ADMIN_GROUP_NAME));
         verify(adminDao, times(1)).delete(eq(ADMIN_ID));
         assertEquals("OK", responseBody.getMessage());
     }
@@ -205,16 +208,16 @@ public class AdminServiceTest {
         DeleteAdminRequestBody requestBody = buildDeleteAdminRequestBody();
         DeleteAdminResponseBody responseBody = cut.deleteAdmin(requestBody);
 
-        verify(cognitoWrapper, never()).deleteUser(anyString());
+        verify(cognitoWrapper, never()).removeUserFromGroupAndDeleteUser(anyString(), anyString());
         verify(adminDao, times(1)).delete(eq(ADMIN_ID));
         assertEquals("OK", responseBody.getMessage());
     }
 
     @Test
-    public void testDeleteAdmin_WHEN_CognitoWrapperDeleteUserThrows_THEN_NoThrow() {
+    public void testDeleteAdmin_WHEN_CognitoWrapperThrows_THEN_NoThrow() {
         when(adminDao.findById(anyString())).thenReturn(buildAdminDefault());
 
-        Mockito.doThrow(CognitoException.class).when(cognitoWrapper).deleteUser(anyString());
+        Mockito.doThrow(CognitoException.class).when(cognitoWrapper).removeUserFromGroupAndDeleteUser(anyString(), anyString());
 
         DeleteAdminRequestBody requestBody = buildDeleteAdminRequestBody();
         DeleteAdminResponseBody responseBody = cut.deleteAdmin(requestBody);

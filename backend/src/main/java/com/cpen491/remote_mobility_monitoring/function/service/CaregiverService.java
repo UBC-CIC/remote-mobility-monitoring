@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,7 +51,7 @@ public class CaregiverService {
      *
      * @param body The request body
      * @return {@link CreateCaregiverResponseBody}
-     * @throws CognitoException If Cognito fails to create user
+     * @throws CognitoException If Cognito fails to create user or add user to group
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
@@ -63,7 +64,7 @@ public class CaregiverService {
 
         organizationDao.findById(body.getOrganizationId());
 
-        CognitoUser user = cognitoWrapper.createUser(body.getEmail());
+        CognitoUser user = cognitoWrapper.createUserIfNotExistAndAddToGroup(body.getEmail(), CAREGIVER_GROUP_NAME);
         String caregiverId = CaregiverTable.ID_PREFIX + user.getId();
 
         Caregiver caregiver = Caregiver.builder()
@@ -211,7 +212,7 @@ public class CaregiverService {
 
         try {
             Caregiver caregiver = caregiverDao.findById(body.getCaregiverId());
-            cognitoWrapper.deleteUser(caregiver.getEmail());
+            cognitoWrapper.removeUserFromGroupAndDeleteUser(caregiver.getEmail(), CAREGIVER_GROUP_NAME);
         } catch (Exception e) {
             log.warn("Error {} thrown when trying to find and delete Caregiver {} in Cognito", e.getClass(), body);
         }

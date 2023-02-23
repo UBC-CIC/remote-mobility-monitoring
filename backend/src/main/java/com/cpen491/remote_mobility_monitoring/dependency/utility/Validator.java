@@ -32,12 +32,15 @@ import org.apache.commons.lang3.Validate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.ADMIN_GROUP_NAME;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
 
 public class Validator {
     public static final String PID_BLANK_ERROR_MESSAGE = "pid must be present";
@@ -76,6 +79,9 @@ public class Validator {
     public static final String TIMESTAMP_BLANK_ERROR_MESSAGE = "timestamp must be present";
     public static final String TIMESTAMP_INVALID_ERROR_MESSAGE = "timestamp is not an in iso8601 format";
     public static final String VERIFIED_NULL_ERROR_MESSAGE = "verified must not be null";
+    public static final String GROUP_NAME_BLANK_ERROR_MESSAGE = "group name must be present";
+    public static final List<String> VALID_GROUP_NAMES = Arrays.asList(ADMIN_GROUP_NAME, CAREGIVER_GROUP_NAME);
+    public static final String GROUP_NAME_INVALID_ERROR_MESSAGE = "group name is not Admin or Caregiver";
     public static final String IDS_NULL_ERROR_MESSAGE = "IDs must not be null";
     public static final String ORGANIZATION_RECORD_NULL_ERROR_MESSAGE = "Organization record must not be null";
     public static final String ADMIN_RECORD_NULL_ERROR_MESSAGE = "Admin record must not be null";
@@ -225,6 +231,13 @@ public class Validator {
 
     public static void validateVerified(Boolean verified) {
         Validate.notNull(verified, VERIFIED_NULL_ERROR_MESSAGE);
+    }
+
+    public static void validateGroupName(String groupName) {
+        Validate.notBlank(groupName, GROUP_NAME_BLANK_ERROR_MESSAGE);
+        if (!VALID_GROUP_NAMES.contains(groupName)) {
+            throw new IllegalArgumentException(GROUP_NAME_INVALID_ERROR_MESSAGE);
+        }
     }
 
     public static void validateIds(List<String> ids) {

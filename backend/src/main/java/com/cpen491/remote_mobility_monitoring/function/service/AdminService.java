@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.ADMIN_GROUP_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class AdminService {
      *
      * @param body The request body
      * @return {@link CreateAdminResponseBody}
-     * @throws CognitoException If Cognito fails to create user
+     * @throws CognitoException If Cognito fails to create user or add user to group
      * @throws RecordDoesNotExistException If Organization record with given organizationId does not exist
      * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
@@ -50,7 +51,7 @@ public class AdminService {
 
         organizationDao.findById(body.getOrganizationId());
 
-        CognitoUser user = cognitoWrapper.createUser(body.getEmail());
+        CognitoUser user = cognitoWrapper.createUserIfNotExistAndAddToGroup(body.getEmail(), ADMIN_GROUP_NAME);
         String adminId = AdminTable.ID_PREFIX + user.getId();
 
         Admin admin = Admin.builder()
@@ -108,7 +109,7 @@ public class AdminService {
 
         try {
             Admin admin = adminDao.findById(body.getAdminId());
-            cognitoWrapper.deleteUser(admin.getEmail());
+            cognitoWrapper.removeUserFromGroupAndDeleteUser(admin.getEmail(), ADMIN_GROUP_NAME);
         } catch (Exception e) {
             log.warn("Error {} thrown when trying to find and delete Admin {} in Cognito", e.getClass(), body);
         }

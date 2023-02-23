@@ -44,6 +44,7 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInpu
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADD_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
@@ -111,7 +112,8 @@ public class CaregiverServiceTest {
 
     @Test
     public void testCreateCaregiver_HappyCase() {
-        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+                .thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
 
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
         CreateCaregiverResponseBody responseBody = cut.createCaregiver(requestBody);
@@ -139,9 +141,9 @@ public class CaregiverServiceTest {
     }
 
     @Test
-    public void testCreateCaregiver_WHEN_CognitoWrapperCreateUserThrows_THEN_ThrowSameException() {
+    public void testCreateCaregiver_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
-        Mockito.doThrow(toThrow).when(cognitoWrapper).createUser(anyString());
+        Mockito.doThrow(toThrow).when(cognitoWrapper).createUserIfNotExistAndAddToGroup(anyString(), anyString());
 
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
         assertThatThrownBy(() -> cut.createCaregiver(requestBody)).isSameAs(toThrow);
@@ -149,7 +151,8 @@ public class CaregiverServiceTest {
 
     @Test
     public void testCreateCaregiver_WHEN_CaregiverDaoCreateThrows_THEN_ThrowSameException() {
-        when(cognitoWrapper.createUser(anyString())).thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+                .thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
 
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(caregiverDao).create(any(Caregiver.class), anyString());
@@ -454,7 +457,7 @@ public class CaregiverServiceTest {
         DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
         DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
 
-        verify(cognitoWrapper, times(1)).deleteUser(eq(EMAIL));
+        verify(cognitoWrapper, times(1)).removeUserFromGroupAndDeleteUser(eq(EMAIL), eq(CAREGIVER_GROUP_NAME));
         verify(caregiverDao, times(1)).delete(eq(CAREGIVER_ID));
         assertEquals("OK", responseBody.getMessage());
     }
@@ -466,16 +469,16 @@ public class CaregiverServiceTest {
         DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
         DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);
 
-        verify(cognitoWrapper, never()).deleteUser(anyString());
+        verify(cognitoWrapper, never()).removeUserFromGroupAndDeleteUser(anyString(), anyString());
         verify(caregiverDao, times(1)).delete(eq(CAREGIVER_ID));
         assertEquals("OK", responseBody.getMessage());
     }
 
     @Test
-    public void testDeleteCaregiver_WHEN_CognitoWrapperDeleteUserThrows_THEN_NoThrow() {
+    public void testDeleteCaregiver_WHEN_CognitoWrapperThrows_THEN_NoThrow() {
         when(caregiverDao.findById(anyString())).thenReturn(buildCaregiverDefault());
 
-        Mockito.doThrow(CognitoException.class).when(cognitoWrapper).deleteUser(anyString());
+        Mockito.doThrow(CognitoException.class).when(cognitoWrapper).removeUserFromGroupAndDeleteUser(anyString(), anyString());
 
         DeleteCaregiverRequestBody requestBody = buildDeleteCaregiverRequestBody();
         DeleteCaregiverResponseBody responseBody = cut.deleteCaregiver(requestBody);

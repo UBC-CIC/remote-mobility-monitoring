@@ -14,6 +14,7 @@ export class CognitoStack extends cdk.Stack {
   public readonly userPoolClient: cognito.UserPoolClient;
   public readonly userPoolDomain: cognito.UserPoolDomain;
   public readonly userPoolAdminGroup: cognito.CfnUserPoolGroup;
+  public readonly userPoolCaregiverGroup: cognito.CfnUserPoolGroup;
 
   constructor(scope: cdk.App, id: string, props: CognitoStackProps) {
     super(scope, id, props);
@@ -48,6 +49,12 @@ export class CognitoStack extends cdk.Stack {
       userPoolId: this.userPool.userPoolId,
       groupName: 'Admin',
       description: 'Admin group for Remote Mobility Monitoring',
+    });
+
+    this.userPoolCaregiverGroup = new cognito.CfnUserPoolGroup(this, 'RemoteMobilityMonitoringUserPoolCaregiverGroup', {
+      userPoolId: this.userPool.userPoolId,
+      groupName: 'Caregiver',
+      description: 'Caregiver group for Remote Mobility Monitoring',
     });
   }
 }
