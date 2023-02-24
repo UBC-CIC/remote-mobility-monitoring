@@ -69,8 +69,9 @@ public class CaregiverDaoTest extends DaoTestParent {
     private static final String ORGANIZATION_NAME = "ORG1";
     private static final String PATIENT_ID1 = "pat-1";
     private static final String PATIENT_ID2 = "pat-2";
-    private static final String DEVICE_ID1 = "device-id-1";
-    private static final String DEVICE_ID2 = "device-id-2";
+    private static final String DEVICE_ID = "device-id-1";
+    private static final String PATIENT_EMAIL1 = "patient1@email.com";
+    private static final String PATIENT_EMAIL2 = "patient2@email.com";
 
     CaregiverDao cut;
 
@@ -256,8 +257,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         GetItemResponse response2 = findByPrimaryKey(PID, PATIENT_ID2);
         assertFalse(response2.hasItem());
 
-        Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, DEVICE_ID2, null, null, null, null,
-                null, null);
+        Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, PATIENT_EMAIL2, DEVICE_ID, null, null, null);
         createPatient(patient2);
         cut.addPatient(PATIENT_ID2, PID);
 
@@ -470,8 +470,7 @@ public class CaregiverDaoTest extends DaoTestParent {
     public void testFindAllPatients_HappyCase() {
         Patient patient1 = buildPatientDefault();
         createPatient(patient1);
-        Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, DEVICE_ID2, null, null, null, null,
-                null, null);
+        Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, PATIENT_EMAIL2, DEVICE_ID, null, null, null);
         createPatient(patient2);
         Caregiver caregiver = buildCaregiverDefault();
         createCaregiver(caregiver);
@@ -563,7 +562,7 @@ public class CaregiverDaoTest extends DaoTestParent {
 
         assertEquals(EMAIL2, findByPrimaryKey(PID, PID).item().get(CaregiverTable.EMAIL_NAME).s());
         assertEquals(EMAIL2, findByPrimaryKey(PID, PATIENT_ID1).item().get(CaregiverTable.EMAIL_NAME).s());
-        assertEquals(DEVICE_ID1, findByPrimaryKey(PID, PATIENT_ID1).item().get(PatientTable.DEVICE_ID_NAME).s());
+        assertEquals(DEVICE_ID, findByPrimaryKey(PID, PATIENT_ID1).item().get(PatientTable.DEVICE_ID_NAME).s());
         assertEquals(EMAIL2, findByPrimaryKey(EXISTS_ORGANIZATION_ID, PID).item().get(CaregiverTable.EMAIL_NAME).s());
     }
 
@@ -605,8 +604,7 @@ public class CaregiverDaoTest extends DaoTestParent {
     public void testDelete_HappyCase() {
         Patient patient1 = buildPatientDefault();
         createPatient(patient1);
-        Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, DEVICE_ID2, null, null, null, null,
-                null, null);
+        Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, PATIENT_EMAIL2, DEVICE_ID, null, null, null);
         createPatient(patient2);
 
         Caregiver newRecord = buildCaregiverDefault();
@@ -658,7 +656,6 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     private static Patient buildPatientDefault() {
-        return buildPatient(PATIENT_ID1, PATIENT_ID1, DEVICE_ID1, null, null, null, null,
-                null, null);
+        return buildPatient(PATIENT_ID1, PATIENT_ID1, PATIENT_EMAIL1, DEVICE_ID, null, null, null);
     }
 }

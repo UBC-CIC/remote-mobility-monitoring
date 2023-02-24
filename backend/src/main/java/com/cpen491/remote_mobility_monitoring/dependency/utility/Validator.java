@@ -271,12 +271,12 @@ public class Validator {
 
     public static void validatePatient(Patient patient) {
         Validate.notNull(patient, PATIENT_RECORD_NULL_ERROR_MESSAGE);
+        validatePidEqualsSid(patient.getPid(), patient.getSid());
+        validatePatientId(patient.getPid());
+        validateEmail(patient.getEmail());
         validateFirstName(patient.getFirstName());
         validateLastName(patient.getLastName());
         validatePhoneNumber(patient.getPhoneNumber());
-        validateAuthCode(patient.getAuthCode());
-        validateAuthCodeTimestamp(patient.getAuthCodeTimestamp());
-        validateVerified(patient.getVerified());
     }
 
     public static void validateMetricsList(List<Metrics> metrics) {

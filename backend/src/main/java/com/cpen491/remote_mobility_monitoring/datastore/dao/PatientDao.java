@@ -31,20 +31,19 @@ public class PatientDao {
      * @param newRecord The Patient record to create
      * @throws DuplicateRecordException If record with the given deviceId already exists
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of firstName, lastName,
-     *                              phoneNumber, authCode, authCodeTimestamp, or verified are empty
+     * @throws NullPointerException Above 2 exceptions are thrown if any of pid, sid, email, firstName, lastName,
+     *                              and phoneNumber are empty
      */
     public void create(Patient newRecord) {
         log.info("Creating new Patient record {}", newRecord);
         Validator.validatePatient(newRecord);
 
-        String deviceId = newRecord.getDeviceId();
-        if (deviceId != null && findByDeviceId(deviceId) != null) {
-            log.error("Patient record with device id [{}] already exists", deviceId);
-            throw new DuplicateRecordException(Patient.class.getSimpleName(), deviceId);
+        if (findByEmail(newRecord.getEmail()) != null) {
+            log.error("Patient record with email [{}] already exists", newRecord.getEmail());
+            throw new DuplicateRecordException(Patient.class.getSimpleName(), newRecord.getEmail());
         }
 
-        genericDao.setIdAndDate(newRecord, PatientTable.ID_PREFIX);
+        genericDao.setDate(newRecord);
         genericDao.put(Patient.convertToMap(newRecord));
     }
 
@@ -69,6 +68,30 @@ public class PatientDao {
         return Patient.convertFromMap(response.item());
     }
 
+    /**
+     * Finds a Patient record by email. Returns null if record does not exist.
+     *
+     * @param email The email of the record to find
+     * @return {@link Patient}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if email is empty
+     */
+    public Patient findByEmail(String email) {
+        log.info("Finding Patient record with email [{}]", email);
+        Validator.validateEmail(email);
+
+        QueryResponse response = genericDao
+                .findAllByPartitionKeyOnIndex(PatientTable.EMAIL_NAME, email, PatientTable.EMAIL_INDEX_NAME);
+        if (!response.hasItems() || response.items().size() == 0) {
+            log.info("Cannot find Patient record with email [{}]", email);
+            return null;
+        }
+        Patient patient = Patient.convertFromMap(response.items().get(0));
+        genericDao.setCorrectId(patient, PatientTable.ID_PREFIX);
+        return patient;
+    }
+
+    // TODO: remove later if not needed
     /**
      * Finds a Patient record by deviceId. Returns null if record does not exist.
      *
@@ -139,20 +162,17 @@ public class PatientDao {
      * @throws DuplicateRecordException If record with the given deviceId already exists
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of id, deviceId, firstName, lastName,
-     *                              or phoneNumber are empty
+     * @throws NullPointerException Above 2 exceptions are thrown if any of pid, sid, email, firstName, lastName,
+     *                              and phoneNumber are empty
      */
     public void update(Patient updatedRecord) {
         log.info("Updating Patient record {}", updatedRecord);
         Validator.validatePatient(updatedRecord);
-        Validator.validatePidEqualsSid(updatedRecord.getPid(), updatedRecord.getSid());
-        Validator.validatePatientId(updatedRecord.getPid());
-        Validator.validateDeviceId(updatedRecord.getDeviceId());
 
-        Patient found = findByDeviceId(updatedRecord.getDeviceId());
+        Patient found = findByEmail(updatedRecord.getEmail());
         if (found != null && !found.getPid().equals(updatedRecord.getPid())) {
-            log.error("Patient record with device id [{}] already exists", updatedRecord.getDeviceId());
-            throw new DuplicateRecordException(Patient.class.getSimpleName(), updatedRecord.getDeviceId());
+            log.error("Patient record with email [{}] already exists", updatedRecord.getEmail());
+            throw new DuplicateRecordException(Patient.class.getSimpleName(), updatedRecord.getEmail());
         }
 
         findById(updatedRecord.getPid());

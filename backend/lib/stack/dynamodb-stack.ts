@@ -15,6 +15,7 @@ export class DynamoDbStack extends cdk.Stack {
   public static ORGANIZATION_NAME_GSI_NAME = 'org-name-gsi';
   public static ADMIN_EMAIL_GSI_NAME = 'adm-email-gsi';
   public static CAREGIVER_EMAIL_GSI_NAME = 'car-email-gsi';
+  public static PATIENT_EMAIL_GSI_NAME = 'pat-email-gsi';
   public static PATIENT_DEVICE_ID_GSI_NAME = 'pat-device_id-gsi';
 
   public readonly remoteMobilityMonitoringTable: dynamodb.Table;
@@ -36,6 +37,7 @@ export class DynamoDbStack extends cdk.Stack {
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ORGANIZATION_NAME_GSI_NAME, 'org-name'));
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.ADMIN_EMAIL_GSI_NAME, 'adm-email'));
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.CAREGIVER_EMAIL_GSI_NAME, 'car-email'));
+    table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.PATIENT_EMAIL_GSI_NAME, 'pat-email'));
     table.addGlobalSecondaryIndex(DynamoDbStack.createGsiProps(DynamoDbStack.PATIENT_DEVICE_ID_GSI_NAME, 'pat-device_id'));
     return table;
   }

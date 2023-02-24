@@ -8,7 +8,6 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
-import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.AddMetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsResponseBody;
@@ -25,11 +24,9 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetri
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsResponseBody.QueryMetricsSerialization;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,12 +50,8 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInpu
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildMetrics;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADD_METRICS_NULL_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
@@ -80,9 +73,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.STEP_LENGTH_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.TIMESTAMP_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.TIMESTAMP_INVALID_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.UPDATE_PATIENT_NULL_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.VERIFY_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.WALKING_ASYMMETRY_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.WALKING_ASYMMETRY_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.WALKING_SPEED_BLANK_ERROR_MESSAGE;
@@ -125,6 +116,7 @@ class PatientServiceTest {
     private static final String TIMESTAMP = getCurrentUtcTimeString();
     private static final String INVALID_TIMESTAMP = "2023-02-01 12:00:00";
     private static final String CREATED_AT = "2023-01-01";
+    private static final String CAREGIVER_EMAIL = "caregiver@email.com";
 
     PatientService cut;
     @Mock
@@ -154,10 +146,7 @@ class PatientServiceTest {
         assertEquals(FIRST_NAME, patientCaptor.getValue().getFirstName());
         assertEquals(LAST_NAME, patientCaptor.getValue().getLastName());
         assertEquals(PHONE_NUMBER1, patientCaptor.getValue().getPhoneNumber());
-        assertNotEquals(AUTH_CODE, patientCaptor.getValue().getAuthCode());
-        assertNotEquals(AUTH_CODE_TIMESTAMP, patientCaptor.getValue().getAuthCodeTimestamp());
         assertNotNull(responseBody);
-        assertEquals(responseBody.getAuthCode(), patientCaptor.getValue().getAuthCode());
     }
 
     @Test
@@ -187,6 +176,7 @@ class PatientServiceTest {
         );
     }
 
+    /*
     @Test
     public void testUpdatePatientDevice_HappyCase() {
         when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
@@ -325,6 +315,7 @@ class PatientServiceTest {
                 Arguments.of(buildVerifyPatientRequestBody(CAREGIVER_ID1, PATIENT_ID, AUTH_CODE, ""), DEVICE_ID_BLANK_ERROR_MESSAGE)
         );
     }
+    */
 
     @Test
     public void testGetPatient_HappyCase() {
@@ -797,14 +788,13 @@ class PatientServiceTest {
     }
 
     private static Patient buildPatientDefault() {
-        Patient patient = buildPatient(PATIENT_ID, PATIENT_ID, null, FIRST_NAME, LAST_NAME, PHONE_NUMBER1,
-                AUTH_CODE, AUTH_CODE_TIMESTAMP, false);
+        Patient patient = buildPatient(PATIENT_ID, PATIENT_ID, EMAIL, null, FIRST_NAME, LAST_NAME, PHONE_NUMBER1);
         patient.setCreatedAt(CREATED_AT);
         return patient;
     }
 
     private static Caregiver buildCaregiverDefault() {
-        return buildCaregiver(CAREGIVER_ID1, CAREGIVER_ID1, EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER1);
+        return buildCaregiver(CAREGIVER_ID1, CAREGIVER_ID1, CAREGIVER_EMAIL, FIRST_NAME, LAST_NAME, TITLE, PHONE_NUMBER1);
     }
 
     private static Metrics buildMetricsDefault(MeasureName measureName, String measureValue) {

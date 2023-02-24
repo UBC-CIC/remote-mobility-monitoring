@@ -48,18 +48,16 @@ public class TestUtils {
                 .build();
     }
 
-    public static Patient buildPatient(String pid, String sid, String deviceId, String firstName, String lastName,
-                                       String phoneNumber, String authCode, String authCodeTimestamp, Boolean verified) {
+    public static Patient buildPatient(String pid, String sid, String email, String deviceId, String firstName, String lastName,
+                                       String phoneNumber) {
         return Patient.builder()
                 .pid(pid)
                 .sid(sid)
+                .email(email)
                 .deviceId(deviceId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber(phoneNumber)
-                .authCode(authCode)
-                .authCodeTimestamp(authCodeTimestamp)
-                .verified(verified)
                 .build();
     }
 

@@ -80,13 +80,10 @@ public class PatientService {
                 .phoneNumber(body.getPhoneNumber())
                 .build();
 
-        generateAuthCodeForPatient(newPatient);
-        newPatient.setVerified(false);
         patientDao.create(newPatient);
 
         return CreatePatientResponseBody.builder()
                 .patientId(newPatient.getPid())
-                .authCode(newPatient.getAuthCode())
                 .build();
     }
 
@@ -101,17 +98,18 @@ public class PatientService {
      * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
      */
     public UpdatePatientDeviceResponseBody updatePatientDevice(UpdatePatientDeviceRequestBody body) {
-        log.info("Updating Patient device {}", body);
-        Validator.validateUpdatePatientDeviceRequestBody(body);
-
-        Patient patient = patientDao.findById(body.getPatientId());
-
-        generateAuthCodeForPatient(patient);
-        patientDao.update(patient);
-
-        return UpdatePatientDeviceResponseBody.builder()
-                .authCode(patient.getAuthCode())
-                .build();
+//        log.info("Updating Patient device {}", body);
+//        Validator.validateUpdatePatientDeviceRequestBody(body);
+//
+//        Patient patient = patientDao.findById(body.getPatientId());
+//
+//        generateAuthCodeForPatient(patient);
+//        patientDao.update(patient);
+//
+//        return UpdatePatientDeviceResponseBody.builder()
+//                .authCode(patient.getAuthCode())
+//                .build();
+        return null;
     }
 
     /**
@@ -127,22 +125,23 @@ public class PatientService {
      *                              or deviceId are empty or invalid
      */
     public VerifyPatientResponseBody verifyPatient(VerifyPatientRequestBody body) {
-        log.info("Verifying Patient {}", body);
-        Validator.validateVerifyPatientRequestBody(body);
-
-        Patient patient = patientDao.findById(body.getPatientId());
-        caregiverDao.findById(body.getCaregiverId());
-
-        verifyAuthCode(patient.getAuthCode(), patient.getAuthCodeTimestamp(), body.getAuthCode());
-
-        patient.setDeviceId(body.getDeviceId());
-        patient.setVerified(true);
-        patientDao.update(patient);
-        caregiverDao.addPatient(body.getPatientId(), body.getCaregiverId());
-
-        return VerifyPatientResponseBody.builder()
-                .message("OK")
-                .build();
+//        log.info("Verifying Patient {}", body);
+//        Validator.validateVerifyPatientRequestBody(body);
+//
+//        Patient patient = patientDao.findById(body.getPatientId());
+//        caregiverDao.findById(body.getCaregiverId());
+//
+//        verifyAuthCode(patient.getAuthCode(), patient.getAuthCodeTimestamp(), body.getAuthCode());
+//
+//        patient.setDeviceId(body.getDeviceId());
+//        patient.setVerified(true);
+//        patientDao.update(patient);
+//        caregiverDao.addPatient(body.getPatientId(), body.getCaregiverId());
+//
+//        return VerifyPatientResponseBody.builder()
+//                .message("OK")
+//                .build();
+        return null;
     }
 
     /**
@@ -307,20 +306,20 @@ public class PatientService {
         log.info("Done priming PatientService");
     }
 
-    private static void generateAuthCodeForPatient(Patient patient) {
-        patient.setAuthCode(UUID.randomUUID().toString().replace("-", ""));
-        String currentTime = getCurrentUtcTimeString();
-        patient.setAuthCodeTimestamp(currentTime);
-    }
+//    private static void generateAuthCodeForPatient(Patient patient) {
+//        patient.setAuthCode(UUID.randomUUID().toString().replace("-", ""));
+//        String currentTime = getCurrentUtcTimeString();
+//        patient.setAuthCodeTimestamp(currentTime);
+//    }
 
-    private static void verifyAuthCode(String expected, String timestamp, String actual) {
-        if (!expected.equals(actual)) {
-            throw new InvalidAuthCodeException();
-        }
-        LocalDateTime authCodeTime = parseTime(timestamp);
-        long secondsBetween = secondsBetweenTimes(authCodeTime, getCurrentUtcTime());
-        if (secondsBetween > TTL) {
-            throw new InvalidAuthCodeException();
-        }
-    }
+//    private static void verifyAuthCode(String expected, String timestamp, String actual) {
+//        if (!expected.equals(actual)) {
+//            throw new InvalidAuthCodeException();
+//        }
+//        LocalDateTime authCodeTime = parseTime(timestamp);
+//        long secondsBetween = secondsBetweenTimes(authCodeTime, getCurrentUtcTime());
+//        if (secondsBetween > TTL) {
+//            throw new InvalidAuthCodeException();
+//        }
+//    }
 }

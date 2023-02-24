@@ -55,15 +55,15 @@ public final class Const {
 
     public static class PatientTable extends BaseTable {
         public static final String ID_PREFIX = "pat-";
+        public static final String EMAIL_NAME = ID_PREFIX + "email";
         public static final String DEVICE_ID_NAME = ID_PREFIX + "device_id";
         public static final String FIRST_NAME_NAME = ID_PREFIX + "first_name";
         public static final String LAST_NAME_NAME = ID_PREFIX + "last_name";
         public static final String PHONE_NUMBER_NAME = ID_PREFIX + "phone_number";
-        public static final String AUTH_CODE_NAME = ID_PREFIX + "auth_code";
-        public static final String AUTH_CODE_TIMESTAMP_NAME = ID_PREFIX + "auth_code_timestamp";
-        public static final String VERIFIED_NAME = ID_PREFIX + "verified";
+        public static final String EMAIL_INDEX_NAME = EMAIL_NAME + INDEX_NAME_SUFFIX;
         public static final String DEVICE_ID_INDEX_NAME = DEVICE_ID_NAME + INDEX_NAME_SUFFIX;
         public static final List<Pair<String, String>> INDEX_NAMES_AND_KEYS = Arrays.asList(
+                new ImmutablePair<>(EMAIL_INDEX_NAME, EMAIL_NAME),
                 new ImmutablePair<>(DEVICE_ID_INDEX_NAME, DEVICE_ID_NAME)
         );
     }

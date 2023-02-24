@@ -23,9 +23,8 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.FIRST_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IDS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.LAST_NAME_BLANK_ERROR_MESSAGE;
@@ -36,7 +35,6 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validato
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PID_NOT_EQUAL_SID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.SID_BLANK_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.VERIFIED_NULL_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -49,19 +47,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PatientDaoTest extends DaoTestParent {
     private static final String PID = "pat-1";
+    private static final String PID2 = "pat-2";
     private static final String SID = PID;
+    private static final String SID2 = PID2;
+    private static final String EMAIL1 = "johndoe@email.com";
+    private static final String EMAIL2 = "johndoeiscool@email.com";
     private static final String DEVICE_ID1 = "device-id-1";
-    private static final String DEVICE_ID2 = "device-id-2";
     private static final String FIRST_NAME = "Jack";
     private static final String LAST_NAME = "Jackson";
     private static final String PHONE_NUMBER = "1234567890";
-    private static final String AUTH_CODE = "auth_code-123";
-    private static final String AUTH_CODE_TIMESTAMP = "2020-01-01T05:00:00.000000";
-    private static final boolean VERIFIED = false;
     private static final String CAREGIVER_ID1 = "car-1";
     private static final String CAREGIVER_ID2 = "car-2";
-    private static final String EMAIL1 = "caregiver1@email.com";
-    private static final String EMAIL2 = "caregiver2@email.com";
+    private static final String CAREGIVER_EMAIL1 = "caregiver1@email.com";
+    private static final String CAREGIVER_EMAIL2 = "caregiver2@email.com";
 
     PatientDao cut;
 
@@ -85,31 +83,23 @@ public class PatientDaoTest extends DaoTestParent {
         assertTrue(response.hasItem());
 
         newRecord = Patient.convertFromMap(response.item());
-        assertNotEquals(PID, newRecord.getPid());
-        assertEquals(DEVICE_ID1, newRecord.getDeviceId());
+        assertEquals(PID, newRecord.getPid());
+        assertEquals(SID, newRecord.getSid());
+        assertEquals(EMAIL1, newRecord.getEmail());
         assertEquals(FIRST_NAME, newRecord.getFirstName());
         assertEquals(LAST_NAME, newRecord.getLastName());
         assertEquals(PHONE_NUMBER, newRecord.getPhoneNumber());
-        assertEquals(AUTH_CODE, newRecord.getAuthCode());
-        assertEquals(AUTH_CODE_TIMESTAMP, newRecord.getAuthCodeTimestamp());
-        assertEquals(VERIFIED, newRecord.getVerified());
         assertNotNull(newRecord.getCreatedAt());
         assertNotNull(newRecord.getUpdatedAt());
     }
 
     @Test
-    public void testCreate_WHEN_RecordWithDeviceIdAlreadyExists_THEN_ThrowDuplicateRecordException() {
+    public void testCreate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
         Patient newRecord = buildPatientDefault();
         cut.create(newRecord);
+        newRecord.setPid(PID2);
+        newRecord.setSid(SID2);
         assertThatThrownBy(() -> cut.create(newRecord)).isInstanceOf(DuplicateRecordException.class);
-    }
-
-    @Test
-    public void testCreate_WHEN_RecordHasNoDeviceId_THEN_NoThrow() {
-        Patient newRecord = buildPatientDefault();
-        newRecord.setDeviceId(null);
-        cut.create(newRecord);
-        cut.create(newRecord);
     }
 
     @ParameterizedTest
@@ -121,28 +111,21 @@ public class PatientDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForCreate() {
         return Stream.of(
                 Arguments.of(null, PATIENT_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, null, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, "", LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, null, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, "", PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, null, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, "", AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, null,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, "",
-                        AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        null, VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        "", VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, null), VERIFIED_NULL_ERROR_MESSAGE)
+                Arguments.of(buildPatient(null, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient("", SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, null, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, "", EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, null, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, "", DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, null, LAST_NAME, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, "", LAST_NAME, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, null, PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, "", PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, null), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, ""), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(CAREGIVER_ID1, CAREGIVER_ID1, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER),
+                        PATIENT_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID + "1", EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
 
@@ -175,6 +158,27 @@ public class PatientDaoTest extends DaoTestParent {
     }
 
     @Test
+    public void testFindByEmail_HappyCase() {
+        Patient newRecord = buildPatientDefault();
+        createPatient(newRecord);
+
+        Patient record = cut.findByEmail(EMAIL1);
+        assertEquals(newRecord, record);
+    }
+
+    @Test
+    public void testFindByEmail_WHEN_RecordDoesNotExist_THEN_ReturnNull() {
+        Patient record = cut.findByEmail(EMAIL1);
+        assertNull(record);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    public void testFindByEmail_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String email) {
+        assertInvalidInputExceptionThrown(() -> cut.findByEmail(email), EMAIL_BLANK_ERROR_MESSAGE);
+    }
+
+    @Test
     public void testFindByDeviceId_HappyCase() {
         Patient newRecord = buildPatientDefault();
         createPatient(newRecord);
@@ -200,7 +204,9 @@ public class PatientDaoTest extends DaoTestParent {
         Patient newRecord1 = buildPatientDefault();
         cut.create(newRecord1);
         Patient newRecord2 = buildPatientDefault();
-        newRecord2.setDeviceId(DEVICE_ID2);
+        newRecord2.setPid(PID2);
+        newRecord2.setSid(SID2);
+        newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2);
 
         List<String> ids = Arrays.asList(newRecord1.getPid(), newRecord2.getPid());
@@ -275,26 +281,28 @@ public class PatientDaoTest extends DaoTestParent {
 
         Patient updatedRecord = cut.findById(newRecord.getPid());
         assertEquals(newRecord, updatedRecord);
-        updatedRecord.setVerified(true);
+        updatedRecord.setEmail(EMAIL2);
         cut.update(updatedRecord);
 
         Patient found = cut.findById(newRecord.getPid());
         assertEquals(newRecord.getPid(), found.getPid());
-        assertNotEquals(newRecord.getVerified(), found.getVerified());
+        assertNotEquals(newRecord.getEmail(), found.getEmail());
         assertNotEquals(newRecord.getUpdatedAt(), found.getUpdatedAt());
         assertEquals(newRecord.getCreatedAt(), found.getCreatedAt());
     }
 
     @Test
-    public void testUpdate_WHEN_RecordWithDeviceIdAlreadyExists_THEN_ThrowDuplicateRecordException() {
+    public void testUpdate_WHEN_RecordWithEmailAlreadyExists_THEN_ThrowDuplicateRecordException() {
         Patient newRecord1 = buildPatientDefault();
         cut.create(newRecord1);
         Patient newRecord2 = buildPatientDefault();
-        newRecord2.setDeviceId(DEVICE_ID2);
+        newRecord2.setPid(PID2);
+        newRecord2.setSid(SID2);
+        newRecord2.setEmail(EMAIL2);
         cut.create(newRecord2);
 
         Patient updatedRecord = cut.findById(newRecord2.getPid());
-        updatedRecord.setDeviceId(DEVICE_ID1);
+        updatedRecord.setEmail(EMAIL1);
         assertThatThrownBy(() -> cut.update(updatedRecord)).isInstanceOf(DuplicateRecordException.class);
     }
 
@@ -307,12 +315,12 @@ public class PatientDaoTest extends DaoTestParent {
         createCaregiver(newRecord2);
 
         Patient updatedRecord = cut.findById(PID);
-        updatedRecord.setDeviceId(DEVICE_ID2);
+        updatedRecord.setEmail(EMAIL2);
         cut.update(updatedRecord);
 
-        assertEquals(DEVICE_ID2, findByPrimaryKey(PID, PID).item().get(PatientTable.DEVICE_ID_NAME).s());
-        assertEquals(DEVICE_ID2, findByPrimaryKey(CAREGIVER_ID1, PID).item().get(PatientTable.DEVICE_ID_NAME).s());
-        assertEquals(EMAIL1, findByPrimaryKey(CAREGIVER_ID1, PID).item().get(CaregiverTable.EMAIL_NAME).s());
+        assertEquals(EMAIL2, findByPrimaryKey(PID, PID).item().get(PatientTable.EMAIL_NAME).s());
+        assertEquals(EMAIL2, findByPrimaryKey(CAREGIVER_ID1, PID).item().get(PatientTable.EMAIL_NAME).s());
+        assertEquals(CAREGIVER_EMAIL1, findByPrimaryKey(CAREGIVER_ID1, PID).item().get(CaregiverTable.EMAIL_NAME).s());
     }
 
     @Test
@@ -330,44 +338,20 @@ public class PatientDaoTest extends DaoTestParent {
     private static Stream<Arguments> invalidInputsForUpdate() {
         return Stream.of(
                 Arguments.of(null, PATIENT_RECORD_NULL_ERROR_MESSAGE),
-                Arguments.of(buildPatient(null, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient("", SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, null, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), SID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, "", DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), SID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, null, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, "", FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, null, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, "", LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), FIRST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, null, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, "", PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), LAST_NAME_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, null, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, "", AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, null,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, "",
-                        AUTH_CODE_TIMESTAMP, VERIFIED), AUTH_CODE_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        null, VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        "", VERIFIED), AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, null), VERIFIED_NULL_ERROR_MESSAGE),
-                Arguments.of(buildPatient(CAREGIVER_ID1, CAREGIVER_ID1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PATIENT_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(buildPatient(PID, SID + "1", DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE,
-                        AUTH_CODE_TIMESTAMP, VERIFIED), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
+                Arguments.of(buildPatient(null, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient("", SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), PID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, null, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, "", EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), SID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, null, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, "", DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, null, LAST_NAME, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, "", LAST_NAME, PHONE_NUMBER), FIRST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, null, PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, "", PHONE_NUMBER), LAST_NAME_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, null), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, ""), PHONE_NUMBER_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildPatient(CAREGIVER_ID1, CAREGIVER_ID1, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), PATIENT_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildPatient(PID, SID + "1", EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER), PID_NOT_EQUAL_SID_ERROR_MESSAGE)
         );
     }
 
@@ -375,7 +359,7 @@ public class PatientDaoTest extends DaoTestParent {
     public void testDelete_HappyCase() {
         Caregiver caregiver1 = buildCaregiverDefault();
         createCaregiver(caregiver1);
-        Caregiver caregiver2 = buildCaregiver(CAREGIVER_ID2, CAREGIVER_ID2, EMAIL2, null, null, null, null);
+        Caregiver caregiver2 = buildCaregiver(CAREGIVER_ID2, CAREGIVER_ID2, CAREGIVER_EMAIL2, null, null, null, null);
         createCaregiver(caregiver2);
 
         Patient newRecord = buildPatientDefault();
@@ -419,10 +403,10 @@ public class PatientDaoTest extends DaoTestParent {
     }
 
     private static Patient buildPatientDefault() {
-        return buildPatient(PID, SID, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER, AUTH_CODE, AUTH_CODE_TIMESTAMP, VERIFIED);
+        return buildPatient(PID, SID, EMAIL1, DEVICE_ID1, FIRST_NAME, LAST_NAME, PHONE_NUMBER);
     }
 
     private static Caregiver buildCaregiverDefault() {
-        return buildCaregiver(CAREGIVER_ID1, CAREGIVER_ID1, EMAIL1, null, null, null, null);
+        return buildCaregiver(CAREGIVER_ID1, CAREGIVER_ID1, CAREGIVER_EMAIL1, null, null, null, null);
     }
 }
