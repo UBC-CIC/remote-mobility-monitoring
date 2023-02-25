@@ -1,6 +1,5 @@
 package com.cpen491.remote_mobility_monitoring.function.service;
 
-import com.cpen491.remote_mobility_monitoring.datastore.dao.CaregiverDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.MetricsDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecordException;
@@ -9,7 +8,9 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotE
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
-import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
+import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.AddMetricsRequestBody.AddMetricsSerialization;
@@ -26,47 +27,37 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatient
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsResponseBody.QueryMetricsSerialization;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientResponseBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientResponseBody;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.parseTime;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.secondsBetweenTimes;
+import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.PATIENT_GROUP_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
 public class PatientService {
-    // TODO: make this configurable
-    private static final long TTL = 300;
-
     @NonNull
     private PatientDao patientDao;
     @NonNull
-    private CaregiverDao caregiverDao;
-    @NonNull
     private MetricsDao metricsDao;
+    @NonNull
+    private CognitoWrapper cognitoWrapper;
 
     /**
-     * Creates a Patient. Generates an authCode which will expire after a short time and returns it.
-     * Patient must verify using this authCode to get verified.
+     * Creates a Patient in database and Cognito.
      *
      * @param body The request body
      * @return {@link CreatePatientResponseBody}
+     * @throws CognitoException If Cognito fails to create user or add user to group
+     * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of firstName, lastName, or phoneNumber are empty
      */
@@ -74,74 +65,23 @@ public class PatientService {
         log.info("Creating Patient {}", body);
         Validator.validateCreatePatientRequestBody(body);
 
+        CognitoUser user = cognitoWrapper.createUserIfNotExistAndAddToGroup(body.getEmail(), PATIENT_GROUP_NAME);
+        cognitoWrapper.setPassword(body.getEmail(), body.getPassword());
+        String patientId = PatientTable.ID_PREFIX + user.getId();
+
         Patient newPatient = Patient.builder()
+                .pid(patientId)
+                .sid(patientId)
+                .email(body.getEmail())
                 .firstName(body.getFirstName())
                 .lastName(body.getLastName())
                 .phoneNumber(body.getPhoneNumber())
                 .build();
-
         patientDao.create(newPatient);
 
         return CreatePatientResponseBody.builder()
                 .patientId(newPatient.getPid())
                 .build();
-    }
-
-    /**
-     * Initiates an update device request. Generates an authCode which will expire after a short time and returns it.
-     * Patient must verify using this authCode to update their device ID.
-     *
-     * @param body The request body
-     * @return {@link UpdatePatientDeviceResponseBody}
-     * @throws RecordDoesNotExistException If Patient record with the given id does not exist
-     * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if id is empty or invalid
-     */
-    public UpdatePatientDeviceResponseBody updatePatientDevice(UpdatePatientDeviceRequestBody body) {
-//        log.info("Updating Patient device {}", body);
-//        Validator.validateUpdatePatientDeviceRequestBody(body);
-//
-//        Patient patient = patientDao.findById(body.getPatientId());
-//
-//        generateAuthCodeForPatient(patient);
-//        patientDao.update(patient);
-//
-//        return UpdatePatientDeviceResponseBody.builder()
-//                .authCode(patient.getAuthCode())
-//                .build();
-        return null;
-    }
-
-    /**
-     * Verifies a patient to mark them as verified or update their device ID.
-     *
-     * @param body The request body
-     * @return {@link VerifyPatientResponseBody}
-     * @throws RecordDoesNotExistException If Patient or Caregiver record with the given ids do not exist
-     * @throws InvalidAuthCodeException If the existing authCode does not match the provided authCode or is expired
-     * @throws DuplicateRecordException If Patient record with the given deviceId already exists
-     * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if caregiverId, patientId, authCode,
-     *                              or deviceId are empty or invalid
-     */
-    public VerifyPatientResponseBody verifyPatient(VerifyPatientRequestBody body) {
-//        log.info("Verifying Patient {}", body);
-//        Validator.validateVerifyPatientRequestBody(body);
-//
-//        Patient patient = patientDao.findById(body.getPatientId());
-//        caregiverDao.findById(body.getCaregiverId());
-//
-//        verifyAuthCode(patient.getAuthCode(), patient.getAuthCodeTimestamp(), body.getAuthCode());
-//
-//        patient.setDeviceId(body.getDeviceId());
-//        patient.setVerified(true);
-//        patientDao.update(patient);
-//        caregiverDao.addPatient(body.getPatientId(), body.getCaregiverId());
-//
-//        return VerifyPatientResponseBody.builder()
-//                .message("OK")
-//                .build();
-        return null;
     }
 
     /**
@@ -160,7 +100,6 @@ public class PatientService {
         Patient patient = patientDao.findById(body.getPatientId());
 
         return GetPatientResponseBody.builder()
-                .deviceId(patient.getDeviceId())
                 .firstName(patient.getFirstName())
                 .lastName(patient.getLastName())
                 .phoneNumber(patient.getPhoneNumber())
@@ -281,6 +220,13 @@ public class PatientService {
         log.info("Deleting Patient {}", body);
         Validator.validateDeletePatientRequestBody(body);
 
+        try {
+            Patient patient = patientDao.findById(body.getPatientId());
+            cognitoWrapper.removeUserFromGroupAndDeleteUser(patient.getEmail(), PATIENT_GROUP_NAME);
+        } catch (Exception e) {
+            log.warn("Error {} thrown when trying to find and delete Patient {} in Cognito", e.getClass(), body);
+        }
+
         patientDao.delete(body.getPatientId());
 
         return DeletePatientResponseBody.builder()
@@ -305,21 +251,4 @@ public class PatientService {
         }
         log.info("Done priming PatientService");
     }
-
-//    private static void generateAuthCodeForPatient(Patient patient) {
-//        patient.setAuthCode(UUID.randomUUID().toString().replace("-", ""));
-//        String currentTime = getCurrentUtcTimeString();
-//        patient.setAuthCodeTimestamp(currentTime);
-//    }
-
-//    private static void verifyAuthCode(String expected, String timestamp, String actual) {
-//        if (!expected.equals(actual)) {
-//            throw new InvalidAuthCodeException();
-//        }
-//        LocalDateTime authCodeTime = parseTime(timestamp);
-//        long secondsBetween = secondsBetweenTimes(authCodeTime, getCurrentUtcTime());
-//        if (secondsBetween > TTL) {
-//            throw new InvalidAuthCodeException();
-//        }
-//    }
 }

@@ -197,7 +197,7 @@ public class LambdaHandlersIntegrationTest {
         assertEquals(StatusCode.OK.code, response.statusCode());
         CreatePatientResponseBody createPatient1ResponseBody = gson.fromJson(response.body(), CreatePatientResponseBody.class);
         String patientId1 = createPatient1ResponseBody.getPatientId();
-        String authCode1 = createPatient1ResponseBody.getAuthCode();
+        String authCode1 = "1";
         assertNotNull(patientId1);
         assertNotNull(authCode1);
         idMap.put(PATIENT_ID1_NAME, patientId1);
@@ -214,7 +214,7 @@ public class LambdaHandlersIntegrationTest {
         assertEquals(StatusCode.OK.code, response.statusCode());
         CreatePatientResponseBody createPatient2ResponseBody = gson.fromJson(response.body(), CreatePatientResponseBody.class);
         String patientId2 = createPatient2ResponseBody.getPatientId();
-        String authCode2 = createPatient2ResponseBody.getAuthCode();
+        String authCode2 = "2";
         assertNotNull(patientId2);
         assertNotNull(authCode2);
         idMap.put(PATIENT_ID2_NAME, patientId2);
@@ -225,7 +225,7 @@ public class LambdaHandlersIntegrationTest {
         assertEquals(StatusCode.OK.code, response.statusCode());
         CreatePatientResponseBody createPatient3ResponseBody = gson.fromJson(response.body(), CreatePatientResponseBody.class);
         String patientId3 = createPatient3ResponseBody.getPatientId();
-        String authCode3 = createPatient3ResponseBody.getAuthCode();
+        String authCode3 = "3";
         assertNotNull(patientId3);
         assertNotNull(authCode3);
         idMap.put(PATIENT_ID3_NAME, patientId3);
@@ -404,7 +404,6 @@ public class LambdaHandlersIntegrationTest {
         response = sendGetRequest(BASE_URL + "/patients/" + idMap.get(PATIENT_ID2_NAME));
         assertEquals(StatusCode.OK.code, response.statusCode());
         GetPatientResponseBody getPatientResponseBody = gson.fromJson(response.body(), GetPatientResponseBody.class);
-        assertEquals(DEVICE_ID_UPDATED2, getPatientResponseBody.getDeviceId());
 
         // Not exists patient ID, should fail
         UpdatePatientRequestBody updatePatient2RequestBody = UpdatePatientRequestBody.builder()
@@ -423,7 +422,6 @@ public class LambdaHandlersIntegrationTest {
         response = sendGetRequest(BASE_URL + "/patients/" + idMap.get(PATIENT_ID2_NAME));
         assertEquals(StatusCode.OK.code, response.statusCode());
         getPatientResponseBody = gson.fromJson(response.body(), GetPatientResponseBody.class);
-        assertEquals(DEVICE_ID_UPDATED2, getPatientResponseBody.getDeviceId());
         assertEquals(PATIENT_UPDATED_NAME2, getPatientResponseBody.getFirstName());
         assertEquals(PATIENT_UPDATED_NAME2, getPatientResponseBody.getLastName());
 

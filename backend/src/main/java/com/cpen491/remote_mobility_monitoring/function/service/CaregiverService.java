@@ -10,7 +10,12 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AcceptPatientPrimaryRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AcceptPatientPrimaryResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientPrimaryRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientPrimaryResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
@@ -30,15 +35,23 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.parseTime;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.secondsBetweenTimes;
 
 @Slf4j
 @RequiredArgsConstructor
 public class CaregiverService {
+    // TODO: make this configurable
+    private static final long TTL = 300;
+
     @NonNull
     private CaregiverDao caregiverDao;
     @NonNull
@@ -81,6 +94,57 @@ public class CaregiverService {
         return CreateCaregiverResponseBody.builder()
                 .caregiverId(caregiverId)
                 .password(user.getPassword())
+                .build();
+    }
+
+    /**
+     * Adds a Patient to a Caregiver. The Caregiver will be set as the primary Caregiver.
+     * The adding process will only be completed after the patient accepts the add using the generated authCode.
+     * Patient and Caregiver must already exist.
+     *
+     * @param body The request body
+     * @return {@link AddPatientPrimaryResponseBody}
+     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientEmail or caregiverId is empty or invalid
+     */
+    public AddPatientPrimaryResponseBody addPatientPrimary(AddPatientPrimaryRequestBody body) {
+        log.info("Adding Patient to primary Caregiver {}", body);
+        Validator.validateAddPatientPrimaryRequestBody(body);
+
+        String authCode = UUID.randomUUID().toString().replace("-", "");
+        caregiverDao.addPatientPrimary(body.getPatientEmail(), body.getCaregiverId(), authCode);
+
+        // TODO: send email
+
+        return AddPatientPrimaryResponseBody.builder()
+                .authCode(authCode)
+                .build();
+    }
+
+    /**
+     * Completes the process of adding a primary Caregiver to a Patient.
+     *
+     * @param body The request body
+     * @return {@link AcceptPatientPrimaryResponseBody}
+     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist, or if Caregiver is not
+     *                                     unverified primary Caregiver of Patient
+     * @throws InvalidAuthCodeException If the existing authCode does not match the provided authCode or is expired
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if caregiverId, patientId, or authCode are empty or invalid
+     */
+    public AcceptPatientPrimaryResponseBody acceptPatientPrimary(AcceptPatientPrimaryRequestBody body) {
+        log.info("Accepting Caregiver as primary Caregiver for Patient {}", body);
+        Validator.validateAcceptPatientPrimaryRequestBody(body);
+
+        Caregiver caregiver = caregiverDao.findUnverifiedPrimaryCaregiver(body.getPatientId(), body.getCaregiverId());
+
+        verifyAuthCode(caregiver.getAuthCode(), caregiver.getAuthCodeTimestamp(), body.getAuthCode());
+
+        caregiverDao.acceptPatientPrimary(body.getPatientId(), body.getCaregiverId());
+
+        return AcceptPatientPrimaryResponseBody.builder()
+                .message("OK")
                 .build();
     }
 
@@ -235,5 +299,16 @@ public class CaregiverService {
             // Expected
         }
         log.info("Done priming CaregiverService");
+    }
+
+    private static void verifyAuthCode(String expected, String timestamp, String actual) {
+        if (!expected.equals(actual)) {
+            throw new InvalidAuthCodeException();
+        }
+        LocalDateTime authCodeTime = parseTime(timestamp);
+        long secondsBetween = secondsBetweenTimes(authCodeTime, getCurrentUtcTime());
+        if (secondsBetween > TTL) {
+            throw new InvalidAuthCodeException();
+        }
     }
 }

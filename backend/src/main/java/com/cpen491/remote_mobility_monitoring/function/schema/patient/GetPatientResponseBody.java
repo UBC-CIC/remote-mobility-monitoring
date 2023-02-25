@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetPatientResponseBody {
-    @SerializedName(Const.DEVICE_ID_NAME)
-    private String deviceId;
     @SerializedName(Const.FIRST_NAME_NAME)
     private String firstName;
     @SerializedName(Const.LAST_NAME_NAME)

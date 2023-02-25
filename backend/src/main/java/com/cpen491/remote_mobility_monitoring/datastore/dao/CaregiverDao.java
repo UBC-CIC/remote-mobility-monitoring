@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getBoolFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 
 @Slf4j
 @AllArgsConstructor
@@ -61,6 +63,55 @@ public class CaregiverDao {
     }
 
     /**
+     * Finds an unverified primary Caregiver record.
+     *
+     * @param patientId The id of the Patient record
+     * @param caregiverId The id of the Caregiver record
+     * @return {@link Caregiver}
+     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist, or if Caregiver is not
+     *                                     unverified primary Caregiver of Patient
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
+     */
+    public Caregiver findUnverifiedPrimaryCaregiver(String patientId, String caregiverId) {
+        log.info("Finding primary Caregiver [{}] with Patient [{}]", caregiverId, patientId);
+
+        GetItemResponse response = findPatientCaregiverAssociation(patientId, caregiverId);
+        if (!response.hasItem()) {
+            log.error("Cannot find Caregiver [{}] and Patient [{}] association", caregiverId, patientId);
+            throw new RecordDoesNotExistException(Caregiver.class.getSimpleName(), patientId + ":" + caregiverId);
+        }
+
+        Caregiver caregiver = Caregiver.convertUnverifiedPrimaryFromMap(response.item());
+        if (caregiver.getAuthCode() == null) {
+            log.error("Caregiver [{}] is not unverified primary Caregiver of Patient [{}]", caregiverId, patientId);
+            throw new RecordDoesNotExistException(Caregiver.class.getSimpleName(), patientId + ":" + caregiverId);
+        }
+
+        genericDao.setCorrectId(caregiver, CaregiverTable.ID_PREFIX);
+        return caregiver;
+    }
+
+    /**
+     * Checks whether Caregiver is the primary Caregiver of Patient.
+     *
+     * @param patientId The id of the Patient record
+     * @param caregiverId The id of the Caregiver record
+     * @return {@link Boolean}
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
+     */
+    public boolean isPrimaryCaregiverOfPatient(String patientId, String caregiverId) {
+        log.info("Checking that Caregiver [{}] is primary Caregiver of Patient [{}]", caregiverId, patientId);
+
+        GetItemResponse response = findPatientCaregiverAssociation(patientId, caregiverId);
+        if (!response.hasItem()) {
+            return false;
+        }
+        return Boolean.TRUE.equals(getBoolFromMap(response.item(), CaregiverTable.IS_PRIMARY_NAME));
+    }
+
+    /**
      * Checks whether Caregiver has Patient.
      *
      * @param patientId The id of the Patient record
@@ -71,11 +122,60 @@ public class CaregiverDao {
      */
     public boolean hasPatient(String patientId, String caregiverId) {
         log.info("Checking that Caregiver [{}] has Patient [{}]", caregiverId, patientId);
+
+        GetItemResponse response = findPatientCaregiverAssociation(patientId, caregiverId);
+        return response.hasItem();
+    }
+
+    private GetItemResponse findPatientCaregiverAssociation(String patientId, String caregiverId) {
         Validator.validatePatientId(patientId);
         Validator.validateCaregiverId(caregiverId);
 
-        GetItemResponse response = genericDao.findByPrimaryKey(caregiverId, patientId);
-        return response.hasItem();
+        return genericDao.findByPrimaryKey(caregiverId, patientId);
+    }
+
+    /**
+     * Adds a Patient to a Caregiver. The Caregiver will be set as the primary Caregiver.
+     * The adding process will only be completed after the patient accepts the add using the authCode.
+     * Patient and Caregiver must already exist.
+     *
+     * @param patientEmail The email of the Patient record
+     * @param caregiverId The id of the Caregiver record
+     * @param authCode The authCode
+     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientEmail or caregiverId is empty or invalid
+     */
+    public void addPatientPrimary(String patientEmail, String caregiverId, String authCode) {
+        log.info("Adding Patient [{}] to primary Caregiver [{}]", patientEmail, caregiverId);
+        Validator.validateEmail(patientEmail);
+        Validator.validateCaregiverId(caregiverId);
+        Validator.validateAuthCode(authCode);
+
+        Patient patient = patientDao.findByEmail(patientEmail);
+        if (patient == null) {
+            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), patientEmail);
+        }
+        Caregiver caregiver = findById(caregiverId);
+        caregiver.setAuthCode(authCode);
+        caregiver.setAuthCodeTimestamp(getCurrentUtcTimeString());
+
+        genericDao.addAssociation(Caregiver.convertPrimaryToMap(caregiver), Patient.convertToMap(patient));
+    }
+
+    /**
+     * Accepts a Caregiver as the primary Caregiver of a Patient.
+     *
+     * @param patientId The id of the Patient record
+     * @param caregiverId The id of the Caregiver record
+     * @throws RecordDoesNotExistException If Patient or Caregiver records do not exist
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
+     */
+    public void acceptPatientPrimary(String patientId, String caregiverId) {
+        log.info("Accepting Caregiver [{}] as primary Caregiver for Patient [{}]", caregiverId, patientId);
+
+        addPatient(patientId, caregiverId, true);
     }
 
     /**
@@ -89,18 +189,25 @@ public class CaregiverDao {
      */
     public void addPatient(String patientId, String caregiverId) {
         log.info("Adding Patient [{}] to Caregiver [{}]", patientId, caregiverId);
+
+        addPatient(patientId, caregiverId, false);
+    }
+
+    private void addPatient(String patientId, String caregiverId, boolean primary) {
         Validator.validatePatientId(patientId);
         Validator.validateCaregiverId(caregiverId);
 
         Patient patient = patientDao.findById(patientId);
         Caregiver caregiver = findById(caregiverId);
 
-        if (hasPatient(patientId, caregiverId)) {
-            log.info("Patient [{}] already associated with Caregiver [{}]", patientId, caregiverId);
-            return;
+        Map<String, AttributeValue> caregiverMap;
+        if (primary) {
+            caregiverMap = Caregiver.convertPrimaryToMap(caregiver);
+        } else {
+            caregiverMap = Caregiver.convertToMap(caregiver);
         }
 
-        genericDao.addAssociation(Caregiver.convertToMap(caregiver), Patient.convertToMap(patient));
+        genericDao.addAssociation(caregiverMap, Patient.convertToMap(patient));
     }
 
     /**

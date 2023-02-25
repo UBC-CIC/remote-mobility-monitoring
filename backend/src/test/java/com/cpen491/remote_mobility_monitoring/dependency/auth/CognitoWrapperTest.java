@@ -21,6 +21,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminGetUse
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminListGroupsForUserRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminListGroupsForUserResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminRemoveUserFromGroupRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminSetUserPasswordRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.GroupType;
@@ -34,9 +35,11 @@ import java.util.stream.Stream;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.ADMIN_GROUP_NAME;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.PATIENT_GROUP_NAME;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.EMAIL_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GROUP_NAME_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.GROUP_NAME_INVALID_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.PASSWORD_BLANK_ERROR_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,6 +57,7 @@ class CognitoWrapperTest {
     private static final String INCORRECT_SUB_NAME = "sup";
     private static final String USER_ID = "1";
     private static final String EMAIL = "user@email.com";
+    private static final String PASSWORD = "password";
     private static final String INVALID_GROUP_NAME = "group-name";
 
     CognitoWrapper cut;
@@ -133,6 +137,37 @@ class CognitoWrapperTest {
     }
 
     @Test
+    public void testSetPassword_HappyCase() {
+        cut.setPassword(EMAIL, PASSWORD);
+
+        verify(cognitoIdentityProviderClient, times(1)).adminSetUserPassword(any(AdminSetUserPasswordRequest.class));
+    }
+
+    @Test
+    public void testSetPassword_WHEN_CognitoClientThrowsCognitoIdentityProviderException_THEN_ThrowCognitoException() {
+        Mockito.doThrow(CognitoIdentityProviderException.class).when(cognitoIdentityProviderClient)
+                .adminSetUserPassword(any(AdminSetUserPasswordRequest.class));
+
+        assertThatThrownBy(() -> cut.setPassword(EMAIL, PASSWORD)).isInstanceOf(CognitoException.class);
+    }
+
+    @Test
+    public void testSetPassword_WHEN_CognitoClientThrowsOtherException_THEN_ThrowSameException() {
+        NullPointerException toThrow = new NullPointerException();
+        Mockito.doThrow(toThrow).when(cognitoIdentityProviderClient)
+                .adminSetUserPassword(any(AdminSetUserPasswordRequest.class));
+
+        assertThatThrownBy(() -> cut.setPassword(EMAIL, PASSWORD)).isSameAs(toThrow);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    public void testSetPassword_WHEN_InvalidInput_THEN_ThrowInvalidInputException(String input) {
+        assertInvalidInputExceptionThrown(() -> cut.setPassword(input, PASSWORD), EMAIL_BLANK_ERROR_MESSAGE);
+        assertInvalidInputExceptionThrown(() -> cut.setPassword(EMAIL, input), PASSWORD_BLANK_ERROR_MESSAGE);
+    }
+
+    @Test
     public void testAddUserToGroup_HappyCase() {
         cut.addUserToGroup(EMAIL, ADMIN_GROUP_NAME);
 
@@ -144,7 +179,7 @@ class CognitoWrapperTest {
         Mockito.doThrow(CognitoIdentityProviderException.class).when(cognitoIdentityProviderClient)
                 .adminAddUserToGroup(any(AdminAddUserToGroupRequest.class));
 
-        assertThatThrownBy(() -> cut.addUserToGroup(EMAIL, ADMIN_GROUP_NAME)).isInstanceOf(CognitoException.class);
+        assertThatThrownBy(() -> cut.addUserToGroup(EMAIL, PATIENT_GROUP_NAME)).isInstanceOf(CognitoException.class);
     }
 
     @Test

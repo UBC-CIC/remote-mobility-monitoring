@@ -9,6 +9,11 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AcceptPatientPrimaryRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AcceptPatientPrimaryResponseBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientPrimaryRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientPrimaryResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientResponseBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
@@ -45,8 +50,12 @@ import static com.cpen491.remote_mobility_monitoring.TestUtils.buildCaregiver;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildOrganization;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildPatient;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ACCEPT_PATIENT_PRIMARY_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADD_PATIENT_NULL_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADD_PATIENT_PRIMARY_NULL_ERROR_MESSAGE;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.AUTH_CODE_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CAREGIVER_ID_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_CAREGIVER_NULL_ERROR_MESSAGE;
@@ -197,6 +206,85 @@ public class CaregiverServiceTest {
                         ORGANIZATION_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildCreateCaregiverRequestBody(EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER, CAREGIVER_ID),
                         ORGANIZATION_ID_INVALID_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testAddPatientPrimary_HappyCase() {
+        AddPatientPrimaryRequestBody requestBody = buildAddPatientPrimaryRequestBody();
+        AddPatientPrimaryResponseBody responseBody = cut.addPatientPrimary(requestBody);
+
+        verify(caregiverDao, times(1)).addPatientPrimary(eq(PATIENT_EMAIL), eq(CAREGIVER_ID), anyString());
+        assertNotNull(responseBody.getAuthCode());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForAddPatientPrimary")
+    public void testAddPatientPrimary_WHEN_InvalidInput_THEN_ThrowInvalidInputException(AddPatientPrimaryRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.addPatientPrimary(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForAddPatientPrimary() {
+        return Stream.of(
+                Arguments.of(null, ADD_PATIENT_PRIMARY_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientPrimaryRequestBody(null, PATIENT_EMAIL), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientPrimaryRequestBody("", PATIENT_EMAIL), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientPrimaryRequestBody(PATIENT_ID1, PATIENT_ID1), CAREGIVER_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientPrimaryRequestBody(CAREGIVER_ID, null), EMAIL_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddPatientPrimaryRequestBody(CAREGIVER_ID, ""), EMAIL_BLANK_ERROR_MESSAGE)
+        );
+    }
+
+    @Test
+    public void testAcceptPatientPrimary_HappyCase() {
+        when(caregiverDao.findUnverifiedPrimaryCaregiver(anyString(), any())).thenReturn(buildUnverifiedPrimaryCaregiver());
+
+        AcceptPatientPrimaryRequestBody requestBody = buildAcceptPatientPrimaryRequestBody();
+        AcceptPatientPrimaryResponseBody responseBody = cut.acceptPatientPrimary(requestBody);
+
+        verify(caregiverDao, times(1)).acceptPatientPrimary(eq(PATIENT_ID1), eq(CAREGIVER_ID));
+        assertEquals("OK", responseBody.getMessage());
+    }
+
+    @Test
+    public void testAcceptPatientPrimary_WHEN_AuthCodesDoNotMatch_THEN_ThrowInvalidAuthCodeException() {
+        when(caregiverDao.findUnverifiedPrimaryCaregiver(anyString(), any())).thenReturn(buildUnverifiedPrimaryCaregiver());
+
+        AcceptPatientPrimaryRequestBody requestBody = buildAcceptPatientPrimaryRequestBody();
+        requestBody.setAuthCode(AUTH_CODE + "1");
+
+        assertThatThrownBy(() -> cut.acceptPatientPrimary(requestBody)).isInstanceOf(InvalidAuthCodeException.class);
+    }
+
+    @Test
+    public void testAcceptPatientPrimary_WHEN_AuthCodesExpired_THEN_ThrowInvalidAuthCodeException() {
+        Caregiver caregiver = buildUnverifiedPrimaryCaregiver();
+        String tenMinutesAgo = getCurrentUtcTime().minusMinutes(10).toString();
+        caregiver.setAuthCodeTimestamp(tenMinutesAgo);
+        when(caregiverDao.findUnverifiedPrimaryCaregiver(anyString(), any())).thenReturn(caregiver);
+
+        AcceptPatientPrimaryRequestBody requestBody = buildAcceptPatientPrimaryRequestBody();
+
+        assertThatThrownBy(() -> cut.acceptPatientPrimary(requestBody)).isInstanceOf(InvalidAuthCodeException.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputsForAcceptPatientPrimary")
+    public void testAcceptPatientPrimary_WHEN_InvalidInput_THEN_ThrowInvalidInputException(AcceptPatientPrimaryRequestBody body, String errorMessage) {
+        assertInvalidInputExceptionThrown(() -> cut.acceptPatientPrimary(body), errorMessage);
+    }
+
+    private static Stream<Arguments> invalidInputsForAcceptPatientPrimary() {
+        return Stream.of(
+                Arguments.of(null, ACCEPT_PATIENT_PRIMARY_NULL_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody(null, PATIENT_ID1, AUTH_CODE), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody("", PATIENT_ID1, AUTH_CODE), CAREGIVER_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody(PATIENT_ID1, PATIENT_ID1, AUTH_CODE), CAREGIVER_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody(CAREGIVER_ID, null, AUTH_CODE), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody(CAREGIVER_ID, "", AUTH_CODE), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody(CAREGIVER_ID, CAREGIVER_ID, AUTH_CODE), PATIENT_ID_INVALID_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody(CAREGIVER_ID, PATIENT_ID1, null), AUTH_CODE_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAcceptPatientPrimaryRequestBody(CAREGIVER_ID, PATIENT_ID1, ""), AUTH_CODE_BLANK_ERROR_MESSAGE)
         );
     }
 
@@ -528,6 +616,29 @@ public class CaregiverServiceTest {
                 .build();
     }
 
+    private static AddPatientPrimaryRequestBody buildAddPatientPrimaryRequestBody() {
+        return buildAddPatientPrimaryRequestBody(CAREGIVER_ID, PATIENT_EMAIL);
+    }
+
+    private static AddPatientPrimaryRequestBody buildAddPatientPrimaryRequestBody(String caregiverId, String patientEmail) {
+        return AddPatientPrimaryRequestBody.builder()
+                .caregiverId(caregiverId)
+                .patientEmail(patientEmail)
+                .build();
+    }
+
+    private static AcceptPatientPrimaryRequestBody buildAcceptPatientPrimaryRequestBody() {
+        return buildAcceptPatientPrimaryRequestBody(CAREGIVER_ID, PATIENT_ID1, AUTH_CODE);
+    }
+
+    private static AcceptPatientPrimaryRequestBody buildAcceptPatientPrimaryRequestBody(String caregiverId, String patientId, String authCode) {
+        return AcceptPatientPrimaryRequestBody.builder()
+                .caregiverId(caregiverId)
+                .patientId(patientId)
+                .authCode(authCode)
+                .build();
+    }
+
     private static AddPatientRequestBody buildAddPatientRequestBody() {
         return buildAddPatientRequestBody(CAREGIVER_ID, PATIENT_ID1);
     }
@@ -598,6 +709,13 @@ public class CaregiverServiceTest {
     private static Caregiver buildCaregiverDefault() {
         Caregiver caregiver = buildCaregiver(CAREGIVER_ID, CAREGIVER_ID, EMAIL, FIRST_NAME, LAST_NAME, TITLE1, PHONE_NUMBER);
         caregiver.setCreatedAt(CREATED_AT);
+        return caregiver;
+    }
+
+    private static Caregiver buildUnverifiedPrimaryCaregiver() {
+        Caregiver caregiver = buildCaregiverDefault();
+        caregiver.setAuthCode(AUTH_CODE);
+        caregiver.setAuthCodeTimestamp(AUTH_CODE_TIMESTAMP);
         return caregiver;
     }
 

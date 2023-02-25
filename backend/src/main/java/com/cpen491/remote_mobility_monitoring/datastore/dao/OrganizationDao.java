@@ -152,8 +152,6 @@ public class OrganizationDao {
         }).collect(Collectors.toList());
     }
 
-    // TODO: find all patients
-
     /**
      * Updates an Organization record. Record with given id must already exist.
      * Record with given name should not already exist unless it is the same record being updated.

@@ -28,4 +28,10 @@ public class DynamoDbUtils {
         if (val == null) return null;
         else return val.s();
     }
+
+    public static Boolean getBoolFromMap(Map<String, AttributeValue> map, String key) {
+        AttributeValue val = map.get(key);
+        if (val == null) return false;
+        else return val.bool();
+    }
 }

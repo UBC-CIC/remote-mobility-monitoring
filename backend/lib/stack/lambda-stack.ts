@@ -40,6 +40,10 @@ export class LambdaStack extends cdk.Stack {
   public readonly deleteAdminAlias: lambda.Alias;
   public readonly createCaregiverFunction: lambda.Function;
   public readonly createCaregiverAlias: lambda.Alias;
+  public readonly addPatientPrimaryFunction: lambda.Function;
+  public readonly addPatientPrimaryAlias: lambda.Alias;
+  public readonly acceptPatientPrimaryFunction: lambda.Function;
+  public readonly acceptPatientPrimaryAlias: lambda.Alias;
   public readonly addPatientFunction: lambda.Function;
   public readonly addPatientAlias: lambda.Alias;
   public readonly removePatientFunction: lambda.Function;
@@ -54,10 +58,6 @@ export class LambdaStack extends cdk.Stack {
   public readonly deleteCaregiverAlias: lambda.Alias;
   public readonly createPatientFunction: lambda.Function;
   public readonly createPatientAlias: lambda.Alias;
-  public readonly updatePatientDeviceFunction: lambda.Function;
-  public readonly updatePatientDeviceAlias: lambda.Alias;
-  public readonly verifyPatientFunction: lambda.Function;
-  public readonly verifyPatientAlias: lambda.Alias;
   public readonly getPatientFunction: lambda.Function;
   public readonly getPatientAlias: lambda.Alias;
   public readonly getAllCaregiversFunction: lambda.Function;
@@ -115,6 +115,12 @@ export class LambdaStack extends cdk.Stack {
     const createCaregiverFunctionName = formResourceName('CreateCaregiverFunction', props.stage);
     this.createCaregiverFunction = this.createCreateCaregiverFunction(createCaregiverFunctionName);
     this.createCaregiverAlias = this.createLambdaAlias(createCaregiverFunctionName, this.createCaregiverFunction);
+    const addPatientPrimaryFunctionName = formResourceName('AddPatientPrimaryFunction', props.stage);
+    this.addPatientPrimaryFunction = this.createLambdaFunction(addPatientPrimaryFunctionName, 'caregiver.AddPatientPrimaryHandler');
+    this.addPatientPrimaryAlias = this.createLambdaAlias(addPatientPrimaryFunctionName, this.addPatientPrimaryFunction);
+    const acceptPatientPrimaryFunctionName = formResourceName('AcceptPatientPrimaryFunction', props.stage);
+    this.acceptPatientPrimaryFunction = this.createLambdaFunction(acceptPatientPrimaryFunctionName, 'caregiver.AcceptPatientPrimaryHandler');
+    this.acceptPatientPrimaryAlias = this.createLambdaAlias(acceptPatientPrimaryFunctionName, this.acceptPatientPrimaryFunction);
     const addPatientFunctionName = formResourceName('AddPatientFunction', props.stage);
     this.addPatientFunction = this.createAddPatientFunction(addPatientFunctionName);
     this.addPatientAlias = this.createLambdaAlias(addPatientFunctionName, this.addPatientFunction);
@@ -137,12 +143,6 @@ export class LambdaStack extends cdk.Stack {
     const createPatientFunctionName = formResourceName('CreatePatientFunction', props.stage);
     this.createPatientFunction = this.createCreatePatientFunction(createPatientFunctionName);
     this.createPatientAlias = this.createLambdaAlias(createPatientFunctionName, this.createPatientFunction);
-    const updatePatientDeviceFunctionName = formResourceName('UpdatePatientDeviceFunction', props.stage);
-    this.updatePatientDeviceFunction = this.createUpdatePatientDeviceFunction(updatePatientDeviceFunctionName);
-    this.updatePatientDeviceAlias = this.createLambdaAlias(updatePatientDeviceFunctionName, this.updatePatientDeviceFunction);
-    const verifyPatientFunctionName = formResourceName('VerifyPatientFunction', props.stage);
-    this.verifyPatientFunction = this.createVerifyPatientFunction(verifyPatientFunctionName);
-    this.verifyPatientAlias = this.createLambdaAlias(verifyPatientFunctionName, this.verifyPatientFunction);
     const getPatientFunctionName = formResourceName('GetPatientFunction', props.stage);
     this.getPatientFunction = this.createGetPatientFunction(getPatientFunctionName);
     this.getPatientAlias = this.createLambdaAlias(getPatientFunctionName, this.getPatientFunction);
@@ -262,14 +262,6 @@ export class LambdaStack extends cdk.Stack {
 
   private createCreatePatientFunction(functionName: string): lambda.Function {
     return this.createLambdaFunction(functionName, 'patient.CreatePatientHandler');
-  }
-
-  private createUpdatePatientDeviceFunction(functionName: string): lambda.Function {
-    return this.createLambdaFunction(functionName, 'patient.UpdatePatientDeviceHandler');
-  }
-
-  private createVerifyPatientFunction(functionName: string): lambda.Function {
-    return this.createLambdaFunction(functionName, 'patient.VerifyPatientHandler');
   }
 
   private createGetPatientFunction(functionName: string): lambda.Function {

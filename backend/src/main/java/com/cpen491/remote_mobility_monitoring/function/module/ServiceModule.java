@@ -37,7 +37,7 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public static PatientService patientService(PatientDao patientDao, CaregiverDao caregiverDao, MetricsDao metricsDao) {
-        return new PatientService(patientDao, caregiverDao, metricsDao);
+    public static PatientService patientService(PatientDao patientDao, MetricsDao metricsDao, CognitoWrapper cognitoWrapper) {
+        return new PatientService(patientDao, metricsDao, cognitoWrapper);
     }
 }

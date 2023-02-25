@@ -47,6 +47,9 @@ public final class Const {
         public static final String LAST_NAME_NAME = ID_PREFIX + "last_name";
         public static final String TITLE_NAME = ID_PREFIX + "title";
         public static final String PHONE_NUMBER_NAME = ID_PREFIX + "phone_number";
+        public static final String AUTH_CODE_NAME = ID_PREFIX + "auth_code";
+        public static final String AUTH_CODE_TIMESTAMP_NAME = ID_PREFIX + "auth_code_timestamp";
+        public static final String IS_PRIMARY_NAME = ID_PREFIX + "is_primary";
         public static final String EMAIL_INDEX_NAME = EMAIL_NAME + INDEX_NAME_SUFFIX;
         public static final List<Pair<String, String>> INDEX_NAMES_AND_KEYS = Arrays.asList(
                 new ImmutablePair<>(EMAIL_INDEX_NAME, EMAIL_NAME)

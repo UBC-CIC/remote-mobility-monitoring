@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatePatientRequestBody {
+    @SerializedName(Const.EMAIL_NAME)
+    private String email;
+    @SerializedName(Const.PASSWORD_NAME)
+    private String password;
     @SerializedName(Const.FIRST_NAME_NAME)
     private String firstName;
     @SerializedName(Const.LAST_NAME_NAME)

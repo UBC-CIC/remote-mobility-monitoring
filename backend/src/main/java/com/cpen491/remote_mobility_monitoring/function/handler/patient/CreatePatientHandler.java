@@ -15,7 +15,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerU
 public class CreatePatientHandler extends HandlerParent implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        log.info("Received Create Patient request with body: {}", requestEvent.getBody());
+        log.info("Received Create Patient request");
         return processApiGatewayRequest((request) -> {
             CreatePatientRequestBody requestBody = gson.fromJson(request.getBody(), CreatePatientRequestBody.class);
             CreatePatientResponseBody responseBody = patientService.createPatient(requestBody);

@@ -26,10 +26,10 @@ public class PatientDao {
     private GenericDao genericDao;
 
     /**
-     * Creates a new Patient record. If deviceId is provided, record with the deviceId must not already exist.
+     * Creates a new Patient record. Record with the given email must not already exist.
      *
      * @param newRecord The Patient record to create
-     * @throws DuplicateRecordException If record with the given deviceId already exists
+     * @throws DuplicateRecordException If record with the given email already exists
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of pid, sid, email, firstName, lastName,
      *                              and phoneNumber are empty
@@ -148,6 +148,7 @@ public class PatientDao {
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociationsOnSidIndex(patientId, CaregiverTable.ID_PREFIX).items();
         return result.stream().map(map -> {
+            // TODO: use convertPrimaryFromMap
             Caregiver caregiver = Caregiver.convertFromMap(map);
             caregiver.setSid(caregiver.getPid());
             return caregiver;
@@ -156,10 +157,10 @@ public class PatientDao {
 
     /**
      * Updates a Patient record. Record with given id must already exist.
-     * Record with given deviceId should not already exist unless it is the same record being updated.
+     * Record with given email should not already exist unless it is the same record being updated.
      *
      * @param updatedRecord The Patient record to update
-     * @throws DuplicateRecordException If record with the given deviceId already exists
+     * @throws DuplicateRecordException If record with the given email already exists
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of pid, sid, email, firstName, lastName,

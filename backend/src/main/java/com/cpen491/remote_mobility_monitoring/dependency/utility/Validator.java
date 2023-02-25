@@ -9,6 +9,8 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.CreateAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.DeleteAdminRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.GetAdminRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AcceptPatientPrimaryRequestBody;
+import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientPrimaryRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AddPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.CreateCaregiverRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.DeleteCaregiverRequestBody;
@@ -25,9 +27,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.DeletePati
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetAllCaregiversRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.GetPatientRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientDeviceRequestBody;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
-import com.cpen491.remote_mobility_monitoring.function.schema.patient.VerifyPatientRequestBody;
 import org.apache.commons.lang3.Validate;
 
 import java.time.LocalDateTime;
@@ -41,6 +41,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Organ
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.ADMIN_GROUP_NAME;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
+import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.PATIENT_GROUP_NAME;
 
 public class Validator {
     public static final String PID_BLANK_ERROR_MESSAGE = "pid must be present";
@@ -48,6 +49,7 @@ public class Validator {
     public static final String PID_NOT_EQUAL_SID_ERROR_MESSAGE = "pid must be the same as sid";
     public static final String NAME_BLANK_ERROR_MESSAGE = "name must be present";
     public static final String EMAIL_BLANK_ERROR_MESSAGE = "email must be present";
+    public static final String PASSWORD_BLANK_ERROR_MESSAGE = "password must be present";
     public static final String FIRST_NAME_BLANK_ERROR_MESSAGE = "first_name must be present";
     public static final String LAST_NAME_BLANK_ERROR_MESSAGE = "last_name must be present";
     public static final String TITLE_BLANK_ERROR_MESSAGE = "title must be present";
@@ -62,7 +64,6 @@ public class Validator {
     public static final String ADMIN_ID_BLANK_ERROR_MESSAGE = "admin_id must be present";
     public static final String ADMIN_ID_INVALID_ERROR_MESSAGE = "admin_id invalid";
     public static final String AUTH_CODE_BLANK_ERROR_MESSAGE = "auth_code must be present";
-    public static final String AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE = "auth_code_timestamp must be present";
     public static final String MEASURE_NAME_NULL_ERROR_MESSAGE = "measure_name must not be null";
     public static final String MEASURE_VALUE_BLANK_ERROR_MESSAGE = "measure_value must be present";
     public static final String MEASURE_VALUE_INVALID_ERROR_MESSAGE = "measure_value is not a double";
@@ -78,9 +79,8 @@ public class Validator {
     public static final String DISTANCE_WALKED_INVALID_ERROR_MESSAGE = "distance_walked is not a double";
     public static final String TIMESTAMP_BLANK_ERROR_MESSAGE = "timestamp must be present";
     public static final String TIMESTAMP_INVALID_ERROR_MESSAGE = "timestamp is not an in iso8601 format";
-    public static final String VERIFIED_NULL_ERROR_MESSAGE = "verified must not be null";
     public static final String GROUP_NAME_BLANK_ERROR_MESSAGE = "group name must be present";
-    public static final List<String> VALID_GROUP_NAMES = Arrays.asList(ADMIN_GROUP_NAME, CAREGIVER_GROUP_NAME);
+    public static final List<String> VALID_GROUP_NAMES = Arrays.asList(ADMIN_GROUP_NAME, CAREGIVER_GROUP_NAME, PATIENT_GROUP_NAME);
     public static final String GROUP_NAME_INVALID_ERROR_MESSAGE = "group name is not Admin or Caregiver";
     public static final String IDS_NULL_ERROR_MESSAGE = "IDs must not be null";
     public static final String ORGANIZATION_RECORD_NULL_ERROR_MESSAGE = "Organization record must not be null";
@@ -95,6 +95,8 @@ public class Validator {
     public static final String GET_ADMIN_NULL_ERROR_MESSAGE = "Get admin request body must not be null";
     public static final String DELETE_ADMIN_NULL_ERROR_MESSAGE = "Delete admin request body must not be null";
     public static final String CREATE_CAREGIVER_NULL_ERROR_MESSAGE = "Create caregiver request body must not be null";
+    public static final String ADD_PATIENT_PRIMARY_NULL_ERROR_MESSAGE = "Add patient primary request body must not be null";
+    public static final String ACCEPT_PATIENT_PRIMARY_NULL_ERROR_MESSAGE = "Accept patient primary request body must not be null";
     public static final String ADD_PATIENT_NULL_ERROR_MESSAGE = "Add patient request body must not be null";
     public static final String REMOVE_PATIENT_NULL_ERROR_MESSAGE = "Remove patient request body must not be null";
     public static final String GET_CAREGIVER_NULL_ERROR_MESSAGE = "Get caregiver request body must not be null";
@@ -102,8 +104,6 @@ public class Validator {
     public static final String UPDATE_CAREGIVER_NULL_ERROR_MESSAGE = "Update caregiver request body must not be null";
     public static final String DELETE_CAREGIVER_NULL_ERROR_MESSAGE = "Delete caregiver request body must not be null";
     public static final String CREATE_PATIENT_NULL_ERROR_MESSAGE = "Create patient request body must not be null";
-    public static final String UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE = "Update patient device request body must not be null";
-    public static final String VERIFY_PATIENT_NULL_ERROR_MESSAGE = "Verify patient request body must not be null";
     public static final String GET_PATIENT_NULL_ERROR_MESSAGE = "Get patient request body must not be null";
     public static final String GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE = "Get all caregivers request body must not be null";
     public static final String ADD_METRICS_NULL_ERROR_MESSAGE = "Add metrics request body must not be null";
@@ -125,6 +125,10 @@ public class Validator {
 
     public static void validateEmail(String email) {
         Validate.notBlank(email, EMAIL_BLANK_ERROR_MESSAGE);
+    }
+
+    public static void validatePassword(String password) {
+        Validate.notBlank(password, PASSWORD_BLANK_ERROR_MESSAGE);
     }
 
     public static void validateFirstName(String firstName) {
@@ -179,10 +183,6 @@ public class Validator {
         Validate.notBlank(authCode, AUTH_CODE_BLANK_ERROR_MESSAGE);
     }
 
-    public static void validateAuthCodeTimestamp(String authCodeTimestamp) {
-        Validate.notBlank(authCodeTimestamp, AUTH_CODE_TIMESTAMP_BLANK_ERROR_MESSAGE);
-    }
-
     public static void validateMeasureName(MeasureName measureName) {
         Validate.notNull(measureName, MEASURE_NAME_NULL_ERROR_MESSAGE);
     }
@@ -227,10 +227,6 @@ public class Validator {
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(TIMESTAMP_INVALID_ERROR_MESSAGE);
         }
-    }
-
-    public static void validateVerified(Boolean verified) {
-        Validate.notNull(verified, VERIFIED_NULL_ERROR_MESSAGE);
     }
 
     public static void validateGroupName(String groupName) {
@@ -340,6 +336,19 @@ public class Validator {
         validateOrganizationId(body.getOrganizationId());
     }
 
+    public static void validateAddPatientPrimaryRequestBody(AddPatientPrimaryRequestBody body) {
+        Validate.notNull(body, ADD_PATIENT_PRIMARY_NULL_ERROR_MESSAGE);
+        validateCaregiverId(body.getCaregiverId());
+        validateEmail(body.getPatientEmail());
+    }
+
+    public static void validateAcceptPatientPrimaryRequestBody(AcceptPatientPrimaryRequestBody body) {
+        Validate.notNull(body, ACCEPT_PATIENT_PRIMARY_NULL_ERROR_MESSAGE);
+        validateCaregiverId(body.getCaregiverId());
+        validatePatientId(body.getPatientId());
+        validateAuthCode(body.getAuthCode());
+    }
+
     public static void validateAddPatientRequestBody(AddPatientRequestBody body) {
         Validate.notNull(body, ADD_PATIENT_NULL_ERROR_MESSAGE);
         validateCaregiverId(body.getCaregiverId());
@@ -378,22 +387,11 @@ public class Validator {
 
     public static void validateCreatePatientRequestBody(CreatePatientRequestBody body) {
         Validate.notNull(body, CREATE_PATIENT_NULL_ERROR_MESSAGE);
+        validateEmail(body.getEmail());
+        validatePassword(body.getPassword());
         validateFirstName(body.getFirstName());
         validateLastName(body.getLastName());
         validatePhoneNumber(body.getPhoneNumber());
-    }
-
-    public static void validateUpdatePatientDeviceRequestBody(UpdatePatientDeviceRequestBody body) {
-        Validate.notNull(body, UPDATE_PATIENT_DEVICE_NULL_ERROR_MESSAGE);
-        validatePatientId(body.getPatientId());
-    }
-
-    public static void validateVerifyPatientRequestBody(VerifyPatientRequestBody body) {
-        Validate.notNull(body, VERIFY_PATIENT_NULL_ERROR_MESSAGE);
-        validateCaregiverId(body.getCaregiverId());
-        validatePatientId(body.getPatientId());
-        validateAuthCode(body.getAuthCode());
-        validateDeviceId(body.getDeviceId());
     }
 
     public static void validateGetPatientRequestBody(GetPatientRequestBody body) {

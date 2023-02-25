@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminGetUse
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminListGroupsForUserRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminListGroupsForUserResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminRemoveUserFromGroupRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminSetUserPasswordRequest;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.DeliveryMediumType;
@@ -45,6 +46,7 @@ public class CognitoWrapper {
 
     public static final String ADMIN_GROUP_NAME = "Admin";
     public static final String CAREGIVER_GROUP_NAME = "Caregiver";
+    public static final String PATIENT_GROUP_NAME = "Patient";
 
     @NonNull
     private String userpoolId;
@@ -104,6 +106,34 @@ public class CognitoWrapper {
             String id = getId(response.user().attributes());
             return new CognitoUser(id, password);
         } catch (CognitoIdentityProviderException | NoSuchElementException e) {
+            log.error("Encountered Cognito error", e);
+            throw new CognitoException(e);
+        }
+    }
+
+    /**
+     * Sets the password for a user in Cognito.
+     *
+     * @param email The email of the user
+     * @param password The new password
+     * @throws CognitoException If Cognito set password fails and throws an exception
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if email is empty
+     */
+    public void setPassword(String email, String password) {
+        log.info("Setting password for user {} in Cognito", email);
+        Validator.validateEmail(email);
+        Validator.validatePassword(password);
+
+        AdminSetUserPasswordRequest request = AdminSetUserPasswordRequest.builder()
+                .username(email)
+                .password(password)
+                .permanent(true)
+                .userPoolId(userpoolId)
+                .build();
+        try {
+            cognitoIdentityProviderClient.adminSetUserPassword(request);
+        } catch (CognitoIdentityProviderException e) {
             log.error("Encountered Cognito error", e);
             throw new CognitoException(e);
         }

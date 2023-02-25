@@ -5,6 +5,7 @@ package com.cpen491.remote_mobility_monitoring.function.schema;
  */
 public final class Const {
     public static final String EMAIL_NAME = "email";
+    public static final String PATIENT_EMAIL_NAME = "patient_email";
     public static final String FIRST_NAME_NAME = "first_name";
     public static final String LAST_NAME_NAME = "last_name";
     public static final String TITLE_NAME = "title";
