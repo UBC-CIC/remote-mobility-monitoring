@@ -593,13 +593,15 @@ public class CaregiverDaoTest extends DaoTestParent {
     @Test
     public void testFindAllPatients_HappyCase() {
         Patient patient1 = buildPatientDefault();
+        patient1.setIsPrimary(true);
+        patient1.setVerified(false);
         createPatient(patient1);
         Patient patient2 = buildPatient(PATIENT_ID2, PATIENT_ID2, PATIENT_EMAIL2, DEVICE_ID, null, null, null);
         createPatient(patient2);
         Caregiver caregiver = buildCaregiverDefault();
         createCaregiver(caregiver);
 
-        cut.addPatient(PATIENT_ID1, PID);
+        cut.addPatientPrimary(PATIENT_EMAIL1, PID, AUTH_CODE);
         cut.addPatient(PATIENT_ID2, PID);
         List<Patient> patients = cut.findAllPatients(PID).stream().peek(patient -> {
             patient.setCreatedAt(null);

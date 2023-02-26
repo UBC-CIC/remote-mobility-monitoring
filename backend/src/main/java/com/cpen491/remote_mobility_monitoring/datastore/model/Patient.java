@@ -29,6 +29,10 @@ public class Patient extends BaseModel {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    // The following 2 attributes only appear in caregiverDao.findAllPatients() to indicate whether a caregiver
+    // is the primary caregiver and whether the relationship is verified
+    private Boolean isPrimary;
+    private Boolean verified;
 
     public static Map<String, AttributeValue> convertToMap(Patient patient) {
         Map<String, AttributeValue> map = new HashMap<>();

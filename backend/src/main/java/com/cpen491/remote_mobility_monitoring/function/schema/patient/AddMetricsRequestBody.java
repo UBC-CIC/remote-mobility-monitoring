@@ -40,7 +40,7 @@ public class AddMetricsRequestBody {
         @SerializedName(MetricsTable.TIMESTAMP_NAME)
         private String timestamp;
 
-        public static List<Metrics> convertToMetrics(String patientId, String deviceId, AddMetricsSerialization serialization) {
+        public static List<Metrics> convertToMetrics(String patientId, AddMetricsSerialization serialization) {
             List<Metrics> metricsList = new ArrayList<>();
 
             metricsList.add(Metrics.builder().measureName(MeasureName.STEP_LENGTH).measureValue(serialization.getStepLength()).build());
@@ -51,15 +51,14 @@ public class AddMetricsRequestBody {
 
             for (Metrics metrics : metricsList) {
                 metrics.setPatientId(patientId);
-                metrics.setDeviceId(deviceId);
                 metrics.setTimestamp(serialization.getTimestamp());
             }
             return metricsList;
         }
     }
 
-    @SerializedName(Const.DEVICE_ID_NAME)
-    private String deviceId;
+    @SerializedName(Const.PATIENT_ID_NAME)
+    private String patientId;
     @SerializedName(Const.METRICS_NAME)
     private List<AddMetricsSerialization> metrics;
 }

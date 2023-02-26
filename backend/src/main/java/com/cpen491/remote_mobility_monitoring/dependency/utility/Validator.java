@@ -282,7 +282,6 @@ public class Validator {
     public static void validateMetrics(Metrics metrics) {
         Validate.notNull(metrics, METRICS_NULL_ERROR_MESSAGE);
         validatePatientId(metrics.getPatientId());
-        validateDeviceId(metrics.getDeviceId());
         validateMeasureName(metrics.getMeasureName());
         validateMeasureValue(metrics.getMeasureValue());
         validateTimestamp(metrics.getTimestamp());
@@ -406,7 +405,7 @@ public class Validator {
 
     public static void validateAddMetricsRequestBody(AddMetricsRequestBody body) {
         Validate.notNull(body, ADD_METRICS_NULL_ERROR_MESSAGE);
-        validateDeviceId(body.getDeviceId());
+        validatePatientId(body.getPatientId());
         Validate.notNull(body.getMetrics(), METRICS_NULL_ERROR_MESSAGE);
     }
 

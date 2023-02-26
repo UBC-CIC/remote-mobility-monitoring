@@ -29,12 +29,15 @@ public class GetAllCaregiversResponseBody {
         private String firstName;
         @SerializedName(Const.LAST_NAME_NAME)
         private String lastName;
+        @SerializedName(Const.IS_PRIMARY_NAME)
+        private Boolean isPrimary;
 
         public static CaregiverSerialization fromCaregiver(Caregiver caregiver) {
             return CaregiverSerialization.builder()
                     .caregiverId(caregiver.getPid())
                     .firstName(caregiver.getFirstName())
                     .lastName(caregiver.getLastName())
+                    .isPrimary(caregiver.getIsPrimary())
                     .build();
         }
     }

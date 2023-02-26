@@ -259,8 +259,8 @@ public class CaregiverServiceTest {
     @Test
     public void testAcceptPatientPrimary_WHEN_AuthCodesExpired_THEN_ThrowInvalidAuthCodeException() {
         Caregiver caregiver = buildUnverifiedPrimaryCaregiver();
-        String tenMinutesAgo = getCurrentUtcTime().minusMinutes(10).toString();
-        caregiver.setAuthCodeTimestamp(tenMinutesAgo);
+        String threeDaysAgo = getCurrentUtcTime().minusDays(3).toString();
+        caregiver.setAuthCodeTimestamp(threeDaysAgo);
         when(caregiverDao.findUnverifiedPrimaryCaregiver(anyString(), any())).thenReturn(caregiver);
 
         AcceptPatientPrimaryRequestBody requestBody = buildAcceptPatientPrimaryRequestBody();
@@ -417,6 +417,8 @@ public class CaregiverServiceTest {
         Patient patient2 = buildPatientDefault();
         patient2.setPid(PATIENT_ID2);
         patient2.setSid(PATIENT_ID2);
+        patient2.setIsPrimary(true);
+        patient2.setVerified(true);
         List<Patient> patients = Arrays.asList(patient1, patient2);
         when(caregiverDao.findAllPatients(anyString())).thenReturn(patients);
 

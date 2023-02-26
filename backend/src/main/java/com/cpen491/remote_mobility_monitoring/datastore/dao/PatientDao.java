@@ -148,8 +148,7 @@ public class PatientDao {
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociationsOnSidIndex(patientId, CaregiverTable.ID_PREFIX).items();
         return result.stream().map(map -> {
-            // TODO: use convertPrimaryFromMap
-            Caregiver caregiver = Caregiver.convertFromMap(map);
+            Caregiver caregiver = Caregiver.convertPrimaryFromMap(map);
             caregiver.setSid(caregiver.getPid());
             return caregiver;
         }).collect(Collectors.toList());

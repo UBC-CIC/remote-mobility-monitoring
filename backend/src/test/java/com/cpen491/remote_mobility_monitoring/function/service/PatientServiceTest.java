@@ -2,7 +2,6 @@ package com.cpen491.remote_mobility_monitoring.function.service;
 
 import com.cpen491.remote_mobility_monitoring.datastore.dao.MetricsDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
-import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Caregiver;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
@@ -54,7 +53,6 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtil
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.ADD_METRICS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.CREATE_PATIENT_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DELETE_PATIENT_NULL_ERROR_MESSAGE;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DISTANCE_WALKED_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DISTANCE_WALKED_INVALID_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DOUBLE_SUPPORT_TIME_BLANK_ERROR_MESSAGE;
@@ -107,7 +105,6 @@ class PatientServiceTest {
     private static final List<String> PATIENT_IDS = Arrays.asList(PATIENT_ID, PATIENT_ID2);
     private static final String CAREGIVER_ID1 = "car-1";
     private static final String CAREGIVER_ID2 = "car-2";
-    private static final String DEVICE_ID = "device-id-1";
     private static final String METRIC_VALUE = "0.0";
     private static final String INVALID_METRIC_VALUE = "0.0%";
     private static final String[] METRIC_VALUES1 = new String[]{"1.0", "2.0", "3.0", "4.0", "5.0"};
@@ -204,6 +201,7 @@ class PatientServiceTest {
         GetPatientRequestBody requestBody = buildGetPatientRequestBody();
         GetPatientResponseBody responseBody = cut.getPatient(requestBody);
 
+        assertEquals(EMAIL, responseBody.getEmail());
         assertEquals(FIRST_NAME, responseBody.getFirstName());
         assertEquals(LAST_NAME, responseBody.getLastName());
         assertEquals(PHONE_NUMBER1, responseBody.getPhoneNumber());
@@ -237,7 +235,9 @@ class PatientServiceTest {
     @Test
     public void testGetAllCaregivers_HappyCase() {
         Caregiver caregiver1 = buildCaregiverDefault();
+        caregiver1.setIsPrimary(true);
         Caregiver caregiver2 = buildCaregiverDefault();
+        caregiver2.setIsPrimary(false);
         caregiver2.setPid(CAREGIVER_ID2);
         caregiver2.setSid(CAREGIVER_ID2);
         List<Caregiver> caregivers = Arrays.asList(caregiver1, caregiver2);
@@ -285,8 +285,6 @@ class PatientServiceTest {
 
     @Test
     public void testAddMetrics_HappyCase() {
-        when(patientDao.findByDeviceId(anyString())).thenReturn(buildPatientDefault());
-
         AddMetricsSerialization serialization1 = buildAddMetricsSerialization(METRIC_VALUES1);
         AddMetricsSerialization serialization2 = buildAddMetricsSerialization(METRIC_VALUES2);
         List<AddMetricsSerialization> serializations = Arrays.asList(serialization1, serialization2);
@@ -312,16 +310,7 @@ class PatientServiceTest {
     }
 
     @Test
-    public void testAddMetrics_WHEN_PatientDaoFindByDeviceIdReturnsNull_THEN_ThrowRecordDoesNotExistException() {
-        List<AddMetricsSerialization> serializations = Arrays.asList(buildAddMetricsSerialization(METRIC_VALUES1));
-        AddMetricsRequestBody requestBody = buildAddMetricsRequestBody(serializations);
-        assertThatThrownBy(() -> cut.addMetrics(requestBody)).isInstanceOf(RecordDoesNotExistException.class);
-    }
-
-    @Test
     public void testAddMetrics_WHEN_MetricsDaoAddThrows_THEN_ThrowSameException() {
-        when(patientDao.findByDeviceId(anyString())).thenReturn(buildPatientDefault());
-
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(metricsDao).add(anyList());
 
@@ -342,16 +331,15 @@ class PatientServiceTest {
         return Stream.of(
                 Arguments.of(null, ADD_METRICS_NULL_ERROR_MESSAGE),
                 Arguments.of(buildAddMetricsRequestBody(null), METRICS_NULL_ERROR_MESSAGE),
-                Arguments.of(buildAddMetricsRequestBody(null, serializations), DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildAddMetricsRequestBody("", serializations), DEVICE_ID_BLANK_ERROR_MESSAGE)
+                Arguments.of(buildAddMetricsRequestBody(null, serializations), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody("", serializations), PATIENT_ID_BLANK_ERROR_MESSAGE),
+                Arguments.of(buildAddMetricsRequestBody(CAREGIVER_ID1, serializations), PATIENT_ID_INVALID_ERROR_MESSAGE)
         );
     }
 
     @ParameterizedTest
     @MethodSource("invalidInputsForAddMetrics2")
     public void testAddMetrics_WHEN_InvalidInput2_THEN_ThrowInvalidInputException(AddMetricsRequestBody body, String errorMessage) {
-        when(patientDao.findByDeviceId(anyString())).thenReturn(buildPatientDefault());
-
         assertInvalidInputExceptionThrown(() -> cut.addMetrics(body), errorMessage);
     }
 
@@ -447,7 +435,7 @@ class PatientServiceTest {
         List<String> ids3 = new ArrayList<>();
         ids3.add("");
         List<String> ids4 = new ArrayList<>();
-        ids4.add(DEVICE_ID);
+        ids4.add(CAREGIVER_ID1);
         List<String> ids5 = new ArrayList<>();
         ids5.add(PATIENT_ID);
         return Stream.of(
@@ -602,12 +590,12 @@ class PatientServiceTest {
     }
 
     private static AddMetricsRequestBody buildAddMetricsRequestBody(List<AddMetricsSerialization> metrics) {
-        return buildAddMetricsRequestBody(DEVICE_ID, metrics);
+        return buildAddMetricsRequestBody(PATIENT_ID, metrics);
     }
 
-    private static AddMetricsRequestBody buildAddMetricsRequestBody(String deviceId, List<AddMetricsSerialization> metrics) {
+    private static AddMetricsRequestBody buildAddMetricsRequestBody(String patientId, List<AddMetricsSerialization> metrics) {
         return AddMetricsRequestBody.builder()
-                .deviceId(deviceId)
+                .patientId(patientId)
                 .metrics(metrics)
                 .build();
     }
@@ -659,7 +647,7 @@ class PatientServiceTest {
     }
 
     private static Metrics buildMetricsDefault(MeasureName measureName, String measureValue) {
-        return buildMetrics(PATIENT_ID, DEVICE_ID, measureName, measureValue, TIMESTAMP);
+        return buildMetrics(PATIENT_ID, measureName, measureValue, TIMESTAMP);
     }
 
     private static AddMetricsSerialization buildAddMetricsSerialization(String[] metricsValues) {

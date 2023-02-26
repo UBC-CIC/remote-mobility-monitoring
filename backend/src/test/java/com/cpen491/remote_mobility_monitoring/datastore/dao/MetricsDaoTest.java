@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.assertInvalidInputExceptionThrown;
 import static com.cpen491.remote_mobility_monitoring.TestUtils.buildMetrics;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.DEVICE_ID_BLANK_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.IDS_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.MEASURE_NAME_NULL_ERROR_MESSAGE;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.Validator.MEASURE_VALUE_BLANK_ERROR_MESSAGE;
@@ -41,7 +40,6 @@ import static org.mockito.ArgumentMatchers.any;
 @ExtendWith(MockitoExtension.class)
 class MetricsDaoTest {
     private static final String PATIENT_ID = "pat-1";
-    private static final String DEVICE_ID = "device-id-1";
     private static final MeasureName MEASURE_NAME = MeasureName.STEP_LENGTH;
     private static final String MEASURE_VALUE = "3.0";
     private static final String INVALID_MEASURE_VALUE = "0.9%";
@@ -78,44 +76,38 @@ class MetricsDaoTest {
         List<Metrics> argument2 = new ArrayList<>();
         argument2.add(null);
         List<Metrics> argument3 = new ArrayList<>();
-        argument3.add(buildMetrics(null, DEVICE_ID, MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
+        argument3.add(buildMetrics(null, MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
         List<Metrics> argument4 = new ArrayList<>();
-        argument4.add(buildMetrics("", DEVICE_ID, MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
+        argument4.add(buildMetrics("", MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
         List<Metrics> argument5 = new ArrayList<>();
-        argument5.add(buildMetrics(DEVICE_ID, DEVICE_ID, MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
+        argument5.add(buildMetrics(MEASURE_VALUE, MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
         List<Metrics> argument6 = new ArrayList<>();
-        argument6.add(buildMetrics(PATIENT_ID, null, MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
+        argument6.add(buildMetrics(PATIENT_ID, null, MEASURE_VALUE, TIMESTAMP));
         List<Metrics> argument7 = new ArrayList<>();
-        argument7.add(buildMetrics(PATIENT_ID, "", MEASURE_NAME, MEASURE_VALUE, TIMESTAMP));
+        argument7.add(buildMetrics(PATIENT_ID, MEASURE_NAME, null, TIMESTAMP));
         List<Metrics> argument8 = new ArrayList<>();
-        argument8.add(buildMetrics(PATIENT_ID, DEVICE_ID, null, MEASURE_VALUE, TIMESTAMP));
+        argument8.add(buildMetrics(PATIENT_ID, MEASURE_NAME, "", TIMESTAMP));
         List<Metrics> argument9 = new ArrayList<>();
-        argument9.add(buildMetrics(PATIENT_ID, DEVICE_ID, MEASURE_NAME, null, TIMESTAMP));
+        argument9.add(buildMetrics(PATIENT_ID, MEASURE_NAME, INVALID_MEASURE_VALUE, TIMESTAMP));
         List<Metrics> argument10 = new ArrayList<>();
-        argument10.add(buildMetrics(PATIENT_ID, DEVICE_ID, MEASURE_NAME, "", TIMESTAMP));
+        argument10.add(buildMetrics(PATIENT_ID, MEASURE_NAME, MEASURE_VALUE, null));
         List<Metrics> argument11 = new ArrayList<>();
-        argument11.add(buildMetrics(PATIENT_ID, DEVICE_ID, MEASURE_NAME, INVALID_MEASURE_VALUE, TIMESTAMP));
+        argument11.add(buildMetrics(PATIENT_ID, MEASURE_NAME, MEASURE_VALUE, ""));
         List<Metrics> argument12 = new ArrayList<>();
-        argument12.add(buildMetrics(PATIENT_ID, DEVICE_ID, MEASURE_NAME, MEASURE_VALUE, null));
-        List<Metrics> argument13 = new ArrayList<>();
-        argument13.add(buildMetrics(PATIENT_ID, DEVICE_ID, MEASURE_NAME, MEASURE_VALUE, ""));
-        List<Metrics> argument14 = new ArrayList<>();
-        argument14.add(buildMetrics(PATIENT_ID, DEVICE_ID, MEASURE_NAME, MEASURE_VALUE, INVALID_TIMESTAMP));
+        argument12.add(buildMetrics(PATIENT_ID, MEASURE_NAME, MEASURE_VALUE, INVALID_TIMESTAMP));
         return Stream.of(
                 Arguments.of(null, METRICS_LIST_NULL_ERROR_MESSAGE),
                 Arguments.of(argument2, METRICS_NULL_ERROR_MESSAGE),
                 Arguments.of(argument3, PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(argument4, PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(argument5, PATIENT_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(argument6, DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(argument7, DEVICE_ID_BLANK_ERROR_MESSAGE),
-                Arguments.of(argument8, MEASURE_NAME_NULL_ERROR_MESSAGE),
-                Arguments.of(argument9, MEASURE_VALUE_BLANK_ERROR_MESSAGE),
-                Arguments.of(argument10, MEASURE_VALUE_BLANK_ERROR_MESSAGE),
-                Arguments.of(argument11, MEASURE_VALUE_INVALID_ERROR_MESSAGE),
-                Arguments.of(argument12, TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(argument13, TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(argument14, TIMESTAMP_INVALID_ERROR_MESSAGE)
+                Arguments.of(argument6, MEASURE_NAME_NULL_ERROR_MESSAGE),
+                Arguments.of(argument7, MEASURE_VALUE_BLANK_ERROR_MESSAGE),
+                Arguments.of(argument8, MEASURE_VALUE_BLANK_ERROR_MESSAGE),
+                Arguments.of(argument9, MEASURE_VALUE_INVALID_ERROR_MESSAGE),
+                Arguments.of(argument10, TIMESTAMP_BLANK_ERROR_MESSAGE),
+                Arguments.of(argument11, TIMESTAMP_BLANK_ERROR_MESSAGE),
+                Arguments.of(argument12, TIMESTAMP_INVALID_ERROR_MESSAGE)
         );
     }
 
@@ -131,7 +123,7 @@ class MetricsDaoTest {
         List<String> ids3 = new ArrayList<>();
         ids3.add("");
         List<String> ids4 = new ArrayList<>();
-        ids4.add(DEVICE_ID);
+        ids4.add(MEASURE_VALUE);
         List<String> ids5 = new ArrayList<>();
         ids5.add(PATIENT_ID);
         return Stream.of(
@@ -149,6 +141,6 @@ class MetricsDaoTest {
     }
 
     private static Metrics buildMetricsDefault(MeasureName measureName, String measureValue) {
-        return buildMetrics(PATIENT_ID, DEVICE_ID, measureName, measureValue, getCurrentUtcTimeString());
+        return buildMetrics(PATIENT_ID, measureName, measureValue, getCurrentUtcTimeString());
     }
 }

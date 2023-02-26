@@ -42,7 +42,6 @@ public class Metrics {
     }
 
     private String patientId;
-    private String deviceId;
     private MeasureName measureName;
     private String measureValue;
     private String timestamp;

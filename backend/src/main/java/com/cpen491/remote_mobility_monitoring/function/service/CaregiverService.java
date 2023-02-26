@@ -49,8 +49,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtil
 @Slf4j
 @RequiredArgsConstructor
 public class CaregiverService {
-    // TODO: make this configurable
-    private static final long TTL = 300;
+    private static final long TTL = 172_800;
 
     @NonNull
     private CaregiverDao caregiverDao;

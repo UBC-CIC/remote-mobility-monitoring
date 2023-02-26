@@ -25,16 +25,28 @@ public class GetAllPatientsResponseBody {
     public static class PatientSerialization {
         @SerializedName(Const.PATIENT_ID_NAME)
         private String patientId;
+        @SerializedName(Const.EMAIL_NAME)
+        private String email;
         @SerializedName(Const.FIRST_NAME_NAME)
         private String firstName;
         @SerializedName(Const.LAST_NAME_NAME)
         private String lastName;
+        @SerializedName(Const.PHONE_NUMBER_NAME)
+        private String phoneNumber;
+        @SerializedName(Const.IS_PRIMARY_NAME)
+        private Boolean isPrimary;
+        @SerializedName(Const.VERIFIED_NAME)
+        private Boolean verified;
 
         public static PatientSerialization fromPatient(Patient patient) {
             return PatientSerialization.builder()
                     .patientId(patient.getPid())
+                    .email(patient.getEmail())
                     .firstName(patient.getFirstName())
                     .lastName(patient.getLastName())
+                    .phoneNumber(patient.getPhoneNumber())
+                    .isPrimary(patient.getIsPrimary())
+                    .verified(patient.getVerified())
                     .build();
         }
     }

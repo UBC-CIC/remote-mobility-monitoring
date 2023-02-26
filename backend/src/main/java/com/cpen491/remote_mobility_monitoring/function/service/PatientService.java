@@ -100,6 +100,7 @@ public class PatientService {
         Patient patient = patientDao.findById(body.getPatientId());
 
         return GetPatientResponseBody.builder()
+                .email(patient.getEmail())
                 .firstName(patient.getFirstName())
                 .lastName(patient.getLastName())
                 .phoneNumber(patient.getPhoneNumber())
@@ -133,27 +134,22 @@ public class PatientService {
      *
      * @param body The request body
      * @return {@link AddMetricsResponseBody}
-     * @throws RecordDoesNotExistException If Patient record with the given deviceId does not exist
+     * @throws RecordDoesNotExistException If Patient record with the given patientId does not exist
      * @throws InvalidMetricsException If the metrics already exists or if timestamp is out of Timestream range
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if deviceId or metrics are empty or invalid
+     * @throws NullPointerException Above 2 exceptions are thrown if patientId or metrics are empty or invalid
      */
     public AddMetricsResponseBody addMetrics(AddMetricsRequestBody body) {
         log.info("Adding Metrics {}", body);
         Validator.validateAddMetricsRequestBody(body);
 
-        String deviceId = body.getDeviceId();
-        Patient patient = patientDao.findByDeviceId(deviceId);
-        if (patient == null) {
-            throw new RecordDoesNotExistException(Patient.class.getSimpleName(), deviceId);
-        }
-        String patientId = patient.getPid();
+        patientDao.findById(body.getPatientId());
 
         List<Metrics> metricsList = new ArrayList<>();
         for (AddMetricsSerialization serialization : body.getMetrics()) {
             Validator.validateAddMetricsSerialization(serialization);
 
-            metricsList.addAll(AddMetricsSerialization.convertToMetrics(patientId, deviceId, serialization));
+            metricsList.addAll(AddMetricsSerialization.convertToMetrics(body.getPatientId(), serialization));
         }
 
         metricsDao.add(metricsList);
@@ -187,7 +183,7 @@ public class PatientService {
      *
      * @param body The request body
      * @return {@link UpdatePatientResponseBody}
-     * @throws DuplicateRecordException If record with the given deviceId already exists
+     * @throws DuplicateRecordException If record with the given email already exists
      * @throws RecordDoesNotExistException If record with the given id does not exist
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if any of patientId, firstName, lastName,

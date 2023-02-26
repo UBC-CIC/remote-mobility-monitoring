@@ -230,9 +230,9 @@ public class PatientDaoTest extends DaoTestParent {
     public void testFindAllCaregivers_HappyCase() {
         Caregiver caregiver1 = buildCaregiverDefault();
         caregiver1.setEmail(null);
-        createCaregiver(caregiver1);
+        caregiver1.setIsPrimary(false);
         Caregiver caregiver2 = buildCaregiver(CAREGIVER_ID2, CAREGIVER_ID2, null, null, null, null, null);
-        createCaregiver(caregiver2);
+        caregiver2.setIsPrimary(false);
         Patient patient = buildPatientDefault();
         createPatient(patient);
 

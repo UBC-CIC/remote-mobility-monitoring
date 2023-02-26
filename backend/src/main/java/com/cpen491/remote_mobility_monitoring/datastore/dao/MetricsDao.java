@@ -50,7 +50,7 @@ public class MetricsDao {
      * @param metricsList The list of Metrics to add
      * @throws InvalidMetricsException If the metrics already exists or if timestamp is out of Timestream range
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of patientId, deviceId, measureName,
+     * @throws NullPointerException Above 2 exceptions are thrown if any of patientId, measureName,
      *                              measureValue, or timestamp are empty or invalid
      */
     public void add(List<Metrics> metricsList) {
@@ -66,9 +66,7 @@ public class MetricsDao {
 
             List<Dimension> dimensions = new ArrayList<>();
             Dimension patientId = Dimension.builder().name(MetricsTable.PATIENT_ID_NAME).value(metrics.getPatientId()).build();
-            Dimension sensorId = Dimension.builder().name(MetricsTable.DEVICE_ID_NAME).value(metrics.getDeviceId()).build();
             dimensions.add(patientId);
-            dimensions.add(sensorId);
 
             Record record = Record.builder()
                     .dimensions(dimensions)
@@ -144,9 +142,6 @@ public class MetricsDao {
                 case MetricsTable.PATIENT_ID_NAME:
                     metricsBuilder.patientId(datum.scalarValue());
                     break;
-                case MetricsTable.DEVICE_ID_NAME:
-                    metricsBuilder.deviceId(datum.scalarValue());
-                    break;
                 case MetricsTable.MEASURE_NAME_NAME:
                     metricsBuilder.measureName(MeasureName.convertToEnum(datum.scalarValue()));
                     break;
@@ -154,7 +149,9 @@ public class MetricsDao {
                     metricsBuilder.timestamp(datum.scalarValue());
                     break;
                 default:
-                    metricsBuilder.measureValue(datum.scalarValue());
+                    if (columnInfo.name().startsWith(MetricsTable.MEASURE_VALUE_NAME)) {
+                        metricsBuilder.measureValue(datum.scalarValue());
+                    }
                     break;
             }
         }

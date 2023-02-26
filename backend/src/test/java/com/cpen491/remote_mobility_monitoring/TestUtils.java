@@ -61,10 +61,9 @@ public class TestUtils {
                 .build();
     }
 
-    public static Metrics buildMetrics(String patientId, String deviceId, MeasureName measureName, String measureValue, String timestamp) {
+    public static Metrics buildMetrics(String patientId, MeasureName measureName, String measureValue, String timestamp) {
         return Metrics.builder()
                 .patientId(patientId)
-                .deviceId(deviceId)
                 .measureName(measureName)
                 .measureValue(measureValue)
                 .timestamp(timestamp)

@@ -21,6 +21,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Careg
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.OrganizationTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getBoolFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTimeString;
 
 @Slf4j
@@ -328,6 +329,10 @@ public class CaregiverDao {
         return result.stream().map(map -> {
             Patient patient = Patient.convertFromMap(map);
             patient.setPid(patient.getSid());
+            if (getBoolFromMap(map, CaregiverTable.IS_PRIMARY_NAME)) {
+                patient.setIsPrimary(true);
+                patient.setVerified(getFromMap(map, CaregiverTable.AUTH_CODE_NAME) == null);
+            }
             return patient;
         }).collect(Collectors.toList());
     }

@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetPatientResponseBody {
+    @SerializedName(Const.EMAIL_NAME)
+    private String email;
     @SerializedName(Const.FIRST_NAME_NAME)
     private String firstName;
     @SerializedName(Const.LAST_NAME_NAME)
