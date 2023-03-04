@@ -15,9 +15,21 @@
 		228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49C7296CB6510046DFD4 /* Assets.xcassets */; };
 		228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */; };
 		228B49D2296CB79A0046DFD4 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49D1296CB79A0046DFD4 /* RegisterView.swift */; };
+		2295EFF529A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2295EFF429A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift */; };
+		2295EFFC29A610B9008CD151 /* RegisterViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */; };
 		22A771112989097600BB170A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22A771102989097600BB170A /* HealthKit.framework */; };
 		22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EE32102990AC8C0096DCA5 /* Styling.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2295EFF629A60FFD008CD151 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 228B49B8296CB64C0046DFD4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 228B49BF296CB64C0046DFD4;
+			remoteInfo = "remote-mobility-monitoring-iOS";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		2249F5EC2994F85200DC8503 /* ApiCallers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiCallers.swift; sourceTree = "<group>"; };
@@ -27,6 +39,9 @@
 		228B49C7296CB6510046DFD4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		228B49D1296CB79A0046DFD4 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
+		2295EFF229A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "remote-mobility-monitoring-iOS-tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2295EFF429A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remote_mobility_monitoring_iOS_tests.swift; sourceTree = "<group>"; };
+		2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewTests.swift; sourceTree = "<group>"; };
 		22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "remote-mobility-monitoring-iOS.entitlements"; sourceTree = "<group>"; };
 		22A771102989097600BB170A /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		22EE32102990AC8C0096DCA5 /* Styling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Styling.swift; sourceTree = "<group>"; };
@@ -43,6 +58,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2295EFEF29A60FFD008CD151 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -50,6 +72,7 @@
 			isa = PBXGroup;
 			children = (
 				228B49C2296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */,
+				2295EFF329A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */,
 				228B49C1296CB64C0046DFD4 /* Products */,
 				22A7710F2989097600BB170A /* Frameworks */,
 			);
@@ -59,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */,
+				2295EFF229A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -84,6 +108,15 @@
 				228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		2295EFF329A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */ = {
+			isa = PBXGroup;
+			children = (
+				2295EFF429A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift */,
+				2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */,
+			);
+			path = "remote-mobility-monitoring-iOS-tests";
 			sourceTree = "<group>";
 		};
 		22A7710F2989097600BB170A /* Frameworks */ = {
@@ -118,6 +151,24 @@
 			productReference = 228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
+		2295EFF129A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2295EFFA29A60FFD008CD151 /* Build configuration list for PBXNativeTarget "remote-mobility-monitoring-iOS-tests" */;
+			buildPhases = (
+				2295EFEE29A60FFD008CD151 /* Sources */,
+				2295EFEF29A60FFD008CD151 /* Frameworks */,
+				2295EFF029A60FFD008CD151 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2295EFF729A60FFD008CD151 /* PBXTargetDependency */,
+			);
+			name = "remote-mobility-monitoring-iOS-tests";
+			productName = "remote-mobility-monitoring-iOS-tests";
+			productReference = 2295EFF229A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -125,11 +176,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1310;
+				LastSwiftUpdateCheck = 1420;
 				LastUpgradeCheck = 1310;
 				TargetAttributes = {
 					228B49BF296CB64C0046DFD4 = {
 						CreatedOnToolsVersion = 13.1;
+					};
+					2295EFF129A60FFD008CD151 = {
+						CreatedOnToolsVersion = 14.2;
+						TestTargetID = 228B49BF296CB64C0046DFD4;
 					};
 				};
 			};
@@ -151,6 +206,7 @@
 			projectRoot = "";
 			targets = (
 				228B49BF296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */,
+				2295EFF129A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */,
 			);
 		};
 /* End PBXProject section */
@@ -162,6 +218,13 @@
 			files = (
 				228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */,
 				228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2295EFF029A60FFD008CD151 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,7 +243,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2295EFEE29A60FFD008CD151 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2295EFF529A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift in Sources */,
+				2295EFFC29A610B9008CD151 /* RegisterViewTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2295EFF729A60FFD008CD151 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 228B49BF296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */;
+			targetProxy = 2295EFF629A60FFD008CD151 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		228B49CC296CB6510046DFD4 /* Debug */ = {
@@ -375,6 +455,46 @@
 			};
 			name = Release;
 		};
+		2295EFF829A60FFD008CD151 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS-tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/remote-mobility-monitoring-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/remote-mobility-monitoring-iOS";
+			};
+			name = Debug;
+		};
+		2295EFF929A60FFD008CD151 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS-tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/remote-mobility-monitoring-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/remote-mobility-monitoring-iOS";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -392,6 +512,15 @@
 			buildConfigurations = (
 				228B49CF296CB6510046DFD4 /* Debug */,
 				228B49D0296CB6510046DFD4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2295EFFA29A60FFD008CD151 /* Build configuration list for PBXNativeTarget "remote-mobility-monitoring-iOS-tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2295EFF829A60FFD008CD151 /* Debug */,
+				2295EFF929A60FFD008CD151 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
