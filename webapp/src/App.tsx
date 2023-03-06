@@ -5,6 +5,7 @@ import Home from "./Home";
 import SystemAdmin from "./components/SystemAdmin/SystemAdmin";
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import Dashboard from "./components/Dashboard/Dashboard";
+import NewDashboard from "./components/NewDashboard/NewDashboard";
 
 function App() {
     return (
@@ -14,6 +15,7 @@ function App() {
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/sysadmin" element={<SystemAdmin/>}/>
                 <Route path="/Dashboard" element={<Dashboard/>}/>
+                <Route path="/NewDashboard" element={<NewDashboard/>}/>
             </Routes>
         </Router>
     );

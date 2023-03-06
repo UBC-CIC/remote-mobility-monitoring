@@ -14,6 +14,9 @@ function App() {
             <button onClick={() => {
                 nav("/Dashboard");
             }}>Dashboard</button>
+            <button onClick={() => {
+                nav("/NewDashboard");
+            }}>NewDashboard</button>
         </div>
     );
 }
