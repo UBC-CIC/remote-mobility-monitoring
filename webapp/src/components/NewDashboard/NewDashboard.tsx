@@ -6,7 +6,11 @@ import sampleData from "./sampleData";
 
 /*
  if all patients or no patient is selected,  the dashboard should display one graph per mobility metric per patient. In the end there is a summary table that contains all that patient's mobility data.
-*/
+I want to display the data in the following format:
+1 one chart/graph for each mobility metric that describes the change of metric with respect to time.
+2 each patient name will be followed by 5 charts/graphs plus a table that summarize all his data
+3 distinguish different patients sections
+ */
 interface Patient {
     name: string;
     gender: string;
