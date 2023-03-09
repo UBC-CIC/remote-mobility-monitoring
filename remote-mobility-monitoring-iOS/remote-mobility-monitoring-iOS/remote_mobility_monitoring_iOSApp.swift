@@ -30,7 +30,7 @@ struct LoadingView: View {
             if isLoading {
                 Text("Loading...")
             } else {
-                RegisterView()
+                MobilityView()
             }
         }
     }
