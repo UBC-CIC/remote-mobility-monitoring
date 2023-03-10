@@ -77,6 +77,8 @@ public class Validator {
     public static final String WALKING_ASYMMETRY_INVALID_ERROR_MESSAGE = "walking_asymmetry is not a double";
     public static final String DISTANCE_WALKED_BLANK_ERROR_MESSAGE = "distance_walked must be present";
     public static final String DISTANCE_WALKED_INVALID_ERROR_MESSAGE = "distance_walked is not a double";
+    public static final String STEP_COUNT_BLANK_ERROR_MESSAGE = "step_count must be present";
+    public static final String STEP_COUNT_INVALID_ERROR_MESSAGE = "step_count is not a double";
     public static final String TIMESTAMP_BLANK_ERROR_MESSAGE = "timestamp must be present";
     public static final String TIMESTAMP_INVALID_ERROR_MESSAGE = "timestamp is not an in iso8601 format";
     public static final String GROUP_NAME_BLANK_ERROR_MESSAGE = "group name must be present";
@@ -211,6 +213,10 @@ public class Validator {
         validateMetricsValue(distanceWalked, DISTANCE_WALKED_BLANK_ERROR_MESSAGE, DISTANCE_WALKED_INVALID_ERROR_MESSAGE);
     }
 
+    public static void validateStepCount(String stepCount) {
+        validateMetricsValue(stepCount, STEP_COUNT_BLANK_ERROR_MESSAGE, STEP_COUNT_INVALID_ERROR_MESSAGE);
+    }
+
     private static void validateMetricsValue(String metricsValue, String blankErrorMessage, String invalidErrorMessage) {
         Validate.notBlank(metricsValue, blankErrorMessage);
         try {
@@ -294,6 +300,7 @@ public class Validator {
         validateWalkingSpeed(metrics.getWalkingSpeed());
         validateWalkingAsymmetry(metrics.getWalkingAsymmetry());
         validateDistanceWalked(metrics.getDistanceWalked());
+        validateStepCount(metrics.getStepCount());
         validateTimestamp(metrics.getTimestamp());
     }
 
