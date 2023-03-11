@@ -7,6 +7,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
 import com.cpen491.remote_mobility_monitoring.function.service.AdminService;
+import com.cpen491.remote_mobility_monitoring.function.service.AuthService;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
 import com.cpen491.remote_mobility_monitoring.function.service.OrganizationService;
 import com.cpen491.remote_mobility_monitoring.function.service.PatientService;
@@ -17,6 +18,12 @@ import javax.inject.Singleton;
 
 @Module
 public class ServiceModule {
+    @Provides
+    @Singleton
+    public static AuthService authService(OrganizationDao organizationDao, AdminDao adminDao, CaregiverDao caregiverDao, PatientDao patientDao) {
+        return new AuthService(organizationDao, adminDao, caregiverDao, patientDao);
+    }
+
     @Provides
     @Singleton
     public static OrganizationService organizationService(OrganizationDao organizationDao) {

@@ -6,7 +6,10 @@ import com.cpen491.remote_mobility_monitoring.datastore.exception.DuplicateRecor
 import com.cpen491.remote_mobility_monitoring.datastore.exception.InvalidMetricsException;
 import com.cpen491.remote_mobility_monitoring.datastore.exception.RecordDoesNotExistException;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.InsufficientPermissionException;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthorizationException;
+import com.cpen491.remote_mobility_monitoring.dependency.exception.SesException;
 import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +23,7 @@ public class HandlerUtils {
         OK(200),
         BAD_REQUEST(400),
         UNAUTHORIZED(401),
+        FORBIDDEN(403),
         NOT_FOUND(404),
         INTERNAL_SERVER_ERROR(500);
 
@@ -44,16 +48,19 @@ public class HandlerUtils {
         } catch (JsonSyntaxException e) {
             log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, MALFORMED_REQUEST_ERROR_MESSAGE);
-        } catch (InvalidMetricsException | CognitoException e) {
+        } catch (InvalidMetricsException | CognitoException | SesException e) {
             Throwable cause = e.getCause();
             log.error("Got {} due to {} with message {}, responding with bad request", e.getClass(), cause.getClass(), cause.getMessage());
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, cause.getMessage());
         } catch (RecordDoesNotExistException e) {
             log.error("Got {} error {}, responding with not found", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.NOT_FOUND, e.getMessage());
-        } catch (InvalidAuthCodeException e) {
+        } catch (InvalidAuthorizationException | InvalidAuthCodeException e) {
             log.error("Got {} error {}, responding with unauthorized", e.getClass(), e.getMessage());
             return generateApiGatewayResponse(StatusCode.UNAUTHORIZED, e.getMessage());
+        } catch (InsufficientPermissionException e) {
+            log.error("Got {} error {}, responding with forbidden", e.getClass(), e.getMessage());
+            return generateApiGatewayResponse(StatusCode.FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             log.error("Got {} error {} with cause {}, responding with internal server error",
                     e.getClass(), e.getMessage(), e.getCause());

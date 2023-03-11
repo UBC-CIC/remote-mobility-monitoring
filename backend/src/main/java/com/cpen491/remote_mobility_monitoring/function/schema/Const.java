@@ -30,5 +30,8 @@ public final class Const {
     public static final String METRIC_NAME_NAME = "metric_name";
     public static final String METRIC_VALUE_NAME = "metric_value";
     public static final String TIMESTAMP_NAME = "timestamp";
+    public static final String AUTHORIZATION_NAME1 = "Authorization";
+    public static final String AUTHORIZATION_NAME2 = "authorization";
+    public static final String SUB_NAME = "sub";
     public static final String MESSAGE_NAME = "message";
 }

@@ -201,6 +201,14 @@ export class LambdaStack extends cdk.Stack {
     }))
     role.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
+      actions: [
+        'ses:SendEmail',
+        'ses:SendRawEmail',
+      ],
+      resources: ['*'],
+    }))
+    role.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
       actions: ['logs:*'],
       resources: ['*'],
     }));
