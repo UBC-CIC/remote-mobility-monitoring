@@ -63,7 +63,7 @@ class HealthStore: ObservableObject {
         let startOfDay = Calendar.current.startOfDay(for: now)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictEndDate)
         
-        if(name != "Distance Walked" || name != "Step Count") {
+        if(name != "Distance Walked" && name != "Step Count") {
             let query = HKStatisticsQuery(quantityType: quantityType,
                                         quantitySamplePredicate: predicate,
                                         options: .discreteAverage) {
@@ -126,7 +126,7 @@ class HealthStore: ObservableObject {
         
         DispatchQueue.main.async {
             self.metrics = [
-                Metric(name: "Step Count", lastUpdated: "Today", value: self.stepCount ?? stepCountStandard, logo: "stepLength"),
+                Metric(name: "Step Count", lastUpdated: "Today", value: self.stepCount ?? stepCountStandard, logo: "stepCount"),
                 Metric(name: "Step Length", lastUpdated: "Today", value: self.walkingStepLength ?? stepLengthStandard, logo: "stepLength"),
                 Metric(name: "Double Support Time", lastUpdated: "Today", value: self.walkingDoubleSupportPercentage ?? doubleSupportTimeStandard, logo: "doubleSupportTime"),
                 Metric(name: "Walking Speed", lastUpdated: "Today", value: self.walkingSpeed ?? walkingSpeedStandard, logo: "walkingSpeed"),
