@@ -34,7 +34,7 @@ struct LoadingView: View {
 
     var body: some View {
         addHealthKitData()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.isLoading = false
         }
 
@@ -42,7 +42,7 @@ struct LoadingView: View {
             if isLoading {
                 Text("Loading...")
             } else {
-                MobilityView()
+                CognitoAuthView()
             }
         }
     }

@@ -1,0 +1,17 @@
+{
+  "authSelections": "userPoolOnly",
+  "resourceName": "mobimone73e44f8",
+  "serviceType": "imported",
+  "region": "us-west-2",
+  "authProvidersUserPool": [],
+  "requiredAttributes": [],
+  "passwordPolicyMinLength": 8,
+  "passwordPolicyCharacters": [
+    "Requires Lowercase",
+    "Requires Uppercase",
+    "Requires Numbers",
+    "Requires Symbols"
+  ],
+  "mfaConfiguration": "OFF",
+  "mfaTypes": []
+}
