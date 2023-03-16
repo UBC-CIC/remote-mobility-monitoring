@@ -7,12 +7,24 @@
 
 import SwiftUI
 import HealthKit
+import Amplify
+import AWSCognitoAuthPlugin
 
 @main
 struct remote_mobility_monitoring_iOSApp: App {
     var body: some Scene {
         WindowGroup {
             LoadingView()
+        }
+    }
+    
+    init() {
+        do {
+            try Amplify.add(plugin: AWSCognitoAuthPlugin())
+            try Amplify.configure()
+            print("Amplify configured with auth plugin")
+        } catch {
+            print("Failed to initialize Amplify with \(error)")
         }
     }
 }
