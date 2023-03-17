@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.cpen491.remote_mobility_monitoring.dependency.utility.JwtUtils;
 import com.cpen491.remote_mobility_monitoring.function.handler.HandlerParent;
 import com.cpen491.remote_mobility_monitoring.function.schema.Const;
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetricsRequestBody;
@@ -21,7 +22,11 @@ public class QueryMetricsHandler extends HandlerParent implements RequestHandler
         log.info("Received Query Metrics request with multi-value query parameters: {}, and query parameters: {}",
                 requestEvent.getMultiValueQueryStringParameters(), requestEvent.getQueryStringParameters());
         return processApiGatewayRequest((request) -> {
+            String rawId = JwtUtils.getIdFromHeader(request.getHeaders(), gson);
             List<String> patientIds = request.getMultiValueQueryStringParameters().get(Const.PATIENTS_NAME);
+            for (String patientId : patientIds) {
+                authService.caregiverHasPatient(rawId, patientId);
+            }
             String start = request.getQueryStringParameters().get(Const.START_NAME);
             String end = request.getQueryStringParameters().get(Const.END_NAME);
             QueryMetricsRequestBody requestBody = QueryMetricsRequestBody.builder()

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
+// TODO: Unit test
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {
@@ -99,9 +100,7 @@ public class AuthService {
      * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
      */
     public void caregiverIsPrimaryCaregiverOfPatient(String caregiverId, String patientId) {
-        if (!caregiverId.startsWith(CaregiverTable.ID_PREFIX)) {
-            caregiverId = CaregiverTable.ID_PREFIX + caregiverId;
-        }
+        caregiverId = CaregiverTable.ID_PREFIX + caregiverId;
 
         if (!caregiverDao.isPrimaryCaregiverOfPatient(patientId, caregiverId)) {
             log.error("Caregiver [{}] is not the primary caregiver of Patient [{}]", caregiverId, patientId);
@@ -119,9 +118,7 @@ public class AuthService {
      * @throws NullPointerException Above 2 exceptions are thrown if patientId or caregiverId is empty or invalid
      */
     public void caregiverHasPatient(String caregiverId, String patientId) {
-        if (!caregiverId.startsWith(CaregiverTable.ID_PREFIX)) {
-            caregiverId = CaregiverTable.ID_PREFIX + caregiverId;
-        }
+        caregiverId = CaregiverTable.ID_PREFIX + caregiverId;
 
         if (!caregiverDao.hasPatient(patientId, caregiverId)) {
             log.error("Caregiver [{}] does not have Patient [{}]", caregiverId, patientId);
