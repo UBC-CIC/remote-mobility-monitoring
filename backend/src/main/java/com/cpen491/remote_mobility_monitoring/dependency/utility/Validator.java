@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
@@ -63,6 +64,9 @@ public class Validator {
     public static final String PATIENT_ID_INVALID_ERROR_MESSAGE = "patient_id invalid";
     public static final String ADMIN_ID_BLANK_ERROR_MESSAGE = "admin_id must be present";
     public static final String ADMIN_ID_INVALID_ERROR_MESSAGE = "admin_id invalid";
+    public static final String USER_ID_BLANK_ERROR_MESSAGE = "user_id must be present";
+    public static final Set<String> VALID_USER_PREFIX = Set.of(AdminTable.ID_PREFIX, CaregiverTable.ID_PREFIX, PatientTable.ID_PREFIX);
+    public static final String USER_ID_INVALID_ERROR_MESSAGE = "user_id invalid";
     public static final String AUTH_CODE_BLANK_ERROR_MESSAGE = "auth_code must be present";
     public static final String MEASURE_NAME_NULL_ERROR_MESSAGE = "measure_name must not be null";
     public static final String MEASURE_VALUE_BLANK_ERROR_MESSAGE = "measure_value must be present";
@@ -178,6 +182,18 @@ public class Validator {
         Validate.notBlank(adminId, ADMIN_ID_BLANK_ERROR_MESSAGE);
         if (!adminId.startsWith(AdminTable.ID_PREFIX)) {
             throw new IllegalArgumentException(ADMIN_ID_INVALID_ERROR_MESSAGE);
+        }
+    }
+
+    public static void validateUserId(String userId) {
+        Validate.notBlank(userId, USER_ID_BLANK_ERROR_MESSAGE);
+        try {
+            String prefix = userId.substring(0, 4);
+            if (!VALID_USER_PREFIX.contains(prefix)) {
+                throw new IllegalArgumentException(USER_ID_INVALID_ERROR_MESSAGE);
+            }
+        } catch (StringIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException(USER_ID_INVALID_ERROR_MESSAGE);
         }
     }
 

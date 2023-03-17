@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.cpen491.remote_mobility_monitoring.dependency.utility.JwtUtils;
 import com.cpen491.remote_mobility_monitoring.function.handler.HandlerParent;
 import com.cpen491.remote_mobility_monitoring.function.schema.Const;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.RemovePatientRequestBody;
@@ -18,8 +19,12 @@ public class RemovePatientHandler extends HandlerParent implements RequestHandle
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         log.info("Received Remove Patient request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
+            String rawId = JwtUtils.getIdFromHeader(request.getHeaders(), gson);
             String caregiverId = request.getPathParameters().get(Const.CAREGIVER_ID_NAME);
             String patientId = request.getPathParameters().get(Const.PATIENT_ID_NAME);
+            if (!authService.selfCheck(rawId, patientId)) {
+                authService.selfCheckThrow(rawId, caregiverId);
+            }
             RemovePatientRequestBody requestBody = RemovePatientRequestBody.builder()
                     .caregiverId(caregiverId)
                     .patientId(patientId)

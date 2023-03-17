@@ -11,7 +11,7 @@ import java.util.Map;
 public class JwtUtils {
     private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
-    public static String getAuthorizationHeader(Map<String, String> headers) {
+    public static String getAuthorizationJwt(Map<String, String> headers) {
         String authorization = headers.get(Const.AUTHORIZATION_NAME1);
         if (authorization == null) {
             authorization = headers.get(Const.AUTHORIZATION_NAME2);
@@ -19,13 +19,13 @@ public class JwtUtils {
                 throw new InvalidAuthorizationException();
             }
         }
-        return authorization;
-    }
 
-    public static String decodeAndGetId(String jwt, String idPrefix, Gson gson) {
-        String payload = decodePayload(jwt);
-        JwtPayload jwtPayload = gson.fromJson(payload, JwtPayload.class);
-        return idPrefix + jwtPayload.getSub();
+        // Skip "Bearer" part of header
+        String[] authorizationSplit = authorization.split(" ");
+        if (authorizationSplit.length != 2) {
+            throw new InvalidAuthorizationException();
+        }
+        return authorizationSplit[1];
     }
 
     public static String decodePayload(String jwt) {
@@ -34,5 +34,15 @@ public class JwtUtils {
             throw new InvalidAuthorizationException();
         }
         return new String(decoder.decode(parts[1]));
+    }
+
+    public static String getIdFromHeader(Map<String, String> headers, Gson gson) {
+        String jwt = getAuthorizationJwt(headers);
+        String payload = decodePayload(jwt);
+        String id = gson.fromJson(payload, JwtPayload.class).getSub();
+        if (id == null || id.isEmpty()) {
+            throw new InvalidAuthorizationException();
+        }
+        return id;
     }
 }

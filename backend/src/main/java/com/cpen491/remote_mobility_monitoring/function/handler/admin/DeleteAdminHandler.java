@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.cpen491.remote_mobility_monitoring.dependency.utility.JwtUtils;
 import com.cpen491.remote_mobility_monitoring.function.handler.HandlerParent;
 import com.cpen491.remote_mobility_monitoring.function.schema.Const;
 import com.cpen491.remote_mobility_monitoring.function.schema.admin.DeleteAdminRequestBody;
@@ -18,7 +19,9 @@ public class DeleteAdminHandler extends HandlerParent implements RequestHandler<
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         log.info("Received Delete Admin request with path parameters: {}", requestEvent.getPathParameters());
         return processApiGatewayRequest((request) -> {
+            String rawId = JwtUtils.getIdFromHeader(request.getHeaders(), gson);
             String adminId = request.getPathParameters().get(Const.ADMIN_ID_NAME);
+            authService.selfCheckThrow(rawId, adminId);
             DeleteAdminRequestBody requestBody = DeleteAdminRequestBody.builder()
                     .adminId(adminId)
                     .build();
