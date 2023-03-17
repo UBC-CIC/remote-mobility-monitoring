@@ -9,12 +9,22 @@ import SwiftUI
 import HealthKit
 import Amplify
 import AWSCognitoAuthPlugin
+import AWSPluginsCore
 
 @main
 struct remote_mobility_monitoring_iOSApp: App {
+    @State var isAuthenticated = false
+    
     var body: some Scene {
         WindowGroup {
-            LoadingView()
+            if isAuthenticated {
+                VerificationView()
+            } else {
+                LoadingView()
+                    .task {
+                        await authenticateUser()
+                    }
+            }
         }
     }
     
@@ -25,6 +35,17 @@ struct remote_mobility_monitoring_iOSApp: App {
             print("Amplify configured with auth plugin")
         } catch {
             print("Failed to initialize Amplify with \(error)")
+        }
+    }
+    
+    func authenticateUser() async {
+        do {
+            let session = try await Amplify.Auth.fetchAuthSession(options: .forceRefresh())
+            isAuthenticated = session.isSignedIn
+        } catch let error as AuthError {
+            print("Fetch auth session failed with error - \(error)")
+        } catch {
+            print("Unexpected error: \(error)")
         }
     }
 }
@@ -42,7 +63,7 @@ struct LoadingView: View {
             if isLoading {
                 Text("Loading...")
             } else {
-                CognitoAuthView()
+                CognitoView()
             }
         }
     }

@@ -1,6 +1,6 @@
 {
   "auth": {
-    "mobimone73e44f8": {
+    "mobimonbf5d772b": {
       "customAuth": false,
       "dependsOn": [],
       "providerPlugin": "awscloudformation",
@@ -9,35 +9,35 @@
     }
   },
   "parameters": {
-    "AMPLIFY_auth_mobimone73e44f8_nativeClientId": {
+    "AMPLIFY_auth_mobimonbf5d772b_nativeClientId": {
       "usedBy": [
         {
           "category": "auth",
-          "resourceName": "mobimone73e44f8"
+          "resourceName": "mobimonbf5d772b"
         }
       ]
     },
-    "AMPLIFY_auth_mobimone73e44f8_userPoolId": {
+    "AMPLIFY_auth_mobimonbf5d772b_userPoolId": {
       "usedBy": [
         {
           "category": "auth",
-          "resourceName": "mobimone73e44f8"
+          "resourceName": "mobimonbf5d772b"
         }
       ]
     },
-    "AMPLIFY_auth_mobimone73e44f8_userPoolName": {
+    "AMPLIFY_auth_mobimonbf5d772b_userPoolName": {
       "usedBy": [
         {
           "category": "auth",
-          "resourceName": "mobimone73e44f8"
+          "resourceName": "mobimonbf5d772b"
         }
       ]
     },
-    "AMPLIFY_auth_mobimone73e44f8_webClientId": {
+    "AMPLIFY_auth_mobimonbf5d772b_webClientId": {
       "usedBy": [
         {
           "category": "auth",
-          "resourceName": "mobimone73e44f8"
+          "resourceName": "mobimonbf5d772b"
         }
       ]
     }
