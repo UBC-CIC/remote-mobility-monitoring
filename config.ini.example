@@ -1,0 +1,5 @@
+; Rename this file to config.ini and fill in the values
+
+[load-testing]
+organization_id=
+admin_token=

@@ -1,0 +1,2 @@
+locust==2.15.1
+ConfigParser==5.3.0
