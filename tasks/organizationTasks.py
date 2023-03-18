@@ -1,9 +1,10 @@
-from locust import TaskSet, task
+from locust import TaskSet, task, tag
 import configparser
 import misc.config as config
 
 
 # Organization tests
+@tag('organization')
 class OrganizationTasks(TaskSet):
     organization_id = None
     admin_token = config.get('admin_token')
