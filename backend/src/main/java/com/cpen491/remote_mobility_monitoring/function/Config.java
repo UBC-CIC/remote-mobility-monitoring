@@ -3,6 +3,7 @@ package com.cpen491.remote_mobility_monitoring.function;
 import com.cpen491.remote_mobility_monitoring.function.module.AuthModule;
 import com.cpen491.remote_mobility_monitoring.function.module.AwsModule;
 import com.cpen491.remote_mobility_monitoring.function.module.DatastoreModule;
+import com.cpen491.remote_mobility_monitoring.function.module.EmailModule;
 import com.cpen491.remote_mobility_monitoring.function.module.EnvironmentModule;
 import com.cpen491.remote_mobility_monitoring.function.module.ServiceModule;
 import com.cpen491.remote_mobility_monitoring.function.module.UtilityModule;
@@ -22,6 +23,7 @@ import javax.inject.Singleton;
         AwsModule.class,
         DatastoreModule.class,
         AuthModule.class,
+        EmailModule.class,
         ServiceModule.class,
         UtilityModule.class,
 })

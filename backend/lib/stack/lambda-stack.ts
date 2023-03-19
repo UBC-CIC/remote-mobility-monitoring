@@ -12,6 +12,7 @@ interface LambdaStackProps extends cdk.StackProps {
   readonly timestreamDatabase: timestream.CfnDatabase;
   readonly timestreamTable: timestream.CfnTable;
   readonly userPool: cognito.UserPool;
+  readonly sesSender: string;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -21,6 +22,7 @@ export class LambdaStack extends cdk.Stack {
   private static timeout = cdk.Duration.seconds(300);
   private static memorySize = 1024;
   private readonly userPool: cognito.UserPool;
+  private readonly sesSender: string;
 
   public readonly lambdaRole: iam.Role
   public readonly dynamoDbTableName: string;
@@ -80,8 +82,7 @@ export class LambdaStack extends cdk.Stack {
     this.timestreamDatabaseName = props.timestreamDatabase.databaseName!;
     this.timestreamTableName = props.timestreamTable.tableName!;
     this.userPool = props.userPool;
-
-    // TODO: DLQs? Layers?
+    this.sesSender = props.sesSender;
 
     const defaultFunctionName = `DefaultFunction-${props.stage}`;
     this.defaultFunction = new lambda.Function(this, defaultFunctionName, {
@@ -310,6 +311,7 @@ export class LambdaStack extends cdk.Stack {
         'TIMESTREAM_DATABASE_NAME': this.timestreamDatabaseName,
         'TIMESTREAM_TABLE_NAME': this.timestreamTableName,
         'COGNITO_USERPOOL_ID': this.userPool.userPoolId,
+        'SES_SENDER': this.sesSender,
       },
     });
     LambdaStack.enableSnapStart(lambdaFunction);

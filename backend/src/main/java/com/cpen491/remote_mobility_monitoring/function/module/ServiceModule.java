@@ -6,6 +6,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.dao.MetricsDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.OrganizationDao;
 import com.cpen491.remote_mobility_monitoring.datastore.dao.PatientDao;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
+import com.cpen491.remote_mobility_monitoring.dependency.email.SesWrapper;
 import com.cpen491.remote_mobility_monitoring.function.service.AdminService;
 import com.cpen491.remote_mobility_monitoring.function.service.AuthService;
 import com.cpen491.remote_mobility_monitoring.function.service.CaregiverService;
@@ -38,8 +39,9 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    public static CaregiverService caregiverService(CaregiverDao caregiverDao, OrganizationDao organizationDao, CognitoWrapper cognitoWrapper) {
-        return new CaregiverService(caregiverDao, organizationDao, cognitoWrapper);
+    public static CaregiverService caregiverService(CaregiverDao caregiverDao, OrganizationDao organizationDao,
+                                                    CognitoWrapper cognitoWrapper, SesWrapper sesWrapper) {
+        return new CaregiverService(caregiverDao, organizationDao, cognitoWrapper, sesWrapper);
     }
 
     @Provides

@@ -4,10 +4,12 @@ import { LambdaStack } from './stack/lambda-stack';
 import { CognitoStack } from './stack/cognito-stack';
 import { TimestreamStack } from './stack/timestream-stack';
 import { ApiGatewayStack, ApiGatewayStackProps } from './stack/apigateway-stack';
+import { SesStack } from "./stack/ses-stack";
 
 const stages = ['dev', 'prod'];
 
 const app = new App();
+const sesStack = new SesStack(app, 'RemoteMobilityMonitoringSesStack');
 stages.forEach((stage) => {
   const cognitoStack = new CognitoStack(app, `RemoteMobilityMonitoringCognitoStack-${stage}`, {
     stage: stage,
@@ -23,7 +25,8 @@ stages.forEach((stage) => {
     ddbTable: dynamoDbStack.remoteMobilityMonitoringTable,
     timestreamDatabase: timestreamStack.database,
     timestreamTable: timestreamStack.metricsTable,
-    userPool: cognitoStack.userPool
+    userPool: cognitoStack.userPool,
+    sesSender: sesStack.senderEmailIdentity.emailIdentityName,
   });
   const apigatewayStackProps: ApiGatewayStackProps = {
     stage: stage,

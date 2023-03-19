@@ -9,6 +9,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.email.SesWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
@@ -37,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
@@ -57,6 +58,8 @@ public class CaregiverService {
     private OrganizationDao organizationDao;
     @NonNull
     private CognitoWrapper cognitoWrapper;
+    @NonNull
+    private SesWrapper sesWrapper;
 
     /**
      * Creates a Caregiver in database and Cognito and adds it to an Organization.
@@ -111,10 +114,10 @@ public class CaregiverService {
         log.info("Adding Patient to primary Caregiver {}", body);
         Validator.validateAddPatientPrimaryRequestBody(body);
 
-        String authCode = UUID.randomUUID().toString().replace("-", "");
+        String authCode = generateAuthCode();
         caregiverDao.addPatientPrimary(body.getPatientEmail(), body.getCaregiverId(), authCode);
 
-        // TODO: send email
+        sesWrapper.caregiverAddPatientEmail(body.getPatientEmail(), body.getCaregiverId(), authCode);
 
         return AddPatientPrimaryResponseBody.builder()
                 .authCode(authCode)
@@ -298,6 +301,17 @@ public class CaregiverService {
             // Expected
         }
         log.info("Done priming CaregiverService");
+    }
+
+    /**
+     * Generates a random 6 digit numeric code between 100,000 (inclusive) and 1,000,000 (exclusive)
+     *
+     * @return {@link String}
+     */
+    private static String generateAuthCode() {
+        Random rand = new Random();
+        int code = rand.nextInt(900000) + 100000;
+        return String.valueOf(code);
     }
 
     private static void verifyAuthCode(String expected, String timestamp, String actual) {

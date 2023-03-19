@@ -73,7 +73,7 @@ public class CaregiverDaoTest extends DaoTestParent {
     private static final String DEVICE_ID = "device-id-1";
     private static final String PATIENT_EMAIL1 = "patient1@email.com";
     private static final String PATIENT_EMAIL2 = "patient2@email.com";
-    private static final String AUTH_CODE = "auth_code-123";
+    private static final String AUTH_CODE = "123456";
 
     CaregiverDao cut;
 

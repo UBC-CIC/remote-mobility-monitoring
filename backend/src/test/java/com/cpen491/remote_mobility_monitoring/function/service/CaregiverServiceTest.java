@@ -8,6 +8,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CognitoUser;
+import com.cpen491.remote_mobility_monitoring.dependency.email.SesWrapper;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.CognitoException;
 import com.cpen491.remote_mobility_monitoring.dependency.exception.InvalidAuthCodeException;
 import com.cpen491.remote_mobility_monitoring.function.schema.caregiver.AcceptPatientPrimaryRequestBody;
@@ -101,7 +102,7 @@ public class CaregiverServiceTest {
     private static final String CREATED_AT = "2023-01-01";
     private static final String PATIENT_ID1 = "pat-1";
     private static final String PATIENT_ID2 = "pat-2";
-    private static final String AUTH_CODE = "auth_code-123";
+    private static final String AUTH_CODE = "123456";
     private static final String AUTH_CODE_TIMESTAMP = getCurrentUtcTimeString();
     private static final String PATIENT_EMAIL = "patient@email.com";
 
@@ -112,12 +113,14 @@ public class CaregiverServiceTest {
     OrganizationDao organizationDao;
     @Mock
     CognitoWrapper cognitoWrapper;
+    @Mock
+    SesWrapper sesWrapper;
     ArgumentCaptor<Caregiver> caregiverCaptor;
 
     @BeforeEach
     public void setup() {
         caregiverCaptor = ArgumentCaptor.forClass(Caregiver.class);
-        cut = new CaregiverService(caregiverDao, organizationDao, cognitoWrapper);
+        cut = new CaregiverService(caregiverDao, organizationDao, cognitoWrapper, sesWrapper);
     }
 
     @Test

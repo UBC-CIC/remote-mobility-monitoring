@@ -16,8 +16,8 @@ import software.amazon.awssdk.services.sesv2.model.SesV2Exception;
 @Slf4j
 @RequiredArgsConstructor
 public class SesWrapper {
-    private static final String sender = "";
-
+    @NonNull
+    private String sender;
     @NonNull
     private SesV2Client sesClient;
 
@@ -29,9 +29,9 @@ public class SesWrapper {
                 .toAddresses(patientEmail)
                 .build();
 
-        String bodyHtml = "<html><head></head><body><p>Click </p><a href=\"com.myApp://home\">here</a></body></html>";
+        String bodyText = String.format("mobimon://verify?authCode=%s&caregiverId=%s", authCode, caregiverId);
         Content content = Content.builder()
-                .data(bodyHtml)
+                .data(bodyText)
                 .build();
 
         Content subject = Content.builder()
@@ -39,7 +39,7 @@ public class SesWrapper {
                 .build();
 
         Body body = Body.builder()
-                .html(content)
+                .text(content)
                 .build();
 
         Message message = Message.builder()

@@ -9,6 +9,7 @@ import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.sesv2.SesV2Client;
 import software.amazon.awssdk.services.timestreamquery.TimestreamQueryClient;
 import software.amazon.awssdk.services.timestreamwrite.TimestreamWriteClient;
 
@@ -29,6 +30,17 @@ public class AwsModule {
     @Singleton
     public static CognitoIdentityProviderClient cognitoIdentityProviderClient(SdkHttpClient httpClient) {
         return CognitoIdentityProviderClient.builder()
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .httpClient(httpClient)
+                .region(REGION)
+                .overrideConfiguration(ClientOverrideConfiguration.builder().build())
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public static SesV2Client sesV2Client(SdkHttpClient httpClient) {
+        return SesV2Client.builder()
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .httpClient(httpClient)
                 .region(REGION)

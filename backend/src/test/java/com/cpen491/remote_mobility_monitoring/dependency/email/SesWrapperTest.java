@@ -16,15 +16,6 @@ public class SesWrapperTest {
 
     @BeforeEach
     public void setup() {
-        cut = new SesWrapper(sesV2Client);
-    }
-
-//    @Test
-    public void testTest() {
-        SesV2Client client = SesV2Client.builder()
-                .region(Region.US_WEST_2)
-                .build();
-        SesWrapper wrapper = new SesWrapper(client);
-        wrapper.caregiverAddPatientEmail("danielnsyu@gmail.com", "car-123", "authCode");
+        cut = new SesWrapper("user@email.com", sesV2Client);
     }
 }
