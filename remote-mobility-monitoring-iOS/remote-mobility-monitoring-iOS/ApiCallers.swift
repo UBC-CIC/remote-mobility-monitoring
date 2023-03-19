@@ -9,20 +9,21 @@ import Foundation
 
 let baseUrl = "https://1au11fgjeb.execute-api.us-west-2.amazonaws.com/prod" // temporary
 
-func verifyPatient(patientId: String, caregiverId: String, authCode: String, deviceId: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
-    let endpoint = baseUrl + "\(patientId)/verify"
+func verifyPatient(patientId: String, caregiverId: String, authCode: String, idToken: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+    let endpoint = baseUrl + "/caregivers/\(caregiverId)" + "/patients/\(patientId)/accept"
     let body: [String: Any] = [
-        "caregiver_id": caregiverId,
-        "auth_code": authCode,
-        "device_id": deviceId
+        "auth_code": authCode
     ]
+    
     guard let url = URL(string: endpoint) else {
         completion(.failure(NSError(domain: "InvalidEndpoint", code: 0, userInfo: nil)))
         return
     }
+    
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
     request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
     let task = URLSession.shared.dataTask(with: request) { data, response, error in

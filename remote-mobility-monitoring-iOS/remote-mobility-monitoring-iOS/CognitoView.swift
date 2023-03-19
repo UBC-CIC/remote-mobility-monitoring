@@ -9,7 +9,6 @@ import SwiftUI
 import Amplify
 import AWSCognitoAuthPlugin
 import AWSPluginsCore
-import JWTDecode
 
 struct CognitoView: View {
     @State var email: String = ""
@@ -38,51 +37,59 @@ struct CognitoView: View {
             
             ShowPasswordsToggle(showPasswords: $showPasswords)
             
-            Button(action: {
-                if isSignIn {
-                    Task {
-                        try await signIn(username: email, password: password)
-                    }
-                } else {
-                    if (password == passwordAgain) { // check if passwords match 
-                        Task {
-                            try await createPatient(email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber) { result in
-                                switch result {
-                                case .success(let responseObject): // patient id is in reponseObject
-                                    print("Successfully created patient: \(responseObject)")
-                                    successMessage = "Succesfully created account!"
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                        successMessage = nil
+            GeometryReader { geometry in
+                HStack {
+                    Spacer()
+                    
+                    Button(action: {
+                        if isSignIn {
+                            Task {
+                                try await signIn(username: email, password: password)
+                            }
+                        } else {
+                            if (password == passwordAgain) { // check if passwords match
+                                Task {
+                                    try await createPatient(email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber) { result in
+                                        switch result {
+                                        case .success(let responseObject): // patient id is in reponseObject
+                                            print("Successfully created patient: \(responseObject)")
+                                            successMessage = "Succesfully created account!"
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                                successMessage = nil
+                                            }
+                                        case .failure(let error):
+                                            print("Failed to create patient: \(error.localizedDescription)")
+                                            errorMessage = "Failed to create an account! \(error.localizedDescription)"
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                                errorMessage = nil
+                                            }
+                                        }
                                     }
-                                case .failure(let error):
-                                    print("Failed to create patient: \(error.localizedDescription)")
-                                    errorMessage = "Failed to create an account! \(error.localizedDescription)"
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                        errorMessage = nil
-                                    }
+                                }
+                            } else {
+                                errorMessage = "Passwords do not match."
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    errorMessage = nil
                                 }
                             }
                         }
-                    } else {
-                        errorMessage = "Passwords do not match."
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                            errorMessage = nil
+                    }) {
+                        if isSignIn {
+                            Text("Sign In")
+                        } else {
+                            Text("Sign Up")
                         }
                     }
-                }
-            }) {
-                if isSignIn {
-                    Text("Sign In")
-                } else {
-                    Text("Sign Up")
+                    .font(ButtonStyling.font)
+                    .foregroundColor(ButtonStyling.foreGroundColor)
+                    .padding()
+                    .frame(minWidth: 0,maxWidth: (geometry.size.width * 2/3))
+                    .background(ButtonStyling.color)
+                    .cornerRadius(ButtonStyling.cornerRadius)
+                    
+                    Spacer()
                 }
             }
-            .frame(minWidth: 0, maxWidth: .infinity)
-            .padding()
-            .foregroundColor(.white)
-            .background(Color.blue)
-            .cornerRadius(5.0)
-            .padding(.bottom, 20)
             
             Button(action: {
                 isSignIn.toggle()
@@ -102,43 +109,14 @@ struct CognitoView: View {
                     .padding(.bottom, 20)
             }
             
-            // Display error message if it exists
+            // Display success message if it exists
             if let successMessage = successMessage {
                 Text(successMessage)
                     .foregroundColor(.green)
                     .padding(.bottom, 20)
             }
-            
-            Button(action: {
-                Task {
-                    try await getAuthIdToken()
-                }
-            }) {
-                Text("Get Auth Token")
-            }
         }
         .padding()
-    }
-    
-    func getAuthIdToken() async {
-        do {
-            let session = try await Amplify.Auth.fetchAuthSession(options: .forceRefresh())
-            // Get cognito user pool token
-            if let cognitoTokenProvider = session as? AuthCognitoTokensProvider {
-                let tokens = try cognitoTokenProvider.getCognitoTokens().get()
-                // Decode the JWT token
-                let jwt = try decode(jwt: tokens.idToken)
-                // Extract the user ID from the JWT payload
-                if let user_id = jwt["sub"].string {
-                    print("user id: \(user_id)")
-                }
-                print("full id token: \(tokens.idToken)")
-            }
-        } catch let error as AuthError {
-            print("Fetch auth session failed with error - \(error)")
-        } catch {
-            print("Unexpected error: \(error)")
-        }
     }
     
     func signIn(username: String, password: String) async {
