@@ -26,7 +26,9 @@ struct CognitoView: View {
     var body: some View {
         VStack {
             WelcomeText()
-                        
+            
+            Spacer()
+            
             EmailField(email: $email)
             
             PasswordFields(isSignIn: $isSignIn, password: $password, passwordAgain: $passwordAgain, showPasswords: $showPasswords)
@@ -40,7 +42,6 @@ struct CognitoView: View {
             GeometryReader { geometry in
                 HStack {
                     Spacer()
-                    
                     Button(action: {
                         if isSignIn {
                             Task {
@@ -53,23 +54,23 @@ struct CognitoView: View {
                                         switch result {
                                         case .success(let responseObject): // patient id is in reponseObject
                                             print("Successfully created patient: \(responseObject)")
-                                            successMessage = "Succesfully created account!"
+                                            self.successMessage = "Succesfully created account!"
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                                successMessage = nil
+                                                self.successMessage = nil
                                             }
                                         case .failure(let error):
                                             print("Failed to create patient: \(error.localizedDescription)")
-                                            errorMessage = "Failed to create an account! \(error.localizedDescription)"
+                                            self.errorMessage = "Failed to create an account! \(error.localizedDescription)"
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                                errorMessage = nil
+                                                self.errorMessage = nil
                                             }
                                         }
                                     }
                                 }
                             } else {
-                                errorMessage = "Passwords do not match."
+                                self.errorMessage = "Passwords do not match."
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                    errorMessage = nil
+                                    self.errorMessage = nil
                                 }
                             }
                         }
@@ -90,6 +91,9 @@ struct CognitoView: View {
                     Spacer()
                 }
             }
+            .frame(maxHeight: 100)
+                                    
+            Spacer()
             
             Button(action: {
                 isSignIn.toggle()
@@ -103,17 +107,20 @@ struct CognitoView: View {
             .padding(.bottom, 20)
             
             // Display error message if it exists
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding(.bottom, 20)
-            }
-            
-            // Display success message if it exists
-            if let successMessage = successMessage {
-                Text(successMessage)
-                    .foregroundColor(.green)
-                    .padding(.bottom, 20)
+            if self.errorMessage != nil || self.successMessage != nil {
+                // Display error message if it exists
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding(.bottom, 20)
+                }
+                
+                // Display success message if it exists
+                if let successMessage = successMessage {
+                    Text(successMessage)
+                        .foregroundColor(.green)
+                        .padding(.bottom, 20)
+                }
             }
         }
         .padding()
