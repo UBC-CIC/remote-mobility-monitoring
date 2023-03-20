@@ -15,14 +15,14 @@ import JWTDecode
 @main
 struct remote_mobility_monitoring_iOSApp: App {
     @UIApplicationDelegateAdaptor(CustomAppDelegate.self) var appDelegate
-    @State var isAuthenticated = false
+    @State var isAuthenticated: Bool = false
     @State var patientId: String = ""
     @State var idToken: String = ""
     
     var body: some Scene {
         WindowGroup {
             if isAuthenticated {
-                VerificationView(patientId: self.patientId, idToken: self.idToken)
+                VerificationView(isAuthenticated: $isAuthenticated, patientId: self.patientId, idToken: self.idToken)
                     .environmentObject(appDelegate.deepLinkURL)
                     .onOpenURL { url in
                         appDelegate.deepLinkURL.url = url
@@ -57,7 +57,7 @@ struct remote_mobility_monitoring_iOSApp: App {
                 let jwt = try decode(jwt: tokens.idToken)
                 // Extract the user ID from the JWT payload
                 if let patientId = jwt["sub"].string {
-                    self.patientId = patientId
+                    self.patientId = "pat-" + patientId
                 }
                 
                 self.idToken = tokens.idToken

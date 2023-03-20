@@ -20,6 +20,8 @@ struct VerificationView: View {
     @State private var isShowingScanningResult: Bool = false
     @State private var isShowingDeepLinkingResult: Bool = false
     @State private var verified: Bool = false
+    @State private var selection = 0
+    @Binding var isAuthenticated: Bool
     @EnvironmentObject var deepLinkURL: DeepLinkURL
     @State var patientId: String
     @State var idToken: String
@@ -100,78 +102,96 @@ struct VerificationView: View {
     }
     
     var body: some View {
-        if !verified {
-            VStack {
-                Text("Verification")
-                    .font(.largeTitle)
+        NavigationView {
+            if !verified {
+                VStack {
+                    HStack {
+                        Text("Verification")
+                            .font(.largeTitle)
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: AccountView(isAuthenticated: $isAuthenticated)) {
+                            Image(systemName: "person.circle")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    
+                    Spacer()
+                    
                     Text("Verify your account remotely:")
                         .font(.system(size: 20, weight: .bold))
                         .padding(.bottom, 18)
                         .padding(.top, 50)
-                Text("Contact your caregiver for a verification email!")
+                    
+                    Text("Contact your caregiver for a verification email!")
                         .font(.system(size: 20))
                         .multilineTextAlignment(.center)
-                
-                GeometryReader { geometry in
-                    HStack {
-                        Spacer()
-                        VStack {
+                    
+                    GeometryReader { geometry in
+                        HStack {
                             Spacer()
-                            Text("Verify your account in person:")
-                                .font(.system(size: 20, weight: .bold))
-                                .padding(.bottom, 20)
-                                .padding(.top, 50)
-                            Button(action: {
-                                self.isScanning = true
-                            }) {
-                                Text("Scan QR Code")
-                                    .font(ButtonStyling.font)
-                                    .foregroundColor(ButtonStyling.foreGroundColor)
-                                    .padding()
-                                    .frame(minWidth: 0,maxWidth: (geometry.size.width * 2/3))
-                                    .background(ButtonStyling.color)
-                                    .cornerRadius(ButtonStyling.cornerRadius)
+                            VStack {
+                                Spacer()
+                                Text("Verify your account in person:")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .padding(.bottom, 20)
+                                    .padding(.top, 50)
+                                Button(action: {
+                                    self.isScanning = true
+                                }) {
+                                    Text("Scan QR Code")
+                                        .font(ButtonStyling.font)
+                                        .foregroundColor(ButtonStyling.foreGroundColor)
+                                        .padding()
+                                        .frame(minWidth: 0,maxWidth: (geometry.size.width * 2/3))
+                                        .background(ButtonStyling.color)
+                                        .cornerRadius(ButtonStyling.cornerRadius)
+                                }
+                                Spacer()
                             }
                             Spacer()
                         }
-                        Spacer()
                     }
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .leading) {
-                    if isShowingScanningResult {
-                        if self.verifyMessage == "Success" {
-                            Text(self.verifyMessage)
-                                .font(.body)
-                                .foregroundColor(.green)
-                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
-                        } else {
-                            Text(self.verifyMessage)
-                                .font(.body)
-                                .foregroundColor(.red)
-                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .leading) {
+                        if isShowingScanningResult {
+                            if self.verifyMessage == "Success" {
+                                Text(self.verifyMessage)
+                                    .font(.body)
+                                    .foregroundColor(.green)
+                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                            } else {
+                                Text(self.verifyMessage)
+                                    .font(.body)
+                                    .foregroundColor(.red)
+                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                            }
                         }
                     }
+                    .padding()
                 }
-                .padding()
-            }
-            .padding(.horizontal, 32)
-            .sheet(isPresented: $isScanning) {
-                CodeScannerView(codeTypes: [.qr], completion: handleScanResult(result:))
-            }
-            .onChange(of: deepLinkURL.url) { newUrlValue in
-                if let url = deepLinkURL.url {
-                    self.errorDeepLinking = false
-                    if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
-                        let authCode = urlComponents.queryItems?.first(where: { $0.name == "authCode" })?.value,
-                        let caregiverId = urlComponents.queryItems?.first(where: { $0.name == "caregiverId" })?.value {
-                        self.authCode = authCode
-                        self.caregiverId = caregiverId
-                        
-                        verifyPatient(patientId: self.patientId, caregiverId: caregiverId, authCode: authCode, idToken: self.idToken) { result in
-                            switch result {
+                .padding(.horizontal, 32)
+                .sheet(isPresented: $isScanning) {
+                    CodeScannerView(codeTypes: [.qr], completion: handleScanResult(result:))
+                }
+                .onChange(of: deepLinkURL.url) { newUrlValue in
+                    if let url = deepLinkURL.url {
+                        self.errorDeepLinking = false
+                        if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                           let authCode = urlComponents.queryItems?.first(where: { $0.name == "authCode" })?.value,
+                           let caregiverId = urlComponents.queryItems?.first(where: { $0.name == "caregiverId" })?.value {
+                            self.authCode = authCode
+                            self.caregiverId = caregiverId
+                            
+                            print(authCode)
+                            print(caregiverId)
+                            print(self.patientId)
+                            
+                            verifyPatient(patientId: self.patientId, caregiverId: caregiverId, authCode: authCode, idToken: self.idToken) { result in
+                                switch result {
                                 case .success(let response):
                                     self.verifyMessage = "Success"
                                     self.displayVerifyingResult()
@@ -181,20 +201,21 @@ struct VerificationView: View {
                                     self.verifyMessage = "Failed to verify new patient!"
                                     self.displayVerifyingResult()
                                     print("Verification failed: \(error.localizedDescription)")
+                                }
                             }
+                        } else {
+                            self.errorDeepLinking = true
+                            self.verifyMessage = "Link is not formatted correctly"
+                            self.displayVerifyingResult()
                         }
-                    } else {
-                        self.errorDeepLinking = true
-                        self.verifyMessage = "Link is not formatted correctly"
-                        self.displayVerifyingResult()
                     }
+                    
+                    // reset
+                    deepLinkURL.url = nil
                 }
-                
-                // reset
-                deepLinkURL.url = nil
+            } else {
+                MobilityView()
             }
-        } else {
-            MobilityView()
         }
     }
 }
