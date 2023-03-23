@@ -1,102 +1,121 @@
-import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import Graph from './Graph';
+import './NewDashboard.css';
 
-interface Metric {
+export interface Patient {
+  patient_id: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface PatientsList {
+  patients: Patient[];
+}
+
+export interface Metric {
   patient_id: string;
   metric_name: string;
   metric_value: string;
   timestamp: string;
 }
 
-interface Patient {
-  name: string;
+export interface MetricsData {
   metrics: Metric[];
 }
 
-interface Props {
-  patients: Patient[];
-}
+function NewDashboard() {
+  // Sidebar props
+  const [selectedPatient, setSelectedPatient] = useState('All Patients');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
-function NewDashboard({ patients }: Props) {
-  const renderGraphs = (patient: Patient) => {
-    const stepLengthData = patient.metrics.filter(metric => metric.metric_name === 'step_length');
-    const doubleSupportTimeData = patient.metrics.filter(metric => metric.metric_name === 'double_support_time');
-    const walkingSpeedData = patient.metrics.filter(metric => metric.metric_name === 'walking_speed');
-    const walkingAsymmetryData = patient.metrics.filter(metric => metric.metric_name === 'walking_asymmetry');
-    const distanceWalkedData = patient.metrics.filter(metric => metric.metric_name === 'distance_walked');
-  
-    return (
-      <>
-        <div>
-          <h3>Step Length</h3>
-          <LineChart
-            data={stepLengthData.map(metric => ({ x: new Date(metric.timestamp), y: parseFloat(metric.metric_value) }))}
-          />
-        </div>
-        <div>
-          <h3>Double Support Time</h3>
-          <LineChart
-            data={doubleSupportTimeData.map(metric => ({ x: new Date(metric.timestamp), y: parseFloat(metric.metric_value) }))}
-          />
-        </div>
-        <div>
-          <h3>Walking Speed</h3>
-          <LineChart
-            data={walkingSpeedData.map(metric => ({ x: new Date(metric.timestamp), y: parseFloat(metric.metric_value) }))}
-          />
-        </div>
-        <div>
-          <h3>Walking Asymmetry</h3>
-          <LineChart
-            data={walkingAsymmetryData.map(metric => ({ x: new Date(metric.timestamp), y: parseFloat(metric.metric_value) }))}
-          />
-        </div>
-        <div>
-          <h3>Distance Walked</h3>
-          <LineChart
-            data={distanceWalkedData.map(metric => ({ x: new Date(metric.timestamp), y: parseFloat(metric.metric_value) }))}
-          />
-        </div>
-      </>
-    );
-  };
-  
+  const [patientsList, setPatientsList] = useState<PatientsList>({ patients: [] });
+  const [filteredPatients, setFilteredPatients] = useState<PatientsList>({ patients: [] });
+  const [metricsData, setMetricsData] = useState<MetricsData>({ metrics: [] });
 
-  const renderTable = (patient: Patient) => {
-    // Use the patient's metrics data to render a summary table
-    return (
-      <table>
-        <thead>
-          <tr>
-            <th>Metric Name</th>
-            <th>Metric Value</th>
-            <th>Timestamp</th>
-          </tr>
-        </thead>
-        <tbody>
-          {patient.metrics.map(metric => (
-            <tr key={metric.timestamp}>
-              <td>{metric.metric_name}</td>
-              <td>{metric.metric_value}</td>
-              <td>{metric.timestamp}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
+  useEffect(() => {
+    // call api to get patients list and filter it for query
+    fetch('https://example.com/patients')
+      .then((response) => response.json())
+      .then((data) => {
+        setPatientsList(data);
+        setFilteredPatients(
+          selectedPatient === 'All Patients'
+            ? data
+            : { patients: data.patients.filter((p:Patient) => p.first_name + ' ' + p.last_name === selectedPatient) }
+        );
+      })
+      .catch((error) => console.error(error));
+  }, [selectedPatient]);
+
+  useEffect(() => {
+    // reformat the start and end dates to pass them to api query
+    const formattedStartDate =
+      startDate &&
+      `${startDate.getFullYear()}_${(startDate.getMonth() + 1).toString().padStart(2, '0')}_${startDate
+        .getDate()
+        .toString()
+        .padStart(2, '0')}T00:00:00`;
+    const formattedEndDate =
+      endDate &&
+      `${endDate.getFullYear()}_${(endDate.getMonth() + 1).toString().padStart(2, '0')}_${endDate.getDate().toString().padStart(2, '0')}T23:59:59`;
+
+    // construct API query to fetch metrics
+    const patientIds = filteredPatients.patients.map((p: Patient) => p.patient_id).join('&patients=');
+    const url = `https://example.com/metrics?patients=${patientIds}&start=${formattedStartDate}&end=${formattedEndDate}`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        setMetricsData(data as MetricsData);
+      })
+      .catch((error) => console.error(error));
+  }, [filteredPatients, startDate, endDate]);
+
+  // Render graph using the metricsData
+  let graph = Graph({patientsList, metricsData});
 
   return (
-    <div>
-      {patients.map(patient => (
-        <div key={patient.name}>
-          <h2>{patient.name}</h2>
-          {renderGraphs(patient)}
-          {renderTable(patient)}
+    <div className="Dashboard">
+      <h2>Dashboard</h2>
+      <div className="sidebar">
+        <select value={selectedPatient} onChange={(e) => setSelectedPatient(e.target.value)}>
+          <option value="All Patients">All Patients</option>
+          {patientsList.patients.map((patient: Patient) => (
+            <option key={patient.patient_id} value={patient.first_name + ' ' + patient.last_name}>
+              {patient.first_name + ' ' + patient.last_name}
+            </option>
+          ))}
+        </select>
+        <div>
+          <label htmlFor="startDatePicker">Start</label>
+          <DatePicker
+            id="startDatePicker"
+            selected={startDate}
+            onChange={(date: Date | null) => setStartDate(date)}
+            dateFormat="yyyy-MM-dd"
+            maxDate={endDate}
+          />
         </div>
-      ))}
+        <div>
+          <label htmlFor="endDatePicker">End</label>
+          <DatePicker
+            id="endDatePicker"
+            selected={endDate}
+            onChange={(date: Date | null) => setEndDate(date)}
+            dateFormat="yyyy-MM-dd"
+            minDate={startDate}
+          />
+        </div>
+      </div>
+  
+      <div className="graphs">
+        {graph}
+      </div>
     </div>
   );
+  
 }
-
-export default NewDashboard;
+export default NewDashboard;  

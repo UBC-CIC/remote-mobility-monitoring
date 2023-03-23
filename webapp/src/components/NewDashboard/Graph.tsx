@@ -1,6 +1,6 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { Patient, PatientsList, Metric, MetricsData } from "./all";
+import { Patient, PatientsList, Metric, MetricsData } from "./NewDashboard";
 
 const Graph = ({ patientsList, metricsData }: { patientsList: PatientsList, metricsData: MetricsData }) => {
   const patientIds = patientsList.patients.map((patient: { patient_id: any; }) => patient.patient_id);
@@ -57,7 +57,7 @@ const Graph = ({ patientsList, metricsData }: { patientsList: PatientsList, metr
     <div>
       {graphData.map(({ patientId, data }) => (
         <div key={patientId}>
-          <h3>{patientsList.patients.find((patient: { patient_id: any; }) => patient.patient_id === patientId).first_name} {patientsList.patients.find((patient: { patient_id: any; }) => patient.patient_id === patientId).last_name}</h3>
+          <h3>{patientsList.patients.find((patient: { patient_id: string; }) => patient.patient_id === patientId).first_name} {patientsList.patients.find((patient: { patient_id: string; }) => patient.patient_id === patientId).last_name}</h3>
           <Line data={data} />
         </div>
       ))}
