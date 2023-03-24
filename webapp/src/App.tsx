@@ -16,7 +16,7 @@ function App() {
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/sysadmin" element={<SystemAdmin/>}/>
                 <Route path="/Dashboard" element={<Dashboard/>}/>
-                <Route path="/NewDashboard" element={<NewDashboard patients={sampleData}/>}/>
+                <Route path="/NewDashboard" element={<NewDashboard/>}/>
             </Routes>
         </Router>
     );
