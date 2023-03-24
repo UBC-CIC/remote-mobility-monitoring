@@ -89,7 +89,6 @@ public class CognitoWrapper {
         log.info("Creating user with email {} in Cognito", email);
         Validator.validateEmail(email);
 
-        // TODO: come up with better way of generating password
         String password = "PASS.word" + UUID.randomUUID();
         AdminCreateUserRequest request = AdminCreateUserRequest.builder()
                 .desiredDeliveryMediums(DeliveryMediumType.EMAIL)

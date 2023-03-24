@@ -213,11 +213,23 @@ public class CaregiverServiceTest {
     }
 
     @Test
-    public void testAddPatientPrimary_HappyCase() {
+    public void testAddPatientPrimary_WHEN_SendEmailFalse_THEN_SesWrapperDoNotSendEmail() {
         AddPatientPrimaryRequestBody requestBody = buildAddPatientPrimaryRequestBody();
         AddPatientPrimaryResponseBody responseBody = cut.addPatientPrimary(requestBody);
 
         verify(caregiverDao, times(1)).addPatientPrimary(eq(PATIENT_EMAIL), eq(CAREGIVER_ID), anyString());
+        verify(sesWrapper, never()).caregiverAddPatientEmail(anyString(), anyString(), anyString());
+        assertNotNull(responseBody.getAuthCode());
+    }
+
+    @Test
+    public void testAddPatientPrimary_WHEN_SendEmailTrue_THEN_SesWrapperSendEmail() {
+        AddPatientPrimaryRequestBody requestBody = buildAddPatientPrimaryRequestBody();
+        requestBody.setSendEmail(true);
+        AddPatientPrimaryResponseBody responseBody = cut.addPatientPrimary(requestBody);
+
+        verify(caregiverDao, times(1)).addPatientPrimary(eq(PATIENT_EMAIL), eq(CAREGIVER_ID), anyString());
+        verify(sesWrapper, times(1)).caregiverAddPatientEmail(eq(PATIENT_EMAIL), eq(CAREGIVER_ID), anyString());
         assertNotNull(responseBody.getAuthCode());
     }
 

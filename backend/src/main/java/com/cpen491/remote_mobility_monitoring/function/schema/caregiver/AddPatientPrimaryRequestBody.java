@@ -16,4 +16,6 @@ public class AddPatientPrimaryRequestBody {
     private String caregiverId;
     @SerializedName(Const.PATIENT_EMAIL_NAME)
     private String patientEmail;
+    @SerializedName(Const.SEND_EMAIL)
+    private boolean sendEmail;
 }
