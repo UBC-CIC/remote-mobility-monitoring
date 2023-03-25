@@ -8,6 +8,8 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
     const { data, patients } = props;
     const chartData: {[metricName: string]: {[patientName: string]: number[]}} = {};
     const colors = ["rgba(75,192,192,1)", "rgba(192,75,192,1)", "rgba(192,192,75,1)", "rgba(75,75,192,1)", "rgba(192,75,75,1)", "rgba(75,192,75,1)"];
+    const units = ["cm", "%", "kpm", "%", "km"];
+    const headers = ["Step Length", "Double Support Time", "Walking Speed", "Walking Asymmetry", "Distance Walked"];
     let colorIndex = 0;
 
     data.metrics.forEach((metric) => {
@@ -22,7 +24,15 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
     const chartOptions = {
         scales: {
             y: {
-                beginAtZero: true
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: units[colorIndex % units.length],
+                    font: {
+                        size: 16,
+                        weight: "bold"
+                    }
+                }
             }
         }
     };
@@ -34,8 +44,8 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
         colorIndex++;
 
         return (
-            <div key={metricName} className="chart-container" style={{ textAlign: "center",  marginBottom: "70px" }}>
-                <h3>{metricName}</h3>
+            <div key={metricName} className="chart-container" style={{ textAlign: "center", marginBottom: "70px" }}>
+                <h3>{headers[colorIndex - 1]}</h3>
                 <Bar data={{
                     labels: chartLabels,
                     datasets: [{
@@ -43,7 +53,19 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
                         data: chartData,
                         backgroundColor: color
                     }]
-                }} options={chartOptions} />
+                }} options={{
+                    ...chartOptions,
+                    scales: {
+                        ...chartOptions.scales,
+                        y: {
+                            ...chartOptions.scales.y,
+                            title: {
+                                ...chartOptions.scales.y.title,
+                                text: units[colorIndex - 1]
+                            }
+                        }
+                    }
+                }} />
             </div>
         );
     });
