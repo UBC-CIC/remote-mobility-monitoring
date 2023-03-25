@@ -3,7 +3,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Graph from "./Graph";
 import "./NewDashboard.css";
-import "./sampleData";
 import sampleData from "./sampleData";
 
 export interface Patient {
@@ -28,7 +27,9 @@ export interface MetricsData {
 }
 
 function NewDashboard(){
-    const  data =  sampleData();
+
+    const data = sampleData();
+
     // Create a new instance of PatientsList
     const patientsList: PatientsList = {
         patients: data.map(({ patient_name }) => {
@@ -54,9 +55,13 @@ function NewDashboard(){
     };
 
     return (
-        <Graph data={metricsData} patients={patientsList} />
+        <div className="Dashboard">
+            <h2>Dashboard</h2>
+            <div className="graphs">
+                <Graph data={metricsData} patients={patientsList} />
+            </div>
+        </div>
     );
-
 
 }
 
