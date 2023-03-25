@@ -3,6 +3,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Graph from "./Graph";
 import "./NewDashboard.css";
+import "./sampleData";
+import sampleData from "./sampleData";
 
 export interface Patient {
   patient_id: string;
@@ -25,6 +27,43 @@ export interface MetricsData {
   metrics: Metric[];
 }
 
+function NewDashboard(){
+    const  data =  sampleData();
+    // Create a new instance of PatientsList
+    const patientsList: PatientsList = {
+        patients: data.map(({ patient_name }) => {
+            const [first_name, last_name] = patient_name.split("-");
+            return {
+                patient_id: patient_name,
+                first_name,
+                last_name
+            };
+        })
+    };
+  
+    // Create a new instance of MetricsData
+    const metricsData: MetricsData = {
+        metrics: data.map(({ patient_name, metric_name, metric_value, timestamp }) => {
+            return {
+                patient_id: patient_name,
+                metric_name,
+                metric_value,
+                timestamp
+            };
+        })
+    };
+
+    return (
+        <Graph data={metricsData} patients={patientsList} />
+    );
+
+
+}
+
+
+
+
+/*
 function NewDashboard() {
     // Sidebar props
     const [selectedPatient, setSelectedPatient] = useState("All Patients");
@@ -118,4 +157,5 @@ function NewDashboard() {
     );
   
 }
+*/
 export default NewDashboard;  

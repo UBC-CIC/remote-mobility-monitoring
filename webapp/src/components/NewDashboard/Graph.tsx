@@ -1,75 +1,52 @@
 import React from "react";
-import { Line } from "react-chartjs-2";
-import { Patient, PatientsList, Metric, MetricsData } from "./NewDashboard";
+import { Bar } from "react-chartjs-2";
+import { MetricsData, PatientsList } from "./NewDashboard";
 
-const Graph = ({ patientsList, metricsData }: { patientsList: PatientsList, metricsData: MetricsData }) => {
-    const patientIds = patientsList.patients.map((patient: { patient_id: any; }) => patient.patient_id);
-
-    const graphData = patientIds.map((patientId: any) => {
-        const metricsForPatient = metricsData.metrics.filter((metric: { patient_id: any; }) => metric.patient_id === patientId);
-        const labels = metricsForPatient.map((metric: { timestamp: any; }) => metric.timestamp);
-        const stepLengthData = metricsForPatient.filter((metric: { metric_name: string; }) => metric.metric_name === "step_length").map((metric: { metric_value: any; }) => metric.metric_value);
-        const walkingSpeedData = metricsForPatient.filter((metric: { metric_name: string; }) => metric.metric_name === "walking_speed").map((metric: { metric_value: any; }) => metric.metric_value);
-        const doubleSupportTimeData = metricsForPatient.filter((metric: { metric_name: string; }) => metric.metric_name === "double_support_time").map((metric: { metric_value: any; }) => metric.metric_value);
-        const walkingAsymmetryData = metricsForPatient.filter((metric: { metric_name: string; }) => metric.metric_name === "walking_asymmetry").map((metric: { metric_value: any; }) => metric.metric_value);
-        const distanceWalkedData = metricsForPatient.filter((metric: { metric_name: string; }) => metric.metric_name === "distance_walked").map((metric: { metric_value: any; }) => metric.metric_value);
-
-        const data = {
-            labels,
-            datasets: [
-                {
-                    label: "Step Length",
-                    data: stepLengthData,
-                    fill: false,
-                    borderColor: "red",
-                },
-                {
-                    label: "Walking Speed",
-                    data: walkingSpeedData,
-                    fill: false,
-                    borderColor: "blue",
-                },
-                {
-                    label: "Double Support Time",
-                    data: doubleSupportTimeData,
-                    fill: false,
-                    borderColor: "green",
-                },
-                {
-                    label: "Walking Asymmetry",
-                    data: walkingAsymmetryData,
-                    fill: false,
-                    borderColor: "orange",
-                },
-                {
-                    label: "Distance Walked",
-                    data: distanceWalkedData,
-                    fill: false,
-                    borderColor: "purple",
-                },
-            ],
-        };
-
-        return { patientId, data };
+function Graph(props: { data: MetricsData, patients: PatientsList }) {
+    const { data, patients } = props;
+    const chartData: {[metricName: string]: {[patientName: string]: number[]}} = {};
+  
+    data.metrics.forEach((metric) => {
+        const metricName = metric.metric_name;
+        const patientName = patients.patients.find((patient) => patient.patient_id === metric.patient_id)?.first_name ?? metric.patient_id;
+        const chartDataMetric = chartData[metricName] ?? {};
+  
+        chartDataMetric[patientName] = [...(chartDataMetric[patientName] ?? []), parseFloat(metric.metric_value)];
+        chartData[metricName] = chartDataMetric;
     });
-
+  
+    const chartOptions = {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    };
+  
+    const chart = Object.entries(chartData).map(([metricName, metricValues]) => {
+        const chartLabels = Object.keys(metricValues);
+        const chartData = Object.values(metricValues);
+  
+        return (
+            <div key={metricName}>
+                <h2>{metricName}</h2>
+                <Bar data={{
+                    labels: chartLabels,
+                    datasets: [{
+                        label: metricName,
+                        data: chartData,
+                        backgroundColor: "rgba(75,192,192,1)"
+                    }]
+                }} options={chartOptions} />
+            </div>
+        );
+    });
+  
     return (
         <div>
-            {graphData.map(({ patientId, data }) => (
-                <div key={patientId}>
-                    <h3>
-                        {patientsList.patients.find(
-                            (patient: { patient_id: string }) => patient.patient_id === patientId
-                        )?.first_name}{" "}
-                        {patientsList.patients.find(
-                            (patient: { patient_id: string }) => patient.patient_id === patientId
-                        )?.last_name}
-                    </h3>
-
-                </div>
-            ))}
+            {chart}
         </div>
     );
-};
+}
 
 export default Graph;
