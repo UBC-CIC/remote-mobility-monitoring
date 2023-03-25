@@ -1,5 +1,6 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
+import "chart.js/auto";
 import { MetricsData, PatientsList } from "./NewDashboard";
 
 function Graph(props: { data: MetricsData, patients: PatientsList }) {
@@ -20,8 +21,11 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
             y: {
                 beginAtZero: true
             }
-        }
+        },
+        height: 20,
+        width: 20
     };
+    
   
     const chart = Object.entries(chartData).map(([metricName, metricValues]) => {
         const chartLabels = Object.keys(metricValues);
