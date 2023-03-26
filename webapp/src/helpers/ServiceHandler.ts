@@ -3,7 +3,6 @@ import {userTypes, getCaregiverId, getIdToken} from "./types";
 
 // Get userID from local storage
 const sub = localStorage.getItem("sub");
-const idToken = getIdToken();
 
 /* 
 * For now the org_id is hard coded as discussed with CIC since we 
@@ -24,6 +23,7 @@ type response = {
 * */
 export const ServiceHandler = {
     addCaregiver: (firstName: string, lastName: string, email: string, contactNumber: string) => {
+        const idToken = getIdToken();
         /*
          * Add Caregiver API called by admin users to create new caregivers for their organization.
         * */
@@ -51,6 +51,7 @@ export const ServiceHandler = {
         return addCallbacks(req);
     },
     addPatient: (email: string) => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("caregiver");
         
         const url = base_url.concat("/caregivers/").concat(getCaregiverId()).concat("/patients");
@@ -72,6 +73,7 @@ export const ServiceHandler = {
         return addCallbacks(req);
     },
     deletePatient: (patientId: string) => {
+        const idToken = getIdToken();
         const base_url = createBaseUrl("caregiver");
         const url = base_url.concat("/patients/").concat(patientId);
         const req = fetch(url, {
@@ -86,6 +88,7 @@ export const ServiceHandler = {
         return addCallbacks(req);
     },
     getAllPatients: () => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();
         const url = base_url.concat("/caregivers/").concat(caregiverId).concat("/patients");
@@ -103,6 +106,7 @@ export const ServiceHandler = {
         return addCallbacks(req);
     },
     getPatient: (patientId: string) => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();
         const url = base_url.concat("/patients/").concat(patientId);
@@ -119,6 +123,7 @@ export const ServiceHandler = {
         return addCallbacks(req);
     },
     getOrg: () => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("admin");
         if (!org_id) throw new Error("Check organization ID");
         const url = base_url.concat("/organizations/").concat(org_id);
@@ -135,6 +140,7 @@ export const ServiceHandler = {
         return addCallbacks(req);
     },
     deleteCaregiver: (carId: string) => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("admin");
         const url = base_url.concat("/caregivers/").concat(carId);
         const req = fetch(url, {
