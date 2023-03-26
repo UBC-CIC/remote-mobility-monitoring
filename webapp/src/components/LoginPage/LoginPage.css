@@ -38,19 +38,19 @@
     width: 60%;
 }
 
-.login-page .login-input input {
-    height: 30px;
-    width: 93%;
-    padding-left: 12px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    background-color: #F0EFFF;
-    border: 1px solid rgba(255,255,255,.5);
-    font-size: 0.7em ;
-}
-.login-page .login-input input::placeholder {
-    color: #A7A3FF;
-}
+/* .login-page .login-input input { */
+    /* height: 30px; */
+    /* width: 93%; */
+    /* padding-left: 12px; */
+    /* margin-bottom: 15px; */
+    /* border-radius: 5px; */
+    /* background-color: #F0EFFF; */
+    /* border: 1px solid rgba(255,255,255,.5); */
+    /* font-size: 0.7em ; */
+/* } */
+/* .login-page .login-input input::placeholder { */
+    /* color: #A7A3FF; */
+/* } */
 
 .login-page .forgot {
     margin-top: -2%;

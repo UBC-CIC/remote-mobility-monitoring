@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import {userTypes, strObjMap}  from "../../helpers/types";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 import jwt_decode from "jwt-decode";
+import {TextField} from "@mui/material";
 
 
 function LoginPage() {
@@ -108,6 +109,8 @@ function LoginPage() {
                 <div className='login-input'>
                     <input placeholder='Email' onKeyDown={(e) => handleKey(e)} onChange={(e) => setEmail(e.target.value)}></input>
                     <br />
+                    <TextField id="outlined-basic" label="Outlined" variant="standard" placeholder="outlined" onChange={(e) => console.log(e)} />
+                    <TextField id="outlined-basic" label="Outlined" variant="standard" placeholder="outlined" />
                     <input type='password' placeholder='Password'onKeyDown={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
                     <div className='forgot'>Forgot password?</div>
                     <button type='submit' onClick={(e) => { handleSubmit(e); }}>Login</button>
