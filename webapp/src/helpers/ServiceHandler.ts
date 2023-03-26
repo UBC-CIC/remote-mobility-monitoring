@@ -58,6 +58,7 @@ export const ServiceHandler = {
         console.log(url);
         const data = {
             "patient_email": email,
+            "send_email": true
         };
         const req = fetch(url, {
             method: "POST", 
