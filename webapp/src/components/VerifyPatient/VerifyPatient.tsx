@@ -4,6 +4,7 @@ import { useNavigate, useParams} from "react-router-dom";
 import CaregiverNavbar from "../Navbar/CaregiverNavbar";
 import {FaArrowLeft} from "react-icons/fa";
 import {ServiceHandler} from "../../helpers/ServiceHandler";
+import {getCaregiverId} from "../../helpers/types";
 import "./VerifyPatient.css";
 
 function VerifyPatient() {
@@ -12,6 +13,7 @@ function VerifyPatient() {
     const [loaded, setLoaded] = useState(false);
     const nav = useNavigate();
     const {email} = useParams();
+    const caregiverId = getCaregiverId();
 
 
     function getWindowDimensions() {
@@ -67,6 +69,7 @@ function VerifyPatient() {
                                 style={{ width: windowDimensions.width/6 }}
                                 value={JSON.stringify({
                                     "auth_code": authCode,
+                                    "caregiver_id": caregiverId
                                 })}
                             />
                         </div>

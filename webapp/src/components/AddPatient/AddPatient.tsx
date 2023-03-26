@@ -88,6 +88,7 @@ function AddCaregiver() {
                                     style={{ width: windowDimensions.width/6 }}
                                     value={JSON.stringify({
                                         "auth_code": authCode,
+                                        "caregiver_id": caregiverId
                                     })}
                                 />
                                 <p className="or">Made a mistake?</p>
