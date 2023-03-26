@@ -69,12 +69,12 @@ p, div {
   }
   
  .sysadmin input {
-    padding: 10px 10px;
+    height: 15px;
+    padding-left: 12px;
     border-radius: 5px;
-    outline: none;
-    border:#f0efff;
-    background-color: #f0efff;
-    font-size: 0.62em;
+    background-color: rgb(240, 239, 255, 0.5);
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 1em ;
   }
   
  .sysadmin input::placeholder {

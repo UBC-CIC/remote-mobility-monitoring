@@ -7,6 +7,7 @@ import {userTypes, strObjMap} from "../../helpers/types";
 import {State} from "../../helpers/store";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 import jwt_decode from "jwt-decode";
+import {TextField} from "@mui/material";
 
 function ForceChangePassword() {
     const [password, setPassword] = useState("");
@@ -67,8 +68,12 @@ function ForceChangePassword() {
             <div></div>
             <div className="wrapper">
                 <div className='login-input'>
-                    <input type='password' placeholder='Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
-                    <input type='password' placeholder='Confirm Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setConfirmPassword(e.target.value)}></input>
+                    <div className="login-input-form">
+                        <TextField color='secondary' fullWidth variant='outlined' type='password' label='New Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}/>
+                        <div className="pad"/>
+                        <TextField color='secondary' fullWidth variant='outlined' type='password' label='Confirm Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setConfirmPassword(e.target.value)}/>
+                        <div className="pad"/>
+                    </div>
                     <button type='submit' onClick={(e) => handleSubmit()}>Change Password</button>
                     {error === ("")? null: <p className="err">{error}</p>}
                 </div>

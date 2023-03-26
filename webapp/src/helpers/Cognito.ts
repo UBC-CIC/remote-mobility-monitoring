@@ -32,6 +32,9 @@ export const logout = () => {
     const cognitoUser = createUser(username, true);
     if (!cognitoUser) return;
     cognitoUser.signOut();
+    localStorage.removeItem("sub");
+    localStorage.removeItem("username");
+    localStorage.removeItem("idToken");
 };
 
 export const login = (cognitoUser: AmazonCognitoIdentity.CognitoUser, email: string, password: string, 

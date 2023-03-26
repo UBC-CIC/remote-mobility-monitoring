@@ -1,8 +1,9 @@
 import React from "react";
-import {userTypes, getCaregiverId} from "./types";
+import {userTypes, getCaregiverId, getIdToken} from "./types";
 
 // Get userID from local storage
 const sub = localStorage.getItem("sub");
+const idToken = getIdToken();
 
 /* 
 * For now the org_id is hard coded as discussed with CIC since we 
@@ -42,19 +43,20 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
             body: JSON.stringify(data),
         });
         return addCallbacks(req);
     },
-    addPatient: (firstName: string, lastName: string, contactNumber: string) => {
+    addPatient: (email: string) => {
         const base_url =createBaseUrl("caregiver");
-        const url = base_url.concat("/patients");
+        
+        const url = base_url.concat("/caregivers/").concat(getCaregiverId()).concat("/patients");
+        console.log(url);
         const data = {
-            "first_name": firstName,
-            "last_name": lastName,
-            "phone_number": contactNumber,
+            "patient_email": email,
         };
         const req = fetch(url, {
             method: "POST", 
@@ -62,7 +64,8 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
             body: JSON.stringify(data),
         });
@@ -86,13 +89,15 @@ export const ServiceHandler = {
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();
         const url = base_url.concat("/caregivers/").concat(caregiverId).concat("/patients");
+        console.log(idToken);
         const req = fetch(url, {
             method: "GET", 
             mode: "cors", 
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);
@@ -107,7 +112,8 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);
@@ -122,7 +128,8 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);
@@ -136,7 +143,8 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);

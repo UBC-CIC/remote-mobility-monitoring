@@ -1,0 +1,35 @@
+
+.verify-patient .icon {
+    margin-top: 1%;
+    text-align: left;
+    /* margin-bottom: -2%; */
+    margin-left: 1%;
+    font-size: 20px;
+    width: 10%;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 2px;
+}
+
+.verify-patient .icon:hover{
+    cursor: pointer;
+    color: #4D47C3;
+}
+
+.verify-patient .qr-wrapper {
+    text-align: center;
+    margin-top: 3%;
+}
+
+.verify-patient .text-wrapper {
+    margin-top: 2%;
+    text-align: left;
+    margin-left: 31.5%;
+}
+.verify-patient .text-wrapper .desc {
+    width: 60%;
+    text-align: left;
+    border-left: 3px solid #4D47C3;
+    padding-left: 8px;
+    font-size: 0.9em;
+}

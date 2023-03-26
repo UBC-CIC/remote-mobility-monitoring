@@ -21,3 +21,11 @@ export const getCaregiverId = () => {
     return sub;
 };
 
+export const getIdToken = () => {
+    const idToken = localStorage.getItem("idToken");
+    if (!idToken) {
+        return "";
+    }
+    return idToken;
+};
+

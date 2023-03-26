@@ -10,6 +10,7 @@ import CaregiverDashboard from "./components/Dashboard/CaregiverDashboard";
 import AdminDashboard from "./components/Dashboard/AdminDashboard";
 import Patient from "./components/Patient/Patient";
 import ProtectedRoute from "./helpers/ProtectedRoute";
+import VerifyPatient from "./components/VerifyPatient/VerifyPatient";
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./helpers/store";
@@ -44,6 +45,9 @@ function App() {
                     }/>
                     <Route path="/dashboard/patient/:patientId" element={
                         <ProtectedRoute type="caregiver"><Patient/></ProtectedRoute>
+                    }/>
+                    <Route path="/dashboard/verifyPatient/:email" element={
+                        <ProtectedRoute type="caregiver"><VerifyPatient/></ProtectedRoute>
                     }/>
                 </Routes>
             </Router>

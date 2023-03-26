@@ -8,7 +8,9 @@ import CaregiverNavbar from "../Navbar/CaregiverNavbar";
 type patient = {
     patient_id: string,
     first_name: string,
-    last_name: string
+    last_name: string,
+    verified: boolean,
+    email: string
 }
 
 function CaregiverDashboard() {
@@ -22,7 +24,7 @@ function CaregiverDashboard() {
                 setFilteredPatients(data.patients);
             })
             .catch((err) => {
-                getPatients();
+                setTimeout(getPatients, 1000);
             });
 
     };
@@ -63,12 +65,18 @@ function CaregiverDashboard() {
                         filteredPatients.length === 3? "entry-view3" : "entry-view"}>
                     {filteredPatients.map((patient: patient) => {
                         return <div key={patient.patient_id} className="entry" onClick={() => {
-                            const navUrl = "patient/".concat(patient.patient_id);
-                            nav(navUrl);
+                            if (patient.verified) {
+                                const navUrl = "patient/".concat(patient.patient_id);
+                                nav(navUrl);
+                            }
+                            else {
+                                const navUrl = "verifyPatient/".concat(patient.email);
+                                nav(navUrl);
+                            }
                         }}>
                             {patient.first_name} <br/> {patient.last_name}
                             <div className="view" >
-                        View Patient <FaArrowRight size="5%"/>
+                                {patient.verified? "View":"Verify"} Patient <FaArrowRight size="5%"/>
                             </div>
                         </div>;
                     })} 

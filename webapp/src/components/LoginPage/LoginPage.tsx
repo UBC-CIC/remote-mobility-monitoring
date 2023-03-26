@@ -59,10 +59,13 @@ function LoginPage() {
                 const username = userType.concat(cognitoUser.getUsername());
                 localStorage.setItem("sub", sub);
                 localStorage.setItem("username", username);
+                const idToken = result.getIdToken().getJwtToken();
+                localStorage.setItem("idToken", idToken);
                 if (loginType === "caregiver") {
                     nav("/dashboard");
                 }
                 else {
+                    console.log(decodedToken);
                     nav("/admindashboard");
                 }
             },
@@ -100,18 +103,17 @@ function LoginPage() {
         <div className='login-page'>
             <div className='login'>
                 <h1>Sign in to</h1>
-                <h2>Mobility Monitor {loginType === "caregiver" ? "": "as admin"}</h2>
+                <h2>Mobility Monitor {loginType === "caregiver" ? "as a caregiver": "as an admin"}</h2>
                 <p>{loginType === "caregiver" ? "Organization administrators can ": "Caregivers can\n"}
                     <span className='alternate' onClick={toggleLoginType}>Login here</span></p>
             </div>
             <div className='login user'>
                 <h2>Sign in</h2>
                 <div className='login-input'>
-                    <input placeholder='Email' onKeyDown={(e) => handleKey(e)} onChange={(e) => setEmail(e.target.value)}></input>
-                    <br />
-                    <TextField id="outlined-basic" label="Outlined" variant="standard" placeholder="outlined" onChange={(e) => console.log(e)} />
-                    <TextField id="outlined-basic" label="Outlined" variant="standard" placeholder="outlined" />
-                    <input type='password' placeholder='Password'onKeyDown={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
+                    <TextField color="secondary" fullWidth id="outlined-basic" label="Email" type="email" variant="outlined" onChange={(e) => setEmail(e.target.value)} />
+                    <div className="login-padding"/>
+                    <TextField color="secondary" fullWidth id="outlined-basic" label="Password" type="password" variant="outlined" onChange={(e) => setPassword(e.target.value)} />
+                    <div className="login-padding"/>
                     <div className='forgot'>Forgot password?</div>
                     <button type='submit' onClick={(e) => { handleSubmit(e); }}>Login</button>
                     {error === ("")? null: <p className="err">{error}</p>}
