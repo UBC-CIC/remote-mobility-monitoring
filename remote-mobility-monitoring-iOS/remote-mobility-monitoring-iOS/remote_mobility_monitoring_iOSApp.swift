@@ -7,121 +7,89 @@
 
 import SwiftUI
 import HealthKit
+import Amplify
+import AWSCognitoAuthPlugin
+import AWSPluginsCore
+import JWTDecode
 
 @main
 struct remote_mobility_monitoring_iOSApp: App {
+    @UIApplicationDelegateAdaptor(CustomAppDelegate.self) var appDelegate
+    @State var isAuthenticated: Bool = false
+    @State var patientId: String = ""
+    @State var idToken: String = ""
+    
     var body: some Scene {
         WindowGroup {
-            LoadingView()
-        }
-    }
-}
-
-struct LoadingView: View {
-    @State private var isLoading = true
-
-    var body: some View {
-        addHealthKitData()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            self.isLoading = false
-        }
-
-        return Group {
-            if isLoading {
-                Text("Loading...")
+            if isAuthenticated {
+                VerificationView(isAuthenticated: $isAuthenticated, patientId: self.patientId, idToken: self.idToken)
+                    .environmentObject(appDelegate.deepLinkURL)
+                    .onOpenURL { url in
+                        appDelegate.deepLinkURL.url = url
+                    }
             } else {
-                RegisterView()
+                InitialLoadView()
+                    .task {
+                        await authenticateUser()
+                    }
             }
         }
     }
     
-    func addHealthKitData() {
-        let healthStore = HKHealthStore()
-        let typesToShare: Set = [
-            HKObjectType.quantityType(forIdentifier: .stepCount)!,
-            HKObjectType.quantityType(forIdentifier: .walkingStepLength)!,
-            HKObjectType.quantityType(forIdentifier: .walkingDoubleSupportPercentage)!,
-            HKObjectType.quantityType(forIdentifier: .walkingSpeed)!,
-            HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
-        ]
-
-        let typesToRead: Set = [
-            HKObjectType.quantityType(forIdentifier: .stepCount)!,
-            HKObjectType.quantityType(forIdentifier: .walkingStepLength)!,
-            HKObjectType.quantityType(forIdentifier: .walkingDoubleSupportPercentage)!,
-            HKObjectType.quantityType(forIdentifier: .walkingSpeed)!,
-            HKObjectType.quantityType(forIdentifier: .walkingAsymmetryPercentage)!,
-            HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
-        ]
-
-        healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead) { (success, error) in
-            if !success {
-                print("Error requesting authorization: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            
-            let stepCountType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
-            let stepCountUnit = HKUnit.count()
-            let stepCount = HKQuantity(unit: stepCountUnit, doubleValue: Double.random(in: 0...5000))
-
-            let walkingStepLengthType = HKQuantityType.quantityType(forIdentifier: .walkingStepLength)!
-            let walkingStepLengthUnit = HKUnit(from: "cm")
-            let walkingStepLength = HKQuantity(unit: walkingStepLengthUnit, doubleValue: Double.random(in: 0...100))
-
-            let walkingDoubleSupportPercentageType = HKQuantityType.quantityType(forIdentifier: .walkingDoubleSupportPercentage)!
-            let walkingDoubleSupportPercentageUnit = HKUnit.percent()
-            let walkingDoubleSupportPercentage = HKQuantity(unit: walkingDoubleSupportPercentageUnit, doubleValue: Double.random(in: 0...1))
-
-            let walkingSpeedType = HKQuantityType.quantityType(forIdentifier: .walkingSpeed)!
-            let walkingSpeedUnit = HKUnit(from: "m/s")
-            let walkingSpeed = HKQuantity(unit: walkingSpeedUnit, doubleValue: Double.random(in: 0...20))
-
-            let distanceWalkingRunningType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
-            let distanceWalkingRunningUnit = HKUnit.meter()
-            let distanceWalkingRunning = HKQuantity(unit: distanceWalkingRunningUnit, doubleValue: Double.random(in: 0...100000))
-
-            let stepCountSample = HKQuantitySample(type: stepCountType, quantity: stepCount, start: Date(), end: Date())
-            let walkingStepLengthSample = HKQuantitySample(type: walkingStepLengthType, quantity: walkingStepLength, start: Date(), end: Date())
-            let walkingDoubleSupportPercentageSample = HKQuantitySample(type: walkingDoubleSupportPercentageType, quantity: walkingDoubleSupportPercentage, start: Date(), end: Date())
-            let walkingSpeedSample = HKQuantitySample(type: walkingSpeedType, quantity: walkingSpeed, start: Date(), end: Date())
-            let distanceWalkingRunningSample = HKQuantitySample(type: distanceWalkingRunningType, quantity: distanceWalkingRunning, start: Date(), end: Date())
-
-            healthStore.save(stepCountSample) { (success, error) in
-                if success {
-                    print("Step count data saved successfully.")
-                } else {
-                    print("Error saving step count data: \(error?.localizedDescription ?? "Unknown error")")
-                }
-            }
-            
-            healthStore.save(walkingStepLengthSample) { (success, error) in
-                if success {
-                    print("walking step length saved successfully.")
-                } else {
-                    print("Error saving step length data: \(error?.localizedDescription ?? "Unknown error")")
-                }
-            }
-            healthStore.save(walkingDoubleSupportPercentageSample) { (success, error) in
-                if success {
-                    print("walking double support percentage saved successfully.")
-                } else {
-                    print("Error saving walking double support percentagedata: \(error?.localizedDescription ?? "Unknown error")")
-                }
-            }
-            healthStore.save(walkingSpeedSample) { (success, error) in
-                if success {
-                    print("walking speed saved successfully.")
-                } else {
-                    print("Error saving walking speed data: \(error?.localizedDescription ?? "Unknown error")")
-                }
-            }
-            healthStore.save(distanceWalkingRunningSample) { (success, error) in
-                if success {
-                    print("walking running distance saved successfully.")
-                } else {
-                    print("Error saving walking running distance data: \(error?.localizedDescription ?? "Unknown error")")
-                }
-            }
+    init() {
+        do {
+            try Amplify.add(plugin: AWSCognitoAuthPlugin())
+            try Amplify.configure()
+            print("Amplify configured with auth plugin")
+        } catch {
+            print("Failed to initialize Amplify with \(error)")
         }
+    }
+    
+    func authenticateUser() async {
+        isAuthenticated = false
+        do {
+            let session = try await Amplify.Auth.fetchAuthSession(options: .forceRefresh())
+            // Get cognito user pool token
+            if let cognitoTokenProvider = session as? AuthCognitoTokensProvider {
+                let tokens = try cognitoTokenProvider.getCognitoTokens().get()
+                // Decode the JWT token
+                let jwt = try decode(jwt: tokens.idToken)
+                // Extract the user ID from the JWT payload
+                if let patientId = jwt["sub"].string {
+                    self.patientId = "pat-" + patientId
+                }
+                
+                self.idToken = tokens.idToken
+            }
+            
+            isAuthenticated = session.isSignedIn
+        } catch let error as AuthError {
+            print("Fetch auth session failed with error - \(error)")
+        } catch {
+            print("Unexpected error: \(error)")
+        }
+    }
+}
+
+class DeepLinkURL: ObservableObject {
+    @Published var url: URL?
+}
+
+class CustomAppDelegate: NSObject, UIApplicationDelegate {
+    @Published var deepLinkURL: DeepLinkURL = DeepLinkURL()
+
+    func application(_ app: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Handle deep link URL when the app is launched
+        if let url = launchOptions?[.url] as? URL {
+            deepLinkURL.url = url
+        }
+        return true
+    }
+
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        // Handle deep link URL when the app is already running
+        deepLinkURL.url = url
+        return true
     }
 }
