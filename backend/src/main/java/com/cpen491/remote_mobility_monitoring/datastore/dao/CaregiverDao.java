@@ -94,7 +94,7 @@ public class CaregiverDao {
     }
 
     /**
-     * Checks whether Caregiver is the primary Caregiver of Patient.
+     * Checks whether Caregiver is a verified primary Caregiver of Patient.
      *
      * @param patientId The id of the Patient record
      * @param caregiverId The id of the Caregiver record
@@ -109,7 +109,10 @@ public class CaregiverDao {
         if (!response.hasItem()) {
             return false;
         }
-        return Boolean.TRUE.equals(getBoolFromMap(response.item(), CaregiverTable.IS_PRIMARY_NAME));
+        if (getBoolFromMap(response.item(), CaregiverTable.IS_PRIMARY_NAME)) {
+            return getFromMap(response.item(), CaregiverTable.AUTH_CODE_NAME) == null;
+        }
+        return false;
     }
 
     /**
@@ -125,7 +128,13 @@ public class CaregiverDao {
         log.info("Checking that Caregiver [{}] has Patient [{}]", caregiverId, patientId);
 
         GetItemResponse response = findPatientCaregiverAssociation(patientId, caregiverId);
-        return response.hasItem();
+        if (!response.hasItem()) {
+            return false;
+        }
+        if (getBoolFromMap(response.item(), CaregiverTable.IS_PRIMARY_NAME)) {
+            return getFromMap(response.item(), CaregiverTable.AUTH_CODE_NAME) == null;
+        }
+        return true;
     }
 
     private GetItemResponse findPatientCaregiverAssociation(String patientId, String caregiverId) {
