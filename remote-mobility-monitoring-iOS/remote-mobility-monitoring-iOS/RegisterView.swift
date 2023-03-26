@@ -10,15 +10,15 @@ import CodeScanner
 import KeychainAccess
 
 struct RegisterView: View {
-    @State var isScanning = false
-    @State var patientId: String = ""
-    @State var authCode: String = ""
-    @State var caregiverId: String = ""
-    @State var deviceId: String = ""
-    @State var scanningMessage: String = ""
-    @State var errorScanning: Bool = false
-    @State var isShowingScanningResult: Bool = false
-    @State var verified: Bool = false
+    @State private var isScanning = false
+    @State private var patientId: String = ""
+    @State private var authCode: String = ""
+    @State private var caregiverId: String = ""
+    @State private var deviceId: String = ""
+    @State private var scanningMessage: String = ""
+    @State private var errorScanning: Bool = false
+    @State private var isShowingScanningResult: Bool = false
+    @State private var verified: Bool = false
     let keychain = Keychain(service: "com.example.remote-mobility-monitoring-iOS")
     
     func getDeviceId() -> String {
@@ -47,8 +47,7 @@ struct RegisterView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             if(self.scanningMessage == "Success") {
                 self.verified = true
-            } else {
-                self.verified = false
+                
             }
             self.isShowingScanningResult = false
             self.errorScanning = false
@@ -144,6 +143,14 @@ struct RegisterView: View {
                 }
                 Spacer()
                 VStack(alignment: .leading) {
+                    Text("Patient ID: \(patientId)")
+                        .font(.headline)
+                    Text("Auth Code: \(authCode)")
+                        .font(.headline)
+                    Text("Caregiver ID: \(caregiverId)")
+                        .font(.headline)
+                    Text("Device Id: \(deviceId)")
+                        .font(.headline)
                     if isShowingScanningResult {
                         if scanningMessage == "Success" {
                             Text(scanningMessage)

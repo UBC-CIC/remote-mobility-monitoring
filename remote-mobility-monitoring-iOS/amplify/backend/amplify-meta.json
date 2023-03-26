@@ -1,0 +1,50 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-mobimon-dev-230439-authRole",
+      "UnauthRoleArn": "arn:aws:iam::356029579852:role/amplify-mobimon-dev-230439-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::356029579852:role/amplify-mobimon-dev-230439-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-mobimon-dev-230439-deployment",
+      "UnauthRoleName": "amplify-mobimon-dev-230439-unauthRole",
+      "StackName": "amplify-mobimon-dev-230439",
+      "StackId": "arn:aws:cloudformation:us-west-2:356029579852:stack/amplify-mobimon-dev-230439/706185d0-c3c0-11ed-b26c-0a5fd296b74f",
+      "AmplifyAppId": "d2s33tslpgtd1s"
+    }
+  },
+  "auth": {
+    "mobimonbf5d772b": {
+      "service": "Cognito",
+      "serviceType": "imported",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "output": {
+        "UserPoolId": "us-west-2_iD29sm3GZ",
+        "UserPoolName": "RemoteMobilityMonitoringUserPool-dev",
+        "AppClientID": "6pqteoh3ls4919s11426qps2l2",
+        "AppClientIDWeb": "6pqteoh3ls4919s11426qps2l2",
+        "HostedUIDomain": "mobimon-dev",
+        "OAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\",\"implicit\"],\"AllowedOAuthScopes\":[\"email\",\"openid\",\"phone\",\"profile\"],\"CallbackURLs\":[\"https://example.com/callback\"],\"LogoutURLs\":[\"https://example.com/logout\"]}"
+      },
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "signupAttributes": [],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": [
+            "REQUIRES_LOWERCASE",
+            "REQUIRES_UPPERCASE",
+            "REQUIRES_NUMBERS",
+            "REQUIRES_SYMBOLS"
+          ]
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [],
+        "verificationMechanisms": []
+      },
+      "lastPushTimeStamp": "2023-03-17T07:53:40.836Z"
+    }
+  }
+}
