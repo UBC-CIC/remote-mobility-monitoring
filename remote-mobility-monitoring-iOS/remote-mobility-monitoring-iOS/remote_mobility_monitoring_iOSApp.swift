@@ -22,16 +22,21 @@ struct remote_mobility_monitoring_iOSApp: App {
     var body: some Scene {
         WindowGroup {
             if isAuthenticated {
-                VerificationView(isAuthenticated: $isAuthenticated, patientId: self.patientId, idToken: self.idToken)
+                VerificationView(isAuthenticated: $isAuthenticated, patientId: $patientId, idToken: $idToken)
                     .environmentObject(appDelegate.deepLinkURL)
                     .onOpenURL { url in
                         appDelegate.deepLinkURL.url = url
                     }
             } else {
-                InitialLoadView()
+                InitialLoadView(isAuthenticated: $isAuthenticated)
                     .task {
                         await authenticateUser()
                     }
+            }
+        }
+        .onChange(of: isAuthenticated) { isAuth in
+            Task.init {
+                await authenticateUser()
             }
         }
     }
@@ -47,7 +52,6 @@ struct remote_mobility_monitoring_iOSApp: App {
     }
     
     func authenticateUser() async {
-        isAuthenticated = false
         do {
             let session = try await Amplify.Auth.fetchAuthSession(options: .forceRefresh())
             // Get cognito user pool token
@@ -58,6 +62,7 @@ struct remote_mobility_monitoring_iOSApp: App {
                 // Extract the user ID from the JWT payload
                 if let patientId = jwt["sub"].string {
                     self.patientId = "pat-" + patientId
+                    print(self.patientId)
                 }
                 
                 self.idToken = tokens.idToken

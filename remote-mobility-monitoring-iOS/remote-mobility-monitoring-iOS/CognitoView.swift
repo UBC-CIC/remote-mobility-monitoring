@@ -22,7 +22,8 @@ struct CognitoView: View {
     @State var successMessage: String? = nil
     @State var isSignedIn: Bool = false
     @State var showPasswords: Bool = false // added state variable to show/hide passwords
-
+    @Binding var isAuthenticated: Bool
+    
     var body: some View {
         VStack {
             WelcomeText()
@@ -172,6 +173,7 @@ struct CognitoView: View {
                 successMessage = "Succesfully logged in"
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     successMessage = nil
+                    isAuthenticated = true
                 }
             }
         } catch let error as AuthError{

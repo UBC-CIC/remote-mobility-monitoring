@@ -10,6 +10,7 @@ import HealthKit
 
 struct InitialLoadView: View {
     @State private var isLoading = true
+    @Binding var isAuthenticated: Bool
 
     var body: some View {
         addHealthKitData()
@@ -21,7 +22,7 @@ struct InitialLoadView: View {
             if isLoading {
                 Text("Loading...")
             } else {
-                CognitoView()
+                CognitoView(isAuthenticated: $isAuthenticated)
             }
         }
     }
