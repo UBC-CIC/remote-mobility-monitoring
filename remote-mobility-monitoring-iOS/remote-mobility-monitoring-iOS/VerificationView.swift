@@ -23,8 +23,8 @@ struct VerificationView: View {
     @State private var selection = 0
     @Binding var isAuthenticated: Bool
     @EnvironmentObject var deepLinkURL: DeepLinkURL
-    @State var patientId: String
-    @State var idToken: String
+    @Binding var patientId: String
+    @Binding var idToken: String
     
     func displayVerifyingResult() {
         self.isShowingScanningResult = true

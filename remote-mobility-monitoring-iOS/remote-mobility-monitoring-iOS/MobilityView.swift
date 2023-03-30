@@ -122,16 +122,16 @@ class HealthStore: ObservableObject {
         let doubleSupportTimeStandard = HKQuantity(unit: HKUnit(from: "min"), doubleValue: 0.15)
         let walkingSpeedStandard = HKQuantity(unit: HKUnit(from: "m/s"), doubleValue: 20.0)
         let walkingAsymmetryStandard = HKQuantity(unit: HKUnit.percent(), doubleValue: 0.083)
-        let distanceWalkedStandard = HKQuantity(unit: HKUnit.meter(), doubleValue: 20.0)
+        let distanceWalkedStandard = HKQuantity(unit: HKUnit.meter(), doubleValue: 1563.0)
         
         DispatchQueue.main.async {
             self.metrics = [
-                Metric(name: "Step Count", lastUpdated: "Today", value: self.stepCount ?? stepCountStandard, logo: "stepCount"),
+                Metric(name: "Step Count", lastUpdated: "Today", value: stepCountStandard, logo: "stepCount"),
                 Metric(name: "Step Length", lastUpdated: "Today", value: self.walkingStepLength ?? stepLengthStandard, logo: "stepLength"),
                 Metric(name: "Double Support Time", lastUpdated: "Today", value: self.walkingDoubleSupportPercentage ?? doubleSupportTimeStandard, logo: "doubleSupportTime"),
                 Metric(name: "Walking Speed", lastUpdated: "Today", value: self.walkingSpeed ?? walkingSpeedStandard, logo: "walkingSpeed"),
                 Metric(name: "Walking Asymmetry", lastUpdated: "Today", value: self.walkingAsymmetryPercentage ?? walkingAsymmetryStandard, logo: "walkingAsymmetry"),
-                Metric(name: "Distance Walked", lastUpdated: "Today", value: self.distanceWalkingRunning ?? distanceWalkedStandard, logo: "distanceWalked")
+                Metric(name: "Distance Walked", lastUpdated: "Today", value: distanceWalkedStandard, logo: "distanceWalked")
             ]
         }
     }
