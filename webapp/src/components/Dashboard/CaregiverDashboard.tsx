@@ -4,6 +4,7 @@ import { useNavigate} from "react-router-dom";
 import {ServiceHandler} from "../../helpers/ServiceHandler";
 import "./Dashboard.css";
 import CaregiverNavbar from "../Navbar/CaregiverNavbar";
+import {encrypt} from "../../helpers/Crypto";
 
 type patient = {
     patient_id: string,
@@ -66,17 +67,23 @@ function CaregiverDashboard() {
                     {filteredPatients.map((patient: patient) => {
                         return <div key={patient.patient_id} className="entry" onClick={() => {
                             if (patient.verified) {
-                                const navUrl = "patient/".concat(patient.patient_id);
+                                const patientIdEncrypt = encrypt(patient.patient_id);
+                                const navUrl = "patient/".concat(patientIdEncrypt);
                                 nav(navUrl);
                             }
                             else {
-                                const navUrl = "verifyPatient/".concat(patient.email);
+                                const emailEncrypt = encrypt(patient.email);
+                                const navUrl = "verifyPatient/".concat(emailEncrypt);
                                 nav(navUrl);
                             }
                         }}>
-                            {patient.first_name} <br/> {patient.last_name}
-                            <div className="view" >
-                                {patient.verified? "View":"Verify"} Patient <FaArrowRight size="5%"/>
+                            <span className={patient.verified? "":"patient-name-verify"}>{patient.first_name} <br/> {patient.last_name} 
+                                <br/>
+                                {patient.verified? "": "(Unverified)"}
+                            </span>
+
+                            <div className={patient.verified? "view":"verify"}>
+                                {patient.verified? "View":"Verify"} <FaArrowRight size="5%"/>
                             </div>
                         </div>;
                     })} 

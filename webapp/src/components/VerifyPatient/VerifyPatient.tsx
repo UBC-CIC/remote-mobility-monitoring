@@ -5,6 +5,7 @@ import CaregiverNavbar from "../Navbar/CaregiverNavbar";
 import {FaArrowLeft} from "react-icons/fa";
 import {ServiceHandler} from "../../helpers/ServiceHandler";
 import {getCaregiverId} from "../../helpers/types";
+import {decrypt} from "../../helpers/Crypto";
 import "./VerifyPatient.css";
 
 function VerifyPatient() {
@@ -12,8 +13,11 @@ function VerifyPatient() {
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
     const [loaded, setLoaded] = useState(false);
     const nav = useNavigate();
-    const {email} = useParams();
+    const {emailEncrypt} = useParams();
     const caregiverId = getCaregiverId();
+    const email = decrypt(emailEncrypt);
+    console.log(email);
+    
 
 
     function getWindowDimensions() {

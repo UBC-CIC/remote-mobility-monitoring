@@ -55,7 +55,6 @@ export const ServiceHandler = {
         const base_url =createBaseUrl("caregiver");
         
         const url = base_url.concat("/caregivers/").concat(getCaregiverId()).concat("/patients");
-        console.log(url);
         const data = {
             "patient_email": email,
             "send_email": true
@@ -93,7 +92,6 @@ export const ServiceHandler = {
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();
         const url = base_url.concat("/caregivers/").concat(caregiverId).concat("/patients");
-        console.log(idToken);
         const req = fetch(url, {
             method: "GET", 
             mode: "cors", 

@@ -43,10 +43,10 @@ function App() {
                     <Route path="/admindashboard" element={
                         <ProtectedRoute type="admin"><AdminDashboard/></ProtectedRoute>
                     }/>
-                    <Route path="/dashboard/patient/:patientId" element={
+                    <Route path="/dashboard/patient/:patientIdEncrypt" element={
                         <ProtectedRoute type="caregiver"><Patient/></ProtectedRoute>
                     }/>
-                    <Route path="/dashboard/verifyPatient/:email" element={
+                    <Route path="/dashboard/verifyPatient/:emailEncrypt" element={
                         <ProtectedRoute type="caregiver"><VerifyPatient/></ProtectedRoute>
                     }/>
                 </Routes>

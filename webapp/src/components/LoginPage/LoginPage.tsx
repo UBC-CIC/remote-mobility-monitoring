@@ -65,7 +65,6 @@ function LoginPage() {
                     nav("/dashboard");
                 }
                 else {
-                    console.log(decodedToken);
                     nav("/admindashboard");
                 }
             },

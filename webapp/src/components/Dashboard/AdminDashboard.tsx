@@ -60,7 +60,6 @@ function AdminDashboard() {
             name = name.toLowerCase();
             if (name.includes(searchString)) {
                 searchCaregivers.push(caregiver);
-                console.log(caregiver.caregiver_id);
             }
         });
         setFilteredCaregivers(searchCaregivers);

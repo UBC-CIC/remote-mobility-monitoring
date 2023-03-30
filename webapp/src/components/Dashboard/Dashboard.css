@@ -96,14 +96,27 @@ html {
 
 .dashboard .view {
     font-size: 0.8em;
+    color: #302E73;
     padding-top: 29%;
     padding-right: 10%;
     text-align: right;
 }
+.dashboard .verify {
+    font-size: 0.8em;
+    color: #302E73;
+    padding-top: 14.5%;
+    padding-right: 10%;
+    text-align: right;
+}
+
+.dashboard .patient-name-verify {
+    color: #6D6D6D;
+}
+
 
 .dashboard .entry:hover{
     background-color: #E2E8F0;
-    color: #4D47C3;
+    color: #302E73;
     cursor: pointer;
 }
 .dashboard .entryd {

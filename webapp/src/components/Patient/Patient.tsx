@@ -2,15 +2,19 @@ import React, {useState, useEffect} from "react";
 import { useNavigate, useParams} from "react-router-dom";
 import {ServiceHandler} from "../../helpers/ServiceHandler";
 import CaregiverNavbar from "../Navbar/CaregiverNavbar";
+import {decrypt} from "../../helpers/Crypto";
 
 
 function Patient() {
     const nav = useNavigate();
     const [patientDetails, setPatientDetails] = useState({});
-    const {patientId} = useParams();
+    const {patientIdEncrypt} = useParams();
     const [deletionMessage, setDeletionMessage] = useState("");
+    const patientId = decrypt(patientIdEncrypt);
+
 
     useEffect(() => {
+        console.log(patientId);
         if (!patientId) return;
         ServiceHandler.getPatient(patientId)
             .then((data: any) => {
