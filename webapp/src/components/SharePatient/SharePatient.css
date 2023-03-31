@@ -1,0 +1,179 @@
+/* html { */
+    /* overflow: scroll; */
+    /* overflow-x: hidden; */
+/* } */
+/* ::-webkit-scrollbar { */
+    /* width: 0;  */
+    /* background: transparent;  */
+/* } */
+/* ::-webkit-scrollbar-thumb { */
+    /* background: #FF0000; */
+/* } */
+
+.share-patient {
+    text-align: center;
+    justify-content: center;
+    margin-top: 2%;
+}
+
+.share-patient input {
+    border: 1px solid rgba(255,255,255,.5);
+    height: 30px;
+    width: 30%;
+    border-radius: 5px;
+    padding-left: 15px;
+    font-size: 0.9em;
+    background-color: #F0EFFF;
+}
+
+.share-patient input::placeholder {
+    color: #A7A3FF;
+}
+
+.share-patient .entry-view {
+    margin-top: 1%;
+    display:grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    text-align: center;
+    width: 60%;
+    position: absolute;
+    left: 20%;
+    max-height: 80%;
+    overflow-y: scroll;
+}
+
+.share-patient .entry-view1 {
+    margin-top: 1%;
+    display:grid;
+    grid-template-columns: 100%;
+    text-align: center;
+    width: 15%;
+    position: absolute;
+    left: 42.3%;
+    max-height: 65vh;
+    overflow-y: scroll;
+}
+.share-patient .entry-view2 {
+    margin-top: 1%;
+    display:grid;
+    grid-template-columns: 50% 50%;
+    text-align: center;
+    width: 30%;
+    position: absolute;
+    left: 35%;
+    max-height: 65vh;
+    overflow-y: scroll;
+}
+.share-patient .entry-view3 {
+    margin-top: 1%;
+    display:grid;
+    grid-template-columns: 33% 33% 33%;
+    text-align: center;
+    width: 45%;
+    position: absolute;
+    left: 27.5%;
+    max-height: 65vh;
+    overflow-y: scroll;
+}
+
+.share-patient .entry {
+    border: 2px solid rgba(77,71,195,0.05); 
+    min-height: 130px;
+    max-height: 130px;
+    max-width: 80%;
+    min-width: 80%;
+    margin: 10%;
+    background-color: #F0F0F0;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    overflow-x: hidden;
+    border-radius: 5px;
+}
+
+.share-patient .view {
+    font-size: 0.8em;
+    color: #302E73;
+    padding-top: 29%;
+    padding-right: 10%;
+    text-align: right;
+}
+.share-patient .verify {
+    font-size: 0.8em;
+    color: #302E73;
+    padding-top: 14.5%;
+    padding-right: 10%;
+    text-align: right;
+}
+
+.share-patient .patient-name-verify {
+    color: #6D6D6D;
+}
+
+
+.share-patient .entryd {
+    border: 2px solid rgba(77,71,195,0.05); 
+    min-height: 130px;
+    max-height: 130px;
+    max-width: 80%;
+    min-width: 80%;
+    margin: 10%;
+    background-color: #F0F0F0;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    overflow-x: hidden;
+    border-radius: 5px;
+}
+.share-patient .entryd:hover{
+    background-color: #E2E8F0;
+    color: #4D47C3;
+    cursor: pointer;
+}
+
+.share-patient .add {
+    position: absolute;
+    bottom: 10%;
+    width: 15%;
+    left: 42.5%;
+    border-radius: 5px;
+    background-color: #4D47C3;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 1em ;
+    height: 42px;
+}
+.share-patient .addl {
+    position: absolute;
+    bottom: 30%;
+    width: 15%;
+    left: 42.5%;
+    border-radius: 5px;
+    background-color: #4D47C3;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 1em ;
+    height: 42px;
+}
+.share-patient .add:hover {
+    cursor: pointer;
+}
+.share-patient .addl:hover {
+    cursor: pointer;
+}
+.share-patient .share {
+    cursor: pointer;
+    font-size: 0.8em;
+    margin-top: 29%;
+    padding-right: 5%;
+    color: white;
+    background-color: #CC2727;
+    border: 1px solid rgba(255,255,255,.5);
+    width: 50%;
+    margin-left:19.5%;
+    text-align: center;
+    padding-left: 5%;
+}
+
+.share-patient .share:hover {
+    background-color: #D55454;
+}
+

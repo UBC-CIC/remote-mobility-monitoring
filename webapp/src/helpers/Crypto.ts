@@ -17,6 +17,5 @@ export function decrypt(s: string|undefined): string {
         return "";
     }
     const s_split = s.split("-s1la2sh-").join("/");
-    console.log(s_split);
     return AES.decrypt(s_split, key).toString(CryptoJS.enc.Utf8);
 }

@@ -7,18 +7,23 @@ import {decrypt} from "../../helpers/Crypto";
 
 function Patient() {
     const nav = useNavigate();
-    const [patientDetails, setPatientDetails] = useState({});
+    const [patientDetails, setPatientDetails]: any = useState({});
     const {patientIdEncrypt} = useParams();
     const [deletionMessage, setDeletionMessage] = useState("");
     const patientId = decrypt(patientIdEncrypt);
 
 
     useEffect(() => {
-        console.log(patientId);
         if (!patientId) return;
         ServiceHandler.getPatient(patientId)
             .then((data: any) => {
                 setPatientDetails(data);
+            })
+            .catch((err) => console.log(err));
+        ServiceHandler.queryMetrics([patientId], {"year": 2022, "month": 3, "day":20}, 
+            {"year": 2023, "month": 11, "day":20})
+            .then((data: any) => {
+                console.log(data);
             })
             .catch((err) => console.log(err));
     }, []);
@@ -47,6 +52,7 @@ function Patient() {
             {deletionMessage && (
                 <div>{deletionMessage}</div>
             )}
+            {patientDetails.is_primary? "Hello": "Not primary"}<button onClick={(e) => nav("share")}>Share</button>
         </>
     );
 }

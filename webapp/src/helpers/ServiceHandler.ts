@@ -17,6 +17,12 @@ type response = {
     text: () => Promise<string>,
 }
 
+type date = {
+    year: number,
+    month: number,
+    day: number
+}
+
 /*
  * This is the ServiceHandler object that will be eported to be used by all the other
  * pages to make the relevant API calls to the backend.
@@ -154,6 +160,50 @@ export const ServiceHandler = {
         });
         return addCallbacks(req);
     },
+    sharePatient: (caregiverId: string, patientId: string) => {
+        const idToken = getIdToken();
+        const base_url =createBaseUrl("caregiver");
+        const url = base_url.concat(`/caregivers/${caregiverId}/patients/${patientId}`);
+        const req = fetch(url, {
+            method: "POST", 
+            mode: "cors", 
+            cache: "no-cache", 
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
+            },
+        });
+        return addCallbacks(req);
+
+    },
+    queryMetrics: (patientIdList: string[], startDate: date, endDate: date) => {
+        const sDate = new Date(startDate.year, startDate.month - 1, startDate.day); // Subtract 1 from the month to make it 0-indexed
+        const startDateIso = sDate.toISOString().substring(0, 10).concat("T00:00:00");
+
+        const eDate = new Date(endDate.year, endDate.month - 1, endDate.day); // Subtract 1 from the month to make it 0-indexed
+        const endDateIso = eDate.toISOString().substring(0, 10).concat("T23:59:59");
+
+        const idToken = getIdToken();
+        const base_url = createBaseUrl("caregiver");
+        let url = base_url.concat("/metrics?");
+        for (const patientId of patientIdList) {
+            url = url.concat(`patients=${patientId}&`);
+        }
+        url = url.concat(`start=${startDateIso}&`);
+        url = url.concat(`end=${endDateIso}`);
+        const req = fetch(url, {
+            method: "GET", 
+            mode: "cors", 
+            cache: "no-cache", 
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
+            },
+        });
+        return addCallbacks(req);
+    }
 };
 
 /*
@@ -183,7 +233,6 @@ const createBaseUrl = (loginType: string) => {
 * */
 const addCallbacks = (p: Promise<response>) => {
     return p.then((res: response) => {
-        console.log(res.status);
         if (res.status === 200) {
             return res.json();
         }
