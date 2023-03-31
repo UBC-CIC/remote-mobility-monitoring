@@ -95,6 +95,7 @@ export const ServiceHandler = {
     },
     getAllPatients: () => {
         const idToken = getIdToken();
+        console.log(idToken);
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();
         const url = base_url.concat("/caregivers/").concat(caregiverId).concat("/patients");
