@@ -31,6 +31,8 @@ public class GetAllCaregiversResponseBody {
         private String lastName;
         @SerializedName(Const.IS_PRIMARY_NAME)
         private Boolean isPrimary;
+        @SerializedName(Const.VERIFIED_NAME)
+        private Boolean verified;
 
         public static CaregiverSerialization fromCaregiver(Caregiver caregiver) {
             return CaregiverSerialization.builder()
@@ -38,6 +40,7 @@ public class GetAllCaregiversResponseBody {
                     .firstName(caregiver.getFirstName())
                     .lastName(caregiver.getLastName())
                     .isPrimary(caregiver.getIsPrimary())
+                    .verified(caregiver.getVerified())
                     .build();
         }
     }

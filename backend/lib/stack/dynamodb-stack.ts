@@ -54,7 +54,6 @@ export class DynamoDbStack extends cdk.Stack {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      // TODO: encryption
     };
   }
 

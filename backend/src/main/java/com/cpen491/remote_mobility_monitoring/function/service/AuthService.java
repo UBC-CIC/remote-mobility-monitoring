@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.AdminTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 
-// TODO: Unit test
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {

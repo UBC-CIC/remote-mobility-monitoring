@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getBoolFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
 
 @Slf4j
 @AllArgsConstructor
@@ -148,8 +150,12 @@ public class PatientDao {
         List<Map<String, AttributeValue>> result = genericDao
                 .findAllAssociationsOnSidIndex(patientId, CaregiverTable.ID_PREFIX).items();
         return result.stream().map(map -> {
-            Caregiver caregiver = Caregiver.convertPrimaryFromMap(map);
+            Caregiver caregiver = Caregiver.convertFromMap(map);
             caregiver.setSid(caregiver.getPid());
+            if (getBoolFromMap(map, CaregiverTable.IS_PRIMARY_NAME)) {
+                caregiver.setIsPrimary(true);
+                caregiver.setVerified(getFromMap(map, CaregiverTable.AUTH_CODE_NAME) == null);
+            }
             return caregiver;
         }).collect(Collectors.toList());
     }
