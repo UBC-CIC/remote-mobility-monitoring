@@ -4,7 +4,7 @@ import "chart.js/auto";
 import { MetricsData, PatientsList } from "./NewDashboard";
 import "./NewDashboard.css"; // import the CSS file
 
-function Graph(props: { data: MetricsData, patients: PatientsList }) {
+function Barchart(props: { data: MetricsData, patients: PatientsList }) {
     const { data, patients } = props;
     const chartData: {[metricName: string]: {[patientName: string]: number[]}} = {};
     const colors = ["rgba(75,192,192,1)", "rgba(192,75,192,1)", "rgba(192,192,75,1)", "rgba(75,75,192,1)", "rgba(192,75,75,1)", "rgba(75,192,75,1)"];
@@ -34,7 +34,9 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
                     }
                 }
             }
-        }
+        },
+        barPercentage: 0.5,
+        categoryPercentage: 0.9
     };
 
     const chart = Object.entries(chartData).map(([metricName, metricValues]) => {
@@ -45,7 +47,7 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
 
         return (
             <div key={metricName} className="chart-container" style={{ textAlign: "center", marginBottom: "70px" }}>
-                <h3>{headers[colorIndex - 1]}</h3>
+                <h4 style={{ color: "lightblue" }}>{headers[colorIndex - 1]}</h4>
                 <Bar data={{
                     labels: chartLabels,
                     datasets: [{
@@ -77,4 +79,4 @@ function Graph(props: { data: MetricsData, patients: PatientsList }) {
     );
 }
 
-export default Graph;
+export default Barchart;

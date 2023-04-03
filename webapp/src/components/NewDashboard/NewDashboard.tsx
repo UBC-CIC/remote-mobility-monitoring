@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Graph from "./Graph";
+import {stringify} from "csv-stringify";
 import "./NewDashboard.css";
+
 import sampleData from "./sampleData";
+import Barchart from "./Barchart";
+import Makegraph from "./Linegraph";
+
 
 export interface Patient {
   patient_id: string;
@@ -26,9 +30,29 @@ export interface MetricsData {
   metrics: Metric[];
 }
 
+// This interface is only used for data filtering
+interface metric {
+    patient_name: string;
+    metric_name: string;
+    metric_value: string;
+    timestamp: string;
+  }
+
 function NewDashboard(){
 
-    const data = sampleData();
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [data, setData] = useState<metric[]>(sampleData());
+    
+    /*
+    if (startDate && endDate) {
+        const filtered = sampleData().filter((data) => {
+            const timestamp = new Date(data.timestamp).getTime();
+            return timestamp >= startDate.getTime() && timestamp <= endDate.getTime();
+        });
+        setData(filtered);
+    }
+    */
 
     // Create a new instance of PatientsList
     const patientsList: PatientsList = {
@@ -53,20 +77,139 @@ function NewDashboard(){
             };
         })
     };
+    
+    // const graph = Makegraph(data);
+    
+    // objects for constructing tables
+    const patientNames = Array.from(new Set(data.map((d) => d.patient_name)));
+    const [expandedTables, setExpandedTables] = useState(
+        Object.fromEntries(patientNames.map((patientName) => [patientName, false]))
+    );
+    
+    const toggleTable = (patientName: string) => {
+        setExpandedTables((prevExpandedTables) => ({
+            ...prevExpandedTables,
+            [patientName]: !prevExpandedTables[patientName],
+        }));
+    };
 
     return (
         <div className="Dashboard">
             <h2>Dashboard</h2>
-            <div className="graphs">
-                <Graph data={metricsData} patients={patientsList} />
+
+            <button 
+                style={{marginLeft: "800px", color: "white", backgroundColor: "black", fontSize: "20px"}} onClick={() => handleExport(data)}>
+                    Export to CSV
+            </button>
+
+            <div className="datepicker" style={{ marginTop: "20px", marginLeft : "100px", marginBottom : "40px", }} >
+                <div>
+                    <label htmlFor="startDatePicker" style={{textAlign: "center", marginLeft : "60px"}} >Start</label>
+                    <DatePicker
+                        id="startDatePicker"
+                        selected={startDate}
+                        onChange={(date: Date | null) => setStartDate(date)}
+                        dateFormat="yyyy-MM-dd"
+                        maxDate={endDate}
+                    />
+                </div>
+                <div style={{marginTop: "20px"}}>
+                    <label htmlFor="endDatePicker" style={{textAlign: "center", marginLeft : "60px"}}>End</label>
+                    <DatePicker
+                        id="endDatePicker"
+                        selected={endDate}
+                        onChange={(date: Date | null) => setEndDate(date)}
+                        dateFormat="yyyy-MM-dd"
+                        minDate={startDate}
+                    />
+                </div>
+            </div>
+
+            <div className="barcharts"  style={{ width: "80%", height: "50%" }}>
+                <Barchart data={metricsData} patients={patientsList} />
+            </div>
+
+            <div className="Instructions" style={{textAlign: "center", fontSize: "30px", marginTop: "50px", marginBottom: "30px" }}>
+                Click pateint name to view full metrics
+            </div>
+            <div className="table">
+                <div style={{ textAlign: "center", maxWidth: "1000px", margin: "0 auto" }}>
+                    {patientNames.map((patientName) => (
+                        <div
+                            key={patientName}
+                            style={{
+                                marginBottom: "120px",
+                                margin: "0 auto",
+                                maxWidth: "1000px",
+                            }}
+                        >
+                            <h3 style={{ cursor: "pointer" }} onClick={() => toggleTable(patientName)}>
+                                {patientName}
+                            </h3>
+                            {expandedTables[patientName] && (
+                                <table
+                                    style={{
+                                        width: "100%",
+                                        borderCollapse: "collapse",
+                                        marginLeft: "-20px",
+                                        marginBottom: "70px",
+                                        fontSize: "0.7em",
+                                    }}
+                                >
+                                    <thead style={{ borderBottom: "1px solid black" }}>
+                                        <tr>
+                                            <th style={{ padding: "10px", minWidth: "200px" }}>Timestamp</th>
+                                            <th style={{ padding: "10px", minWidth: "200px" }}>Metric Name</th>
+                                            <th style={{ padding: "10px", minWidth: "200px" }}>Metric Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data
+                                            .filter((d) => d.patient_name === patientName)
+                                            .map((d, index) => (
+                                                <tr
+                                                    key={index}
+                                                    style={{ borderBottom: "1px solid lightgray" }}
+                                                >
+                                                    <td style={{ padding: "10px" }}>
+                                                        {new Date(d.timestamp).toLocaleDateString()}
+                                                    </td>
+                                                    <td style={{ padding: "10px" }}>{d.metric_name}</td>
+                                                    <td style={{ padding: "10px" }}>{d.metric_value}</td>
+                                                </tr>
+                                            ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
-
 }
 
+export default NewDashboard;
 
-
+// handler of exporting data to csv
+function handleExport(data: any[]) {
+    // Create the CSV string
+    let csv = "data:text/csv;charset=utf-8,";
+  
+    // Add the header row
+    csv += "Patient Name,Metric Name,Metric Value,Timestamp\n";
+  
+    // Add each data row
+    data.forEach((row) => {
+        csv += `${row.patient_name},${row.metric_name},${row.metric_value},${row.timestamp}\n`;
+    });
+  
+    // Create a temporary link to download the CSV file
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csv));
+    link.setAttribute("download", "patient_metrics.csv");
+    link.click();
+}
 
 /*
 function NewDashboard() {
@@ -163,4 +306,3 @@ function NewDashboard() {
   
 }
 */
-export default NewDashboard;  
