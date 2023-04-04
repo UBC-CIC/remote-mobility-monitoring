@@ -7,7 +7,7 @@
 
 import Foundation
 
-let baseUrl = "https://1au11fgjeb.execute-api.us-west-2.amazonaws.com/prod" // temporary
+let baseUrl = "https://tqd4aslpsj.execute-api.us-west-2.amazonaws.com/prod" // temporary
 
 func verifyPatient(patientId: String, caregiverId: String, authCode: String, idToken: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
     let endpoint = baseUrl + "/caregivers/\(caregiverId)" + "/patients/\(patientId)/accept"
