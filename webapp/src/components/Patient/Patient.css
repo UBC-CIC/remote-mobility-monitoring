@@ -1,0 +1,25 @@
+
+html, body {
+    height: 100%;
+}
+
+.patient-container {
+    display: grid;
+    grid-template-columns: 22% 78%;
+    min-height: 600px;
+    text-align: center;
+}
+
+.patient-container .filters {
+    min-height: 100%;
+    border-right: 1px solid #DBDBDB;
+    padding: 5%;
+}
+
+.patient-container .data {
+    min-height: 100%;
+}
+
+.patient-container .padding {
+    min-height: 20px;
+}
