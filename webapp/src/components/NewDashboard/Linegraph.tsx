@@ -111,7 +111,6 @@ export default function LineGraph() {
 
     return (
         <div>
-            <h4 style={{ textAlign: "center" }}>Select a Metric</h4>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <select value={selectedMetric} onChange={handleMetricSelect} style={{ fontSize: "14px" }}>
                     <option value="all">All Metrics</option>

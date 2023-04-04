@@ -37,79 +37,66 @@ interface metric {
     timestamp: string;
   }
 
+
 function NewDashboard(){
-    
+
     const [data, setData] = useState<metric[]>(sampleData());
-    
-    // objects for constructing tables
-    const patientNames = Array.from(new Set(data.map((d) => d.patient_name)));
+
+    const headers = ["Date", "Step Length (km)", "Double Support Time (%)", "Walking Speed (kpm)", "Walking Asymmetry (%)", "Distance Walked (km)", " Step Count (s)"];
+
+    const getMetricValue = (metricName: string, timestamp: string): string => {
+        const metricData = data.find(
+            (metric) => metric.metric_name === metricName && metric.timestamp === timestamp
+        );
+        return metricData ? metricData.metric_value : "-";
+    };
+
+    const formatDate = (timestamp: string): string => {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString();
+    };
 
     return (
         <div className="Dashboard">
             <h2>Dashboard</h2>
+            <h3>{data[0].patient_name}</h3>
 
-            <button 
-                style={{marginLeft: "800px", color: "white", backgroundColor: "black", fontSize: "20px"}} onClick={() => handleExport(data)}>
-                    Export to CSV
-            </button>
-
-            <div className="linegraphs"  style={{ width: "100%", height: "150%" }}>
+            <div className="linegraphs"  style={{ width: "100%", height: "150%", marginBottom: "40px" }}>
                 <LineGraph />
             </div>
 
-            <div className="table" style={{  display: "flex", justifyContent: "center", alignItems: "center"}}>
-                <div style={{ textAlign: "center", maxWidth: "800px" }}>
-                    {patientNames.map((patientName) => (
-                        <div
-                            key={patientName}
-                            style={{
-                                marginBottom: "70px",
-                                margin: "0 auto",
-                                maxWidth: "1000px",
-                            }}
-                        >
-                            {(
-                                <table
-                                    style={{
-                                        width: "100%",
-                                        borderCollapse: "collapse",
-                                        fontSize: "0.7em",
-                                    }}
-                                >
-                                    <thead style={{ borderBottom: "1px solid black" }}>
-                                        <tr>
-                                            <th style={{ padding: "10px", minWidth: "200px" }}>Timestamp</th>
-                                            <th style={{ padding: "10px", minWidth: "200px" }}>Metric Name</th>
-                                            <th style={{ padding: "10px", minWidth: "200px" }}>Metric Value</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {data
-                                            .filter((d) => d.patient_name === patientName)
-                                            .map((d, index) => (
-                                                <tr
-                                                    key={index}
-                                                    style={{ borderBottom: "1px solid lightgray" }}
-                                                >
-                                                    <td style={{ padding: "10px" }}>
-                                                        {new Date(d.timestamp).toLocaleDateString()}
-                                                    </td>
-                                                    <td style={{ padding: "10px" }}>{d.metric_name}</td>
-                                                    <td style={{ padding: "10px" }}>{d.metric_value}</td>
-                                                </tr>
-                                            ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
+            <table style={{ margin: "0 auto", width: "80%" }}>
+                <thead>
+                    <tr>
+                        {headers.map((header) => (
+                            <th key={header}>{header}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map((metric, index) => (
+                        <React.Fragment key={metric.timestamp}>
+                            <tr>
+                                <td>{formatDate(metric.timestamp)}</td>
+                                <td>{getMetricValue("stepLength", metric.timestamp)}</td>
+                                <td>{getMetricValue("doubleSupportTime", metric.timestamp)}</td>
+                                <td>{getMetricValue("walkingSpeed", metric.timestamp)}</td>
+                                <td>{getMetricValue("walkingAsymmetry", metric.timestamp)}</td>
+                                <td>{getMetricValue("distanceWalked", metric.timestamp)}</td>
+                                <td>{getMetricValue("stepCount", metric.timestamp)}</td>
+                            </tr>
+                            {index !== data.length - 1 && <tr style={{ backgroundColor: "#eee" }}><td colSpan={7} style={{ height: "1px" }}></td></tr>}
+                        </React.Fragment>
                     ))}
-                </div>
-            </div>
+                </tbody>
+            </table>
+
         </div>
     );
 }
 
 export default NewDashboard;
+
 
 // handler of exporting data to csv
 function handleExport(data: any[]) {
@@ -135,6 +122,12 @@ function handleExport(data: any[]) {
             <div className="barcharts"  style={{ width: "80%", height: "50%" }}>
                 <Barchart data={metricsData} patients={patientsList} />
             </div>
+
+
+            <button 
+                style={{marginLeft: "800px", color: "white", backgroundColor: "black", fontSize: "20px"}} onClick={() => handleExport(data)}>
+                    Export to CSV
+            </button>
 */ 
 
 /*
