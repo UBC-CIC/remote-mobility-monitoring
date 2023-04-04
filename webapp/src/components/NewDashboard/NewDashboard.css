@@ -11,14 +11,3 @@
   font-weight: bold;
   margin-bottom: 30px;
 }
-
-.barcharts {
-  display: flex;
-  justify-content: center;
-}
-
-.chart-container canvas {
-  width: 100% !important;
-  height: 500px !important;
-  margin-top: 40px;
-}

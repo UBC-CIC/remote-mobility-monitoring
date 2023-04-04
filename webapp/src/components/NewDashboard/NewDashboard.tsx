@@ -38,48 +38,11 @@ interface metric {
   }
 
 function NewDashboard(){
-
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
-    const [data, setData] = useState<metric[]>(sampleData());
     
-
-    // Create a new instance of PatientsList
-    const patientsList: PatientsList = {
-        patients: data.map(({ patient_name }) => {
-            const [first_name, last_name] = patient_name.split("-");
-            return {
-                patient_id: patient_name,
-                first_name,
-                last_name
-            };
-        })
-    };
-  
-    // Create a new instance of MetricsData
-    const metricsData: MetricsData = {
-        metrics: data.map(({ patient_name, metric_name, metric_value, timestamp }) => {
-            return {
-                patient_id: patient_name,
-                metric_name,
-                metric_value,
-                timestamp
-            };
-        })
-    };
+    const [data, setData] = useState<metric[]>(sampleData());
     
     // objects for constructing tables
     const patientNames = Array.from(new Set(data.map((d) => d.patient_name)));
-    const [expandedTables, setExpandedTables] = useState(
-        Object.fromEntries(patientNames.map((patientName) => [patientName, false]))
-    );
-    
-    const toggleTable = (patientName: string) => {
-        setExpandedTables((prevExpandedTables) => ({
-            ...prevExpandedTables,
-            [patientName]: !prevExpandedTables[patientName],
-        }));
-    };
 
     return (
         <div className="Dashboard">
@@ -90,51 +53,26 @@ function NewDashboard(){
                     Export to CSV
             </button>
 
-            <div className="datepicker" style={{ marginTop: "20px", marginLeft : "100px", marginBottom : "40px", }} >
-                <div>
-                    <label htmlFor="startDatePicker" style={{textAlign: "center", marginLeft : "60px"}} >Start</label>
-                    <DatePicker
-                        id="startDatePicker"
-                        selected={startDate}
-                        onChange={(date: Date | null) => setStartDate(date)}
-                        dateFormat="yyyy-MM-dd"
-                        maxDate={endDate}
-                    />
-                </div>
-                <div style={{marginTop: "20px"}}>
-                    <label htmlFor="endDatePicker" style={{textAlign: "center", marginLeft : "60px"}}>End</label>
-                    <DatePicker
-                        id="endDatePicker"
-                        selected={endDate}
-                        onChange={(date: Date | null) => setEndDate(date)}
-                        dateFormat="yyyy-MM-dd"
-                        minDate={startDate}
-                    />
-                </div>
-            </div>
-
-            <div className="linegraphs"  style={{ width: "100%", height: "100%" }}>
+            <div className="linegraphs"  style={{ width: "100%", height: "150%" }}>
                 <LineGraph />
             </div>
 
-            <div className="table">
-                <div style={{ textAlign: "center", maxWidth: "1000px", margin: "0 auto" }}>
+            <div className="table" style={{  display: "flex", justifyContent: "center", alignItems: "center"}}>
+                <div style={{ textAlign: "center", maxWidth: "800px" }}>
                     {patientNames.map((patientName) => (
                         <div
                             key={patientName}
                             style={{
-                                marginBottom: "120px",
+                                marginBottom: "70px",
                                 margin: "0 auto",
                                 maxWidth: "1000px",
                             }}
                         >
-                            {expandedTables[patientName] && (
+                            {(
                                 <table
                                     style={{
                                         width: "100%",
                                         borderCollapse: "collapse",
-                                        marginLeft: "-20px",
-                                        marginBottom: "70px",
                                         fontSize: "0.7em",
                                     }}
                                 >
