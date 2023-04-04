@@ -224,6 +224,7 @@ public class CaregiverDaoTest extends DaoTestParent {
         Caregiver caregiver = buildCaregiverDefault();
         createCaregiver(caregiver);
         cut.addPatientPrimary(PATIENT_EMAIL1, PID, AUTH_CODE);
+        cut.acceptPatientPrimary(PATIENT_ID1, PID);
 
         boolean result = cut.isPrimaryCaregiverOfPatient(PATIENT_ID1, PID);
         assertTrue(result);
@@ -253,12 +254,37 @@ public class CaregiverDaoTest extends DaoTestParent {
     }
 
     @Test
+    public void testIsPrimaryCaregiverOfPatient_WHEN_PrimaryCaregiverNotVerified_THEN_ReturnFalse() {
+        Patient patient = buildPatientDefault();
+        createPatient(patient);
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
+        cut.addPatientPrimary(PATIENT_EMAIL1, PID, AUTH_CODE);
+
+        boolean result = cut.isPrimaryCaregiverOfPatient(PATIENT_ID1, PID);
+        assertFalse(result);
+    }
+
+    @Test
     public void testHasPatient_HappyCase() {
         Patient patient = buildPatientDefault();
         createPatient(patient);
         Caregiver caregiver = buildCaregiverDefault();
         createCaregiver(caregiver);
         putPrimaryKey(PID, PATIENT_ID1);
+
+        boolean result = cut.hasPatient(PATIENT_ID1, PID);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testHasPatient_WHEN_PrimaryCaregiverVerified_THEN_ReturnTrue() {
+        Patient patient = buildPatientDefault();
+        createPatient(patient);
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
+        cut.addPatientPrimary(PATIENT_EMAIL1, PID, AUTH_CODE);
+        cut.acceptPatientPrimary(PATIENT_ID1, PID);
 
         boolean result = cut.hasPatient(PATIENT_ID1, PID);
         assertTrue(result);
@@ -288,6 +314,18 @@ public class CaregiverDaoTest extends DaoTestParent {
         createPatient(patient);
         Caregiver caregiver = buildCaregiverDefault();
         createCaregiver(caregiver);
+
+        boolean result = cut.hasPatient(PATIENT_ID1, PID);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testHasPatient_WHEN_PrimaryCaregiverNotVerified_THEN_ReturnFalse() {
+        Patient patient = buildPatientDefault();
+        createPatient(patient);
+        Caregiver caregiver = buildCaregiverDefault();
+        createCaregiver(caregiver);
+        cut.addPatientPrimary(PATIENT_EMAIL1, PID, AUTH_CODE);
 
         boolean result = cut.hasPatient(PATIENT_ID1, PID);
         assertFalse(result);

@@ -118,7 +118,9 @@ public class CaregiverService {
         String authCode = generateAuthCode();
         caregiverDao.addPatientPrimary(body.getPatientEmail(), body.getCaregiverId(), authCode);
 
-        sesWrapper.caregiverAddPatientEmail(body.getPatientEmail(), body.getCaregiverId(), authCode);
+        if (body.isSendEmail()) {
+            sesWrapper.caregiverAddPatientEmail(body.getPatientEmail(), body.getCaregiverId(), authCode);
+        }
 
         return AddPatientPrimaryResponseBody.builder()
                 .authCode(authCode)
