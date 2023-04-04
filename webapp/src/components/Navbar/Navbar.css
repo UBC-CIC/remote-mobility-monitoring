@@ -11,11 +11,18 @@
 .navbar .navbar-items {
     margin-left: 3%;
 }
+.navbar .navbar-items-logout {
+    margin-left: 60%;
+}
 .navbar right {
     margin-left: 3%;
     text-align: right;
 }
 .navbar .navbar-items:hover {
+    color: #E3C55D;
+    cursor: pointer;
+}
+.navbar .navbar-items-logout:hover {
     color: #E3C55D;
     cursor: pointer;
 }

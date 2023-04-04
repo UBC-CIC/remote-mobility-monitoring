@@ -12,12 +12,9 @@ function CaregiverNavbar() {
                 nav("/dashboard");
             }}>Dashboard</span>
             <span className="navbar-items" onClick={(e) => {
-                nav("/addpatient");
-            }}>Add Patients</span>
-            <span className="navbar-items" onClick={(e) => {
                 nav("/changepwd");
             }}>Change Password</span>
-            <span className="navbar-items" onClick={(e) => {
+            <span className="navbar-items-logout" onClick={(e) => {
                 logout();
                 nav("/login");
             }}>Logout</span>
