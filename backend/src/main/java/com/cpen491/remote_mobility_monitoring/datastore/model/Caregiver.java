@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.CaregiverTable;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getBoolFromMap;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.putInMap;
 
@@ -30,10 +29,11 @@ public class Caregiver extends BaseModel {
     private String lastName;
     private String title;
     private String phoneNumber;
-    // The following 3 attributes are only required in records that associate a patient with his/her primary caregiver
+    // The following 4 attributes are only required in records that associate a patient with his/her primary caregiver
     private String authCode;
     private String authCodeTimestamp;
     private Boolean isPrimary;
+    private Boolean verified;
 
     public static Map<String, AttributeValue> convertToMap(Caregiver caregiver) {
         Map<String, AttributeValue> map = new HashMap<>();
@@ -75,12 +75,6 @@ public class Caregiver extends BaseModel {
         Caregiver caregiver = convertFromMap(map);
         caregiver.setAuthCode(getFromMap(map, CaregiverTable.AUTH_CODE_NAME));
         caregiver.setAuthCodeTimestamp(getFromMap(map, CaregiverTable.AUTH_CODE_TIMESTAMP_NAME));
-        return caregiver;
-    }
-
-    public static Caregiver convertPrimaryFromMap(Map<String, AttributeValue> map) {
-        Caregiver caregiver = convertFromMap(map);
-        caregiver.setIsPrimary(getBoolFromMap(map, CaregiverTable.IS_PRIMARY_NAME));
         return caregiver;
     }
 }
