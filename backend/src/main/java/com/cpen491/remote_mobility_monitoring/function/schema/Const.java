@@ -35,8 +35,8 @@ public final class Const {
     public static final String SUB_NAME = "sub";
     public static final String SEND_EMAIL = "send_email";
     public static final String MESSAGE_NAME = "message";
-    public static final String PATIENT_BIRTHDAY = "patient_birthday";
-    public static final String PATIENT_SEX = "patient_sex";
-    public static final String PATIENT_HEIGHT = "patient_height";
-    public static final String PATIENT_WEIGHT = "patient_weight";
+    public static final String PATIENT_BIRTHDAY = "birthday";
+    public static final String PATIENT_SEX = "sex";
+    public static final String PATIENT_HEIGHT = "height";
+    public static final String PATIENT_WEIGHT = "weight";
 }

@@ -58,7 +58,7 @@ public class AddMetricsRequestBody {
                 metrics.setHeight(patient.getHeight());
                 metrics.setWeight(patient.getWeight());
                 metrics.setSex(patient.getSex());
-                metrics.setBirthday(patient.getBirthday().toString());
+                metrics.setBirthday(patient.getBirthday() == null ? null : patient.getBirthday().toString());
                 metrics.setTimestamp(serialization.getTimestamp());
             }
             return metricsList;
