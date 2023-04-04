@@ -44,6 +44,7 @@ public class PatientDao {
         }
 
         genericDao.setDate(newRecord);
+        log.info("Creating new Patient record {}", Patient.convertToMap(newRecord));
         genericDao.put(Patient.convertToMap(newRecord));
     }
 

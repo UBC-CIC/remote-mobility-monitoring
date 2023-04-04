@@ -77,6 +77,10 @@ public final class Const {
 
     public static class MetricsTable {
         public static final String PATIENT_ID_NAME = "patient_id";
+        public static final String PATIENT_SEX_NAME = "patient_sex";
+        public static final String PATIENT_BIRTHDAY_NAME = "patient_birthday";
+        public static final String PATIENT_HEIGHT_NAME = "patient_height";
+        public static final String PATIENT_WEIGHT_NAME = "patient_weight";
         public static final String MEASURE_NAME_NAME = "measure_name";
         public static final String MEASURE_VALUE_NAME = "measure_value";
         public static final String TIME_NAME = "time";

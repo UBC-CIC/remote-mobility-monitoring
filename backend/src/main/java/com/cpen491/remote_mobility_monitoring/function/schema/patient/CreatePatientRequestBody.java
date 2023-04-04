@@ -27,7 +27,7 @@ public class CreatePatientRequestBody {
     @SerializedName(Const.PATIENT_BIRTHDAY)
     private String birthday;        // This will be converted to a Date object in the backend yyy-mm-dd
     @SerializedName(Const.PATIENT_HEIGHT)
-    private float height;
+    private Float height;
     @SerializedName(Const.PATIENT_WEIGHT)
-    private float weight;
+    private Float weight;
 }

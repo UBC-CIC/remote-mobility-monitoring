@@ -66,7 +66,11 @@ public class MetricsDao {
 
             List<Dimension> dimensions = new ArrayList<>();
             Dimension patientId = Dimension.builder().name(MetricsTable.PATIENT_ID_NAME).value(metrics.getPatientId()).build();
-            dimensions.add(patientId);
+            Dimension patientSex = Dimension.builder().name(MetricsTable.PATIENT_SEX_NAME).value(metrics.getSex() == null ? null : metrics.getSex()).build();
+            Dimension patientBirthday = Dimension.builder().name(MetricsTable.PATIENT_BIRTHDAY_NAME).value(metrics.getBirthday() == null ? null : metrics.getBirthday()).build();
+            Dimension patientHeight = Dimension.builder().name(MetricsTable.PATIENT_HEIGHT_NAME).value(metrics.getHeight() == null ? null : metrics.getHeight().toString()).build();
+            Dimension patientWeight = Dimension.builder().name(MetricsTable.PATIENT_WEIGHT_NAME).value(metrics.getWeight() == null ? null : metrics.getWeight().toString()).build();
+            dimensions.addAll(List.of(patientId, patientSex, patientBirthday, patientHeight, patientWeight));
 
             Record record = Record.builder()
                     .dimensions(dimensions)
@@ -141,6 +145,18 @@ public class MetricsDao {
             switch (columnInfo.name()) {
                 case MetricsTable.PATIENT_ID_NAME:
                     metricsBuilder.patientId(datum.scalarValue());
+                    break;
+                case MetricsTable.PATIENT_SEX_NAME:
+                    metricsBuilder.sex(datum.scalarValue());
+                    break;
+                case MetricsTable.PATIENT_BIRTHDAY_NAME:
+                    metricsBuilder.birthday(datum.scalarValue());
+                    break;
+                case MetricsTable.PATIENT_HEIGHT_NAME:
+                    metricsBuilder.height(Float.parseFloat(datum.scalarValue()));
+                    break;
+                case MetricsTable.PATIENT_WEIGHT_NAME:
+                    metricsBuilder.weight(Float.parseFloat(datum.scalarValue()));
                     break;
                 case MetricsTable.MEASURE_NAME_NAME:
                     metricsBuilder.measureName(MeasureName.convertToEnum(datum.scalarValue()));

@@ -287,6 +287,7 @@ class PatientServiceTest {
 
     @Test
     public void testAddMetrics_HappyCase() {
+        Mockito.when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
         AddMetricsSerialization serialization1 = buildAddMetricsSerialization(METRIC_VALUES1);
         AddMetricsSerialization serialization2 = buildAddMetricsSerialization(METRIC_VALUES2);
         List<AddMetricsSerialization> serializations = Arrays.asList(serialization1, serialization2);
@@ -317,6 +318,7 @@ class PatientServiceTest {
     public void testAddMetrics_WHEN_MetricsDaoAddThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(metricsDao).add(anyList());
+        Mockito.when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
 
         List<AddMetricsSerialization> serializations = Arrays.asList(buildAddMetricsSerialization(METRIC_VALUES1));
         AddMetricsRequestBody requestBody = buildAddMetricsRequestBody(serializations);

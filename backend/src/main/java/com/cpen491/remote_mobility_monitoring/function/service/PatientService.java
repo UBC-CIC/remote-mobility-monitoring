@@ -155,13 +155,13 @@ public class PatientService {
         log.info("Adding Metrics {}", body);
         Validator.validateAddMetricsRequestBody(body);
 
-        patientDao.findById(body.getPatientId());
+        Patient patient = patientDao.findById(body.getPatientId());
 
         List<Metrics> metricsList = new ArrayList<>();
         for (AddMetricsSerialization serialization : body.getMetrics()) {
             Validator.validateAddMetricsSerialization(serialization);
 
-            metricsList.addAll(AddMetricsSerialization.convertToMetrics(body.getPatientId(), serialization));
+            metricsList.addAll(AddMetricsSerialization.convertToMetrics(patient, serialization));
         }
 
         metricsDao.add(metricsList);
@@ -209,6 +209,12 @@ public class PatientService {
         patient.setFirstName(body.getFirstName());
         patient.setLastName(body.getLastName());
         patient.setPhoneNumber(body.getPhoneNumber());
+        patient.setBirthday(
+                isEmpty(body.getBirthday()) ? null : LocalDate.parse(body.getBirthday(), DateTimeFormatter.ISO_DATE)
+        );
+        patient.setHeight(body.getHeight());
+        patient.setWeight(body.getWeight());
+        patient.setSex(body.getSex());
         patientDao.update(patient);
 
         return UpdatePatientResponseBody.builder()
