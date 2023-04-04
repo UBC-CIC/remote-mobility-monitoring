@@ -16,9 +16,6 @@ function VerifyPatient() {
     const {emailEncrypt} = useParams();
     const caregiverId = getCaregiverId();
     const email = decrypt(emailEncrypt);
-    console.log(email);
-    
-
 
     function getWindowDimensions() {
         const { innerWidth: width, innerHeight: height } = window;
