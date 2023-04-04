@@ -4,7 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./NewDashboard.css";
 
 import sampleData from "./sampleData";
-import Barchart from "./Barchart";
+//import Barchart from "./Barchart";
 import LineGraph from "./Linegraph";
 
 
@@ -43,15 +43,6 @@ function NewDashboard(){
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [data, setData] = useState<metric[]>(sampleData());
     
-    /*
-    if (startDate && endDate) {
-        const filtered = sampleData().filter((data) => {
-            const timestamp = new Date(data.timestamp).getTime();
-            return timestamp >= startDate.getTime() && timestamp <= endDate.getTime();
-        });
-        setData(filtered);
-    }
-    */
 
     // Create a new instance of PatientsList
     const patientsList: PatientsList = {
@@ -76,8 +67,6 @@ function NewDashboard(){
             };
         })
     };
-    
-    // const graph = Makegraph(data);
     
     // objects for constructing tables
     const patientNames = Array.from(new Set(data.map((d) => d.patient_name)));

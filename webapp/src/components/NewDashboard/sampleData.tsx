@@ -6,6 +6,7 @@ function sampleData(){
         "walkingSpeed",
         "walkingAsymmetry",
         "distanceWalked",
+        "stepCount"
     ];
     
     const data = [];
