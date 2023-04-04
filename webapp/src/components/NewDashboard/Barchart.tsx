@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
@@ -78,5 +79,4 @@ function Barchart(props: { data: MetricsData, patients: PatientsList }) {
         </div>
     );
 }
-
 export default Barchart;

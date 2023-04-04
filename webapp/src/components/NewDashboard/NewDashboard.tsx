@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {stringify} from "csv-stringify";
 import "./NewDashboard.css";
 
 import sampleData from "./sampleData";
 import Barchart from "./Barchart";
-import Makegraph from "./Linegraph";
+import LineGraph from "./Linegraph";
 
 
 export interface Patient {
@@ -125,8 +124,8 @@ function NewDashboard(){
                 </div>
             </div>
 
-            <div className="barcharts"  style={{ width: "80%", height: "50%" }}>
-                <Barchart data={metricsData} patients={patientsList} />
+            <div className="linegraphs"  style={{ width: "100%", height: "70%" }}>
+                <LineGraph />
             </div>
 
             <div className="Instructions" style={{textAlign: "center", fontSize: "30px", marginTop: "50px", marginBottom: "30px" }}>
@@ -210,6 +209,12 @@ function handleExport(data: any[]) {
     link.setAttribute("download", "patient_metrics.csv");
     link.click();
 }
+
+/*
+            <div className="barcharts"  style={{ width: "80%", height: "50%" }}>
+                <Barchart data={metricsData} patients={patientsList} />
+            </div>
+*/ 
 
 /*
 function NewDashboard() {
