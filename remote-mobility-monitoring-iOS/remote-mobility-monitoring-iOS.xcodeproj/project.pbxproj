@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2238C27429D914AD00C65CDE /* InitialLoadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2238C27329D914AD00C65CDE /* InitialLoadView.swift */; };
+		2238C27629D93F9D00C65CDE /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2238C27529D93F9D00C65CDE /* Helper.swift */; };
 		223F25C229C1B5750036539B /* CognitoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 223F25C129C1B5750036539B /* CognitoView.swift */; };
 		223F25C529C1BC970036539B /* AWSCognitoAuthPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 223F25C429C1BC970036539B /* AWSCognitoAuthPlugin */; };
 		223F25C729C1BC970036539B /* Amplify in Frameworks */ = {isa = PBXBuildFile; productRef = 223F25C629C1BC970036539B /* Amplify */; };
-		223F25CB29C1BE710036539B /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 223F25CA29C1BE710036539B /* SessionManager.swift */; };
 		2249F5ED2994F85200DC8503 /* ApiCallers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2249F5EC2994F85200DC8503 /* ApiCallers.swift */; };
-		2249F5F02995972F00DC8503 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2249F5EF2995972F00DC8503 /* KeychainAccess */; };
 		2259546A29930D1900879733 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 2259546929930D1900879733 /* CodeScanner */; };
+		2262043129DA835900E48D46 /* LogoutButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2262043029DA835900E48D46 /* LogoutButtonView.swift */; };
 		227547B92980BD5100D12030 /* MobilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227547B82980BD5100D12030 /* MobilityView.swift */; };
-		2275C8F229C686970087B6FB /* InitialLoadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2275C8F129C686970087B6FB /* InitialLoadView.swift */; };
 		2275C8F729C809B40087B6FB /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2275C8F629C809B40087B6FB /* AccountView.swift */; };
 		228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */; };
 		228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49C7296CB6510046DFD4 /* Assets.xcassets */; };
@@ -41,11 +41,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2238C27329D914AD00C65CDE /* InitialLoadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialLoadView.swift; sourceTree = "<group>"; };
+		2238C27529D93F9D00C65CDE /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		223F25C129C1B5750036539B /* CognitoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitoView.swift; sourceTree = "<group>"; };
-		223F25CA29C1BE710036539B /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		2249F5EC2994F85200DC8503 /* ApiCallers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiCallers.swift; sourceTree = "<group>"; };
+		2262043029DA835900E48D46 /* LogoutButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoutButtonView.swift; sourceTree = "<group>"; };
 		227547B82980BD5100D12030 /* MobilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilityView.swift; sourceTree = "<group>"; };
-		2275C8F129C686970087B6FB /* InitialLoadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialLoadView.swift; sourceTree = "<group>"; };
 		2275C8F329C6A98F0087B6FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2275C8F629C809B40087B6FB /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "remote-mobility-monitoring-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -72,7 +73,6 @@
 				223F25C729C1BC970036539B /* Amplify in Frameworks */,
 				22C4DCD629C45C6300E20F4F /* JWTDecode in Frameworks */,
 				22A771112989097600BB170A /* HealthKit.framework in Frameworks */,
-				2249F5F02995972F00DC8503 /* KeychainAccess in Frameworks */,
 				223F25C529C1BC970036539B /* AWSCognitoAuthPlugin in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -91,7 +91,6 @@
 			isa = PBXGroup;
 			children = (
 				228B49C2296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */,
-				2295EFF329A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */,
 				228B49C1296CB64C0046DFD4 /* Products */,
 				22A7710F2989097600BB170A /* Frameworks */,
 				2C277B7B47B7754B0F4B2018 /* AmplifyConfig */,
@@ -113,16 +112,18 @@
 				2275C8F329C6A98F0087B6FB /* Info.plist */,
 				22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */,
 				228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */,
-				2275C8F129C686970087B6FB /* InitialLoadView.swift */,
+				2238C27329D914AD00C65CDE /* InitialLoadView.swift */,
 				223F25C129C1B5750036539B /* CognitoView.swift */,
 				2290931A29C43008008C650A /* VerificationView.swift */,
 				227547B82980BD5100D12030 /* MobilityView.swift */,
 				2249F5EC2994F85200DC8503 /* ApiCallers.swift */,
-				223F25CA29C1BE710036539B /* SessionManager.swift */,
 				22EE32102990AC8C0096DCA5 /* Styling.swift */,
 				2275C8F629C809B40087B6FB /* AccountView.swift */,
+				2238C27529D93F9D00C65CDE /* Helper.swift */,
+				2262043029DA835900E48D46 /* LogoutButtonView.swift */,
 				228B49C7296CB6510046DFD4 /* Assets.xcassets */,
 				228B49C9296CB6510046DFD4 /* Preview Content */,
+				2295EFF329A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */,
 			);
 			path = "remote-mobility-monitoring-iOS";
 			sourceTree = "<group>";
@@ -179,7 +180,6 @@
 			name = "remote-mobility-monitoring-iOS";
 			packageProductDependencies = (
 				2259546929930D1900879733 /* CodeScanner */,
-				2249F5EF2995972F00DC8503 /* KeychainAccess */,
 				223F25C429C1BC970036539B /* AWSCognitoAuthPlugin */,
 				223F25C629C1BC970036539B /* Amplify */,
 				22C4DCD529C45C6300E20F4F /* JWTDecode */,
@@ -236,7 +236,6 @@
 			mainGroup = 228B49B7296CB64C0046DFD4;
 			packageReferences = (
 				2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */,
-				2249F5EE2995972F00DC8503 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				223F25C329C1BC970036539B /* XCRemoteSwiftPackageReference "amplify-swift" */,
 				22C4DCD429C45C6300E20F4F /* XCRemoteSwiftPackageReference "JWTDecode" */,
 			);
@@ -280,9 +279,10 @@
 				2249F5ED2994F85200DC8503 /* ApiCallers.swift in Sources */,
 				22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */,
 				223F25C229C1B5750036539B /* CognitoView.swift in Sources */,
-				223F25CB29C1BE710036539B /* SessionManager.swift in Sources */,
-				2275C8F229C686970087B6FB /* InitialLoadView.swift in Sources */,
 				2275C8F729C809B40087B6FB /* AccountView.swift in Sources */,
+				2238C27629D93F9D00C65CDE /* Helper.swift in Sources */,
+				2262043129DA835900E48D46 /* LogoutButtonView.swift in Sources */,
+				2238C27429D914AD00C65CDE /* InitialLoadView.swift in Sources */,
 				228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */,
 				2290931B29C43008008C650A /* VerificationView.swift in Sources */,
 			);
@@ -583,14 +583,6 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		2249F5EE2995972F00DC8503 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.0;
-			};
-		};
 		2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/twostraws/CodeScanner";
@@ -619,11 +611,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 223F25C329C1BC970036539B /* XCRemoteSwiftPackageReference "amplify-swift" */;
 			productName = Amplify;
-		};
-		2249F5EF2995972F00DC8503 /* KeychainAccess */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2249F5EE2995972F00DC8503 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
-			productName = KeychainAccess;
 		};
 		2259546929930D1900879733 /* CodeScanner */ = {
 			isa = XCSwiftPackageProductDependency;

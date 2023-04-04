@@ -16,27 +16,40 @@ import JWTDecode
 struct remote_mobility_monitoring_iOSApp: App {
     @UIApplicationDelegateAdaptor(CustomAppDelegate.self) var appDelegate
     @State var isAuthenticated: Bool = false
+    @State var hasCaregivers: Bool = false
     @State var patientId: String = ""
     @State var idToken: String = ""
     
     var body: some Scene {
         WindowGroup {
-            if isAuthenticated {
-                VerificationView(isAuthenticated: $isAuthenticated, patientId: $patientId, idToken: $idToken)
+            if isAuthenticated && hasCaregivers {
+                MobilityView(isAuthenticated: $isAuthenticated, patientId: $patientId, idToken: $idToken, hasCaregivers: $hasCaregivers)
                     .environmentObject(appDelegate.deepLinkURL)
                     .onOpenURL { url in
                         appDelegate.deepLinkURL.url = url
                     }
-            } else {
+            } else if isAuthenticated && !hasCaregivers {
+                VerificationView(isAuthenticated: $isAuthenticated, patientId: $patientId, idToken: $idToken, hasCaregivers: $hasCaregivers)
+                    .environmentObject(appDelegate.deepLinkURL)
+                    .onOpenURL { url in
+                        appDelegate.deepLinkURL.url = url
+                    }
+            }else {
                 InitialLoadView(isAuthenticated: $isAuthenticated)
                     .task {
                         await authenticateUser()
+                        if isAuthenticated {
+                            self.hasCaregivers = await hasAtLeastOneVerifiedCaregiver(patientId: self.patientId, idToken: self.idToken)
+                        }
                     }
             }
         }
         .onChange(of: isAuthenticated) { isAuth in
             Task.init {
                 await authenticateUser()
+                if isAuthenticated {
+                    self.hasCaregivers = await hasAtLeastOneVerifiedCaregiver(patientId: self.patientId, idToken: self.idToken)
+                }
             }
         }
     }
@@ -45,7 +58,7 @@ struct remote_mobility_monitoring_iOSApp: App {
         do {
             try Amplify.add(plugin: AWSCognitoAuthPlugin())
             try Amplify.configure()
-            print("Amplify configured with auth plugin")
+            print("Successfully configure Amplify with auth plugin")
         } catch {
             print("Failed to initialize Amplify with \(error)")
         }
@@ -62,9 +75,7 @@ struct remote_mobility_monitoring_iOSApp: App {
                 // Extract the user ID from the JWT payload
                 if let patientId = jwt["sub"].string {
                     self.patientId = "pat-" + patientId
-                    print(self.patientId)
                 }
-                
                 self.idToken = tokens.idToken
             }
             
@@ -74,6 +85,31 @@ struct remote_mobility_monitoring_iOSApp: App {
         } catch {
             print("Unexpected error: \(error)")
         }
+    }
+    
+    func hasAtLeastOneVerifiedCaregiver(patientId: String, idToken: String) async -> Bool {
+        var hasCaregiver = false
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        getAllCaregiversForPatient(patientId: patientId, idToken: idToken) { result in
+            switch result {
+            case .success(let responseObject):
+                if let caregivers = responseObject["caregivers"] as? [[String: Any]], !caregivers.isEmpty {
+                    for caregiver in caregivers {
+                        if let verified = caregiver["verified"] as? Int, verified == 1 {
+                            hasCaregiver = true
+                            break
+                        }
+                    }
+                }
+            case .failure(let error):
+                print("Error while checking for caregivers: \(error)")
+            }
+            semaphore.signal()
+        }
+        
+        _ = semaphore.wait(timeout: .distantFuture)
+        return hasCaregiver
     }
 }
 
@@ -86,7 +122,10 @@ class CustomAppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_ app: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Handle deep link URL when the app is launched
+        print("hello world")
+        
         if let url = launchOptions?[.url] as? URL {
+            print(url)
             deepLinkURL.url = url
         }
         return true

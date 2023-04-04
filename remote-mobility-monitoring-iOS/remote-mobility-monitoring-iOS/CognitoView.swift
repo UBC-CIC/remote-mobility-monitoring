@@ -18,113 +18,156 @@ struct CognitoView: View {
     @State var lastName: String = ""
     @State var phoneNumber: String = ""
     @State var isSignIn: Bool = true
-    @State var errorMessage: String? = nil
-    @State var successMessage: String? = nil
-    @State var isSignedIn: Bool = false
-    @State var showPasswords: Bool = false // added state variable to show/hide passwords
+    @State var showPasswords: Bool = false
+    @State var authenticateMessage: String = ""
+    @State var isShowingAuthenticateResult: Bool = false
+    @State var popupTextHeight: CGFloat = 50
     @Binding var isAuthenticated: Bool
     
+    func displayAuthenticateResult(message: String) {
+        self.isShowingAuthenticateResult = true
+        self.authenticateMessage = message
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            self.isShowingAuthenticateResult = false
+            self.authenticateMessage = ""
+        }
+    }
+    
+    func resetFields(keepSignInFields: Bool) {
+        if (!keepSignInFields) {
+            email = ""
+            password = ""
+        }
+        passwordAgain = ""
+        firstName = ""
+        lastName = ""
+        phoneNumber = ""
+        isShowingAuthenticateResult = false
+    }
+    
     var body: some View {
-        VStack {
-            WelcomeText()
-            
-            Spacer()
-            
-            EmailField(email: $email)
-            
-            PasswordFields(isSignIn: $isSignIn, password: $password, passwordAgain: $passwordAgain, showPasswords: $showPasswords)
-            
-            if !isSignIn {
-                SignUpFields(firstName: $firstName, lastName: $lastName, phoneNumber: $phoneNumber)
-            }
-            
-            ShowPasswordsToggle(showPasswords: $showPasswords)
-            
-            GeometryReader { geometry in
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        if isSignIn {
-                            Task {
-                                try await signIn(username: email, password: password)
-                            }
-                        } else {
-                            if (password == passwordAgain) { // check if passwords match
+        ZStack {
+            VStack {
+                WelcomeText()
+                
+                Spacer()
+                
+                EmailField(email: $email)
+                
+                PasswordFields(isSignIn: $isSignIn, password: $password, passwordAgain: $passwordAgain, showPasswords: $showPasswords)
+                
+                if !isSignIn {
+                    SignUpFields(firstName: $firstName, lastName: $lastName, phoneNumber: $phoneNumber)
+                }
+                
+                ShowPasswordsToggle(showPasswords: $showPasswords)
+                
+                GeometryReader { geometry in
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            if isSignIn {
                                 Task {
-                                    try await createPatient(email: email, password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber) { result in
-                                        switch result {
-                                        case .success(let responseObject): // patient id is in reponseObject
-                                            print("Successfully created patient: \(responseObject)")
-                                            self.successMessage = "Succesfully created account!"
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                                self.successMessage = nil
-                                            }
-                                        case .failure(let error):
-                                            print("Failed to create patient: \(error.localizedDescription)")
-                                            self.errorMessage = "Failed to create an account! \(error.localizedDescription)"
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                                self.errorMessage = nil
-                                            }
-                                        }
+                                    if(password == "" || email == "") {
+                                        displayAuthenticateResult(message: "Please fill out email and password")
+                                    } else {
+                                        try await signIn(username: email.trimmingCharacters(in: .whitespaces), password: password)
                                     }
                                 }
                             } else {
-                                self.errorMessage = "Passwords do not match."
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                    self.errorMessage = nil
+                                if (email == "" || password == "" || passwordAgain == "" || firstName == "" || lastName == "" || phoneNumber == "") {
+                                    displayAuthenticateResult(message: "Please fill out all the required fields")
+                                } else if (!CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: phoneNumber))) {
+                                    displayAuthenticateResult(message: "Phone number must only contain numeric values")
+                                } else if (password == passwordAgain) {
+                                    Task {
+                                        try await createPatient(email: email.trimmingCharacters(in: .whitespaces), password: password, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber) { result in
+                                            switch result {
+                                            case .success(let responseObject): // patient id is in reponseObject
+                                                print("Successfully created patient: \(responseObject)")
+                                                displayAuthenticateResult(message: "Success")
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                                    resetFields(keepSignInFields: true)
+                                                    isSignIn = true
+                                                }
+                                                
+                                            case .failure(let error):
+                                                print("Failed to create patient: \(error.localizedDescription)")
+                                                displayAuthenticateResult(message: "\(error.localizedDescription)")
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    displayAuthenticateResult(message: "Passwords do not match")
                                 }
                             }
+                        }) {
+                            if isSignIn {
+                                Text("Sign In")
+                            } else {
+                                Text("Sign Up")
+                            }
                         }
-                    }) {
-                        if isSignIn {
-                            Text("Sign In")
-                        } else {
-                            Text("Sign Up")
-                        }
+                        .font(ButtonStyling.font)
+                        .foregroundColor(ButtonStyling.foreGroundColor)
+                        .padding()
+                        .frame(minWidth: 0,maxWidth: (geometry.size.width * 2/3))
+                        .background(ButtonStyling.color)
+                        .cornerRadius(ButtonStyling.cornerRadius)
+                        
+                        Spacer()
                     }
-                    .font(ButtonStyling.font)
-                    .foregroundColor(ButtonStyling.foreGroundColor)
-                    .padding()
-                    .frame(minWidth: 0,maxWidth: (geometry.size.width * 2/3))
-                    .background(ButtonStyling.color)
-                    .cornerRadius(ButtonStyling.cornerRadius)
-                    
-                    Spacer()
                 }
-            }
-            .frame(maxHeight: 100)
-                                    
-            Spacer()
-            
-            Button(action: {
-                isSignIn.toggle()
-            }) {
-                if isSignIn {
-                    Text("Don't have an account? Sign up here.")
-                } else {
-                    Text("Already have an account? Sign in here.")
-                }
-            }
-            .padding(.bottom, 20)
-            
-            // Display error message if it exists
-            if self.errorMessage != nil || self.successMessage != nil {
-                // Display error message if it exists
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding(.bottom, 20)
-                }
+                .frame(maxHeight: 100)
                 
-                // Display success message if it exists
-                if let successMessage = successMessage {
-                    Text(successMessage)
-                        .foregroundColor(.green)
-                        .padding(.bottom, 20)
+                Spacer()
+                
+                Button(action: {
+                    resetFields(keepSignInFields: false)
+                    isSignIn.toggle()
+                }) {
+                    if isSignIn {
+                        Text("Don't have an account? Sign up here.")
+                    } else {
+                        Text("Already have an account? Sign in here.")
+                    }
+                }
+                .padding(.bottom, 20)
+            }
+            .padding()
+            
+            if isShowingAuthenticateResult {
+                var maxPopUpHeight = self.authenticateMessage == "Success" ? 0.1 : 0.2
+
+                GeometryReader { geometry in
+                    VStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white)
+                            .shadow(radius: 10)
+                            .overlay(
+                                VStack(alignment: .center) {
+                                    if self.authenticateMessage == "Success" {
+                                        Text(self.authenticateMessage)
+                                            .font(.body)
+                                            .foregroundColor(.green)
+                                            .padding()
+                                    } else {
+                                        Text(self.authenticateMessage)
+                                            .font(.body)
+                                            .foregroundColor(.red)
+                                            .padding()
+                                    }
+                                }
+                            )
+                            .frame(maxWidth: geometry.size.width * 0.8)
+                            .frame(maxHeight: geometry.size.height * maxPopUpHeight)
+                            .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                            .zIndex(1)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
         }
-        .padding()
     }
     
     func signIn(username: String, password: String) async {
@@ -170,16 +213,17 @@ struct CognitoView: View {
             case .done:
                 // Use has successfully signed in to the app
                 print("Signin complete")
-                successMessage = "Succesfully logged in"
+                displayAuthenticateResult(message: "Success")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    successMessage = nil
                     isAuthenticated = true
                 }
             }
         } catch let error as AuthError{
             print ("Sign in failed \(error)")
+            displayAuthenticateResult(message: "Sign in failed. \(error.errorDescription)")
         } catch {
             print("Unexpected error: \(error)")
+            displayAuthenticateResult(message: "Failed to login, unexpected error")
         }
     }
 }

@@ -7,44 +7,40 @@
 import SwiftUI
 import HealthKit
 import CodeScanner
-import KeychainAccess
 
 struct VerificationView: View {
     @State private var isScanning = false
     @State private var authCode: String = ""
     @State private var caregiverId: String = ""
-    @State private var deviceId: String = ""
     @State private var verifyMessage: String = ""
-    @State private var errorScanning: Bool = false
-    @State private var errorDeepLinking: Bool = false
-    @State private var isShowingScanningResult: Bool = false
-    @State private var isShowingDeepLinkingResult: Bool = false
+    @State private var isShowingVerifyingResult: Bool = false
     @State private var verified: Bool = false
     @State private var selection = 0
     @Binding var isAuthenticated: Bool
-    @EnvironmentObject var deepLinkURL: DeepLinkURL
     @Binding var patientId: String
     @Binding var idToken: String
+    @Binding var hasCaregivers: Bool
+    @EnvironmentObject var deepLinkURL: DeepLinkURL
     
-    func displayVerifyingResult() {
-        self.isShowingScanningResult = true
-        self.isShowingDeepLinkingResult = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+    func displayVerifyingResult(verifyLoading: Bool) {
+        var displayTime = DispatchTimeInterval.seconds(3)
+        if verifyLoading {
+            displayTime = DispatchTimeInterval.seconds(6)
+        }
+        self.isShowingVerifyingResult = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + displayTime) {
             if(self.verifyMessage == "Success") {
-                self.verified = true
-            } else {
-                self.verified = false
+                self.hasCaregivers = true
             }
-            self.isShowingScanningResult = false
-            self.isShowingDeepLinkingResult = false
-            self.errorScanning = false
-            self.errorDeepLinking = false
+            self.isShowingVerifyingResult = false
             self.verifyMessage = ""
         }
     }
     
     func handleScanResult(result: Result<ScanResult, ScanError>) {
         self.isScanning = false
+        self.isShowingVerifyingResult = true
+        self.verifyMessage = "Verifying..."
         
         switch result {
         case .success(let result):
@@ -56,46 +52,40 @@ struct VerificationView: View {
                 self.authCode = jsonObject?["auth_code"] ?? ""
                 self.caregiverId = jsonObject?["caregiver_id"] ?? ""
                 
-                if (errorScanning == false && self.patientId != "" && authCode != "" && caregiverId != "" && deviceId != "" && self.idToken != "") {
+                if (self.patientId != "" && authCode != "" && caregiverId != "" && self.idToken != "") {
                     verifyPatient(patientId: self.patientId, caregiverId: caregiverId, authCode: authCode, idToken: self.idToken) { result in
                         switch result {
                             case .success(let response):
                                 self.verifyMessage = "Success"
-                                self.displayVerifyingResult()
+                            self.displayVerifyingResult(verifyLoading: false)
                                 print(response)
                             case .failure(let error):
-                                self.errorScanning = true
-                                self.verifyMessage = "Failed to verify new patient!"
-                                self.displayVerifyingResult()
+                                self.verifyMessage = "Failed to verify new caregiver. Please double-check the QR code!"
+                                self.displayVerifyingResult(verifyLoading: false)
                                 print("Verification failed: \(error.localizedDescription)")
                         }
                     }
                 } else {
-                    self.errorScanning = true
                     if self.patientId == "" {
-                        self.verifyMessage = "Failed to get patientId from QR code. Failed to verify."
+                        self.verifyMessage = "QR code contains insufficient data. Failed to verify!"
                     } else if authCode == "" {
-                        self.verifyMessage = "Failed to get authCode from QR code. Failed to verify."
+                        self.verifyMessage = "QR code contains insufficient data. Failed to verify!"
                     } else if caregiverId == "" {
-                        self.verifyMessage = "Failed to get caregiverId from QR code. Failed to verify."
-                    } else if deviceId == "" {
-                        self.verifyMessage = "Failed to get deviceId from. Failed to verify."
+                        self.verifyMessage = "QR code contains insufficient data. Failed to verify!"
                     } else if self.idToken == "" {
-                        self.verifyMessage = "Failed to authenticate. Failed to verify."
+                        self.verifyMessage = "You are not authenticated. Failed to verify!"
                     } else {
                         self.verifyMessage = "Unknown error occurred. Failed to verify."
                     }
                     
-                    self.displayVerifyingResult()
+                    self.displayVerifyingResult(verifyLoading: false)
                 }
             } catch {
-                self.errorScanning = true
                 self.verifyMessage = "Failed to read QR code: \(error.localizedDescription)"
                 print("Error while parsing JSON: \(error.localizedDescription)")
             }
             
         case .failure(let error):
-            self.errorScanning = true
             self.verifyMessage = "Scanning failed: \(error.localizedDescription)"
             print("Scanning failed: \(error.localizedDescription)")
         }
@@ -103,7 +93,7 @@ struct VerificationView: View {
     
     var body: some View {
         NavigationView {
-            if !verified {
+            ZStack {
                 VStack {
                     HStack {
                         Text("Verification")
@@ -111,15 +101,12 @@ struct VerificationView: View {
                         
                         Spacer()
                         
-                        NavigationLink(destination: AccountView(isAuthenticated: $isAuthenticated)) {
-                            Image(systemName: "person.circle")
-                                .foregroundColor(.blue)
-                        }
+                        LogoutButtonView(isAuthenticated: $isAuthenticated)
                     }
                     
                     Spacer()
                     
-                    Text("Verify your account remotely:")
+                    Text("Verify a new caregiver remotely:")
                         .font(.system(size: 20, weight: .bold))
                         .padding(.bottom, 18)
                         .padding(.top, 50)
@@ -133,7 +120,7 @@ struct VerificationView: View {
                             Spacer()
                             VStack {
                                 Spacer()
-                                Text("Verify your account in person:")
+                                Text("Verify a new caregiver in person:")
                                     .font(.system(size: 20, weight: .bold))
                                     .padding(.bottom, 20)
                                     .padding(.top, 50)
@@ -155,31 +142,27 @@ struct VerificationView: View {
                     }
                     
                     Spacer()
-                    
-                    VStack(alignment: .leading) {
-                        if isShowingScanningResult {
-                            if self.verifyMessage == "Success" {
-                                Text(self.verifyMessage)
-                                    .font(.body)
-                                    .foregroundColor(.green)
-                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
-                            } else {
-                                Text(self.verifyMessage)
-                                    .font(.body)
-                                    .foregroundColor(.red)
-                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
-                            }
-                        }
-                    }
-                    .padding()
                 }
                 .padding(.horizontal, 32)
                 .sheet(isPresented: $isScanning) {
                     CodeScannerView(codeTypes: [.qr], completion: handleScanResult(result:))
                 }
+                .onAppear() {
+                    if let url = deepLinkURL.url {
+                        self.verifyMessage = "Verifying..."
+                        self.displayVerifyingResult(verifyLoading: true)
+                        
+                        // trigger the link change again
+                        deepLinkURL.url = nil
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            deepLinkURL.url = url
+                        }
+                    }
+                }
                 .onChange(of: deepLinkURL.url) { newUrlValue in
                     if let url = deepLinkURL.url {
-                        self.errorDeepLinking = false
+                        self.verifyMessage = "Verifying..."
+                        self.displayVerifyingResult(verifyLoading: true)
                         if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
                            let authCode = urlComponents.queryItems?.first(where: { $0.name == "authCode" })?.value,
                            let caregiverId = urlComponents.queryItems?.first(where: { $0.name == "caregiverId" })?.value {
@@ -194,27 +177,59 @@ struct VerificationView: View {
                                 switch result {
                                 case .success(let response):
                                     self.verifyMessage = "Success"
-                                    self.displayVerifyingResult()
+                                    self.displayVerifyingResult(verifyLoading: false)
                                     print(response)
                                 case .failure(let error):
-                                    self.errorDeepLinking = true
-                                    self.verifyMessage = "Failed to verify new patient!"
-                                    self.displayVerifyingResult()
+                                    self.verifyMessage = "Failed to verify new caregiver. Please double-check the link!"
+                                    self.displayVerifyingResult(verifyLoading: false)
                                     print("Verification failed: \(error.localizedDescription)")
                                 }
                             }
                         } else {
-                            self.errorDeepLinking = true
                             self.verifyMessage = "Link is not formatted correctly"
-                            self.displayVerifyingResult()
+                            self.displayVerifyingResult(verifyLoading: false)
                         }
                     }
                     
-                    // reset
                     deepLinkURL.url = nil
                 }
-            } else {
-                MobilityView()
+                
+                if isShowingVerifyingResult {
+                    let maxPopUpHeight = self.verifyMessage == "Success" || self.verifyMessage == "Verifying..." ? 0.1 : 0.2
+
+                    GeometryReader { geometry in
+                        VStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white)
+                                .shadow(radius: 10)
+                                .overlay(
+                                    VStack(alignment: .center) {
+                                        if self.verifyMessage == "Success" {
+                                            Text(self.verifyMessage)
+                                                .font(.body)
+                                                .foregroundColor(.green)
+                                                .padding()
+                                        } else if self.verifyMessage == "Verifying..."{
+                                            Text(self.verifyMessage)
+                                                .font(.body)
+                                                .foregroundColor(.black)
+                                                .padding()
+                                        } else {
+                                            Text(self.verifyMessage)
+                                                .font(.body)
+                                                .foregroundColor(.red)
+                                                .padding()
+                                        }
+                                    }
+                                )
+                                .frame(maxWidth: geometry.size.width * 0.8)
+                                .frame(maxHeight: geometry.size.height * maxPopUpHeight)
+                                .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                                .zIndex(1)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
             }
         }
     }
