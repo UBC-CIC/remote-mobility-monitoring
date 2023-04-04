@@ -1,5 +1,5 @@
 function sampleData(){
-    const patients = ["Emily Smith", "James Davis", "Sophia Rodriguez"];
+    const patients = ["Emily Smith"];
     const metrics = [
         "stepLength",
         "doubleSupportTime",

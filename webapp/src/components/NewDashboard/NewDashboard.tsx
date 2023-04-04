@@ -113,13 +113,10 @@ function NewDashboard(){
                 </div>
             </div>
 
-            <div className="linegraphs"  style={{ width: "100%", height: "70%" }}>
+            <div className="linegraphs"  style={{ width: "100%", height: "100%" }}>
                 <LineGraph />
             </div>
 
-            <div className="Instructions" style={{textAlign: "center", fontSize: "30px", marginTop: "50px", marginBottom: "30px" }}>
-                Click pateint name to view full metrics
-            </div>
             <div className="table">
                 <div style={{ textAlign: "center", maxWidth: "1000px", margin: "0 auto" }}>
                     {patientNames.map((patientName) => (
@@ -131,9 +128,6 @@ function NewDashboard(){
                                 maxWidth: "1000px",
                             }}
                         >
-                            <h3 style={{ cursor: "pointer" }} onClick={() => toggleTable(patientName)}>
-                                {patientName}
-                            </h3>
                             {expandedTables[patientName] && (
                                 <table
                                     style={{
