@@ -10,6 +10,17 @@ html, body {
     text-align: center;
 }
 
+.patient-container .date-label {
+    font-size: 0.8em;
+}
+
+.patient-container .date {
+    text-align: center;
+    width: 50%;
+    padding: 6px;
+    border-radius: 4px;
+}
+
 .patient-container .filters {
     min-height: 100%;
     border-right: 1px solid #DBDBDB;

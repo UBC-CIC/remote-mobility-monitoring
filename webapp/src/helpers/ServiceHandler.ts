@@ -177,12 +177,12 @@ export const ServiceHandler = {
         return addCallbacks(req);
 
     },
-    queryMetrics: (patientIdList: string[], startDate: date, endDate: date) => {
-        const sDate = new Date(startDate.year, startDate.month - 1, startDate.day); // Subtract 1 from the month to make it 0-indexed
-        const startDateIso = sDate.toISOString().substring(0, 10).concat("T00:00:00");
+    queryMetrics: (patientIdList: string[], startDate: string, endDate: string) => {
+        const startDateIso = startDate.substring(0, 10).concat("T00:00:00");
 
-        const eDate = new Date(endDate.year, endDate.month - 1, endDate.day); // Subtract 1 from the month to make it 0-indexed
-        const endDateIso = eDate.toISOString().substring(0, 10).concat("T23:59:59");
+        const endDateIso = endDate.substring(0, 10).concat("T23:59:59");
+        console.log(startDateIso);
+        console.log(endDateIso);
 
         const idToken = getIdToken();
         const base_url = createBaseUrl("caregiver");
