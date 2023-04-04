@@ -27,6 +27,13 @@ public final class Const {
     public static final String METRICS_NAME = "metrics";
     public static final String START_NAME = "start";
     public static final String END_NAME = "end";
+    public static final String MIN_AGE = "min_age";
+    public static final String MAX_AGE = "max_age";
+    public static final String MIN_HEIGHT = "min_height";
+    public static final String MAX_HEIGHT = "max_height";
+    public static final String MIN_WEIGHT = "min_weight";
+    public static final String MAX_WEIGHT = "max_weight";
+    public static final String SEX = "sex";
     public static final String METRIC_NAME_NAME = "metric_name";
     public static final String METRIC_VALUE_NAME = "metric_value";
     public static final String TIMESTAMP_NAME = "timestamp";

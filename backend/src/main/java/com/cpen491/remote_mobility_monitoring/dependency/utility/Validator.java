@@ -471,6 +471,9 @@ public class Validator {
         }
         validateTimestamp(body.getStart());
         validateTimestamp(body.getEnd());
+        if (!isEmpty(body.getSex())) {
+            validateSex(body.getSex());
+        }
     }
 
     public static void validateUpdatePatientRequestBody(UpdatePatientRequestBody body) {

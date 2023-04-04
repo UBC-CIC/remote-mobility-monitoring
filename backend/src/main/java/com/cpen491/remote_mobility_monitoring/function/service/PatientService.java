@@ -183,7 +183,17 @@ public class PatientService {
         log.info("Querying Metrics {}", body);
         Validator.validateQueryMetricsRequestBody(body);
 
-        List<Metrics> metrics = metricsDao.query(body.getPatientIds(), body.getStart(), body.getEnd());
+        List<Metrics> metrics = metricsDao.query(
+                body.getPatientIds(),
+                body.getMinAge(),
+                body.getMaxAge(),
+                body.getMinHeight(),
+                body.getMaxHeight(),
+                body.getMinWeight(),
+                body.getMaxWeight(),
+                body.getStart(),
+                body.getEnd()
+        );
 
         return QueryMetricsResponseBody.builder()
                 .metrics(QueryMetricsSerialization.convertFromMetrics(metrics))
