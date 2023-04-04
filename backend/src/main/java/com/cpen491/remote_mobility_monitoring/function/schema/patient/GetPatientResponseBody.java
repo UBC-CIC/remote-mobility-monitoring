@@ -20,6 +20,14 @@ public class GetPatientResponseBody {
     private String lastName;
     @SerializedName(Const.PHONE_NUMBER_NAME)
     private String phoneNumber;
+    @SerializedName(Const.PATIENT_BIRTHDAY)
+    private String birthday;
+    @SerializedName(Const.PATIENT_SEX)
+    private String sex;
+    @SerializedName(Const.PATIENT_HEIGHT)
+    private Float height;
+    @SerializedName(Const.PATIENT_WEIGHT)
+    private Float weight;
     @SerializedName(Const.CREATED_AT_NAME)
     private String createdAt;
 }

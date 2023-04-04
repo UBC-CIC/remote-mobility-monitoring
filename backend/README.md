@@ -1,6 +1,5 @@
 Java version: Amazon corretto 11
 
-DynamoDb local [here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html)
 
 ## Build
 
@@ -8,6 +7,7 @@ Run the AWS DynamoDB docker container for local testing:
 ```
 docker-compose up -d
 ```
+ - Alternatively, you can run DynamoDB natively by downloading the DynamoDB Local JAR file and running it with Java. For more information, see [Running DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html) in the Amazon DynamoDB Developer Guide.
 
 Make sure you are in backend directory, then run the following:
 ```

@@ -22,4 +22,12 @@ public class CreatePatientRequestBody {
     private String lastName;
     @SerializedName(Const.PHONE_NUMBER_NAME)
     private String phoneNumber;
+    @SerializedName(Const.PATIENT_SEX)
+    private String sex;
+    @SerializedName(Const.PATIENT_BIRTHDAY)
+    private String birthday;        // This will be converted to a Date object in the backend yyy-mm-dd
+    @SerializedName(Const.PATIENT_HEIGHT)
+    private float height;
+    @SerializedName(Const.PATIENT_WEIGHT)
+    private float weight;
 }

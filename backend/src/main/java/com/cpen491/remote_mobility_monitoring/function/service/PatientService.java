@@ -33,6 +33,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.PATIENT_GROUP_NAME;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -76,9 +79,14 @@ public class PatientService {
                 .firstName(body.getFirstName())
                 .lastName(body.getLastName())
                 .phoneNumber(body.getPhoneNumber())
+                .sex(body.getSex())
+                .height(body.getHeight())
+                .weight(body.getWeight())
+                .birthday(
+                        isEmpty(body.getBirthday()) ? null : LocalDate.parse(body.getBirthday(), DateTimeFormatter.ISO_DATE)
+                )
                 .build();
         patientDao.create(newPatient);
-
         return CreatePatientResponseBody.builder()
                 .patientId(newPatient.getPid())
                 .build();
@@ -105,6 +113,10 @@ public class PatientService {
                 .lastName(patient.getLastName())
                 .phoneNumber(patient.getPhoneNumber())
                 .createdAt(patient.getCreatedAt())
+                .birthday(patient.getBirthday() == null ? null : patient.getBirthday().format(DateTimeFormatter.ISO_DATE))
+                .height(patient.getHeight())
+                .weight(patient.getWeight())
+                .sex(patient.getSex())
                 .build();
     }
 

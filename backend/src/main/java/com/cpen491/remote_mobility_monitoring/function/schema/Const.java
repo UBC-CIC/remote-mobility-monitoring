@@ -17,6 +17,7 @@ public final class Const {
     public static final String PATIENT_ID_NAME = "patient_id";
     public static final String DEVICE_ID_NAME = "device_id";
     public static final String PASSWORD_NAME = "password";
+    public static final String SUPPRESS_EMAIL_NAME = "suppress_email";
     public static final String IS_PRIMARY_NAME = "is_primary";
     public static final String AUTH_CODE_NAME = "auth_code";
     public static final String VERIFIED_NAME = "verified";
@@ -34,4 +35,8 @@ public final class Const {
     public static final String AUTHORIZATION_NAME2 = "authorization";
     public static final String SUB_NAME = "sub";
     public static final String MESSAGE_NAME = "message";
+    public static final String PATIENT_BIRTHDAY = "patient_birthday";
+    public static final String PATIENT_SEX = "patient_sex";
+    public static final String PATIENT_HEIGHT = "patient_height";
+    public static final String PATIENT_WEIGHT = "patient_weight";
 }
