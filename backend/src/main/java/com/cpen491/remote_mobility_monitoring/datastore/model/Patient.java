@@ -1,6 +1,5 @@
 package com.cpen491.remote_mobility_monitoring.datastore.model;
 
-import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,7 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.PatientTable;
-import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.*;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFloatFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.getFromMap;
+import static com.cpen491.remote_mobility_monitoring.dependency.utility.DynamoDbUtils.putInMap;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Getter
@@ -32,7 +33,7 @@ public class Patient extends BaseModel {
     private String lastName;
     private String phoneNumber;
     private String sex;
-    private LocalDate birthday;        // This will be converted to a Date object in the backend yyy-mm-d
+    private LocalDate birthday;        // This will be converted to a Date object in the backend yyyy-mm-dd
     private Float height;
     private Float weight;
 
