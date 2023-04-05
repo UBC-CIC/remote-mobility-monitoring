@@ -13,8 +13,7 @@ import {ToggleButton, ToggleButtonGroup, TextField} from "@mui/material";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker";
 import sampleData from "../NewDashboard/sampleData";
 import {encrypt} from "../../helpers/Crypto";
-import LineGraphbyMetrics from "../NewDashboard/GraphForMultipatients";
-
+import MuliPatientGraph from "../NewDashboard/GraphForMultipatients";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Patient.css";
 
@@ -48,14 +47,14 @@ export interface metric {
 
 
 
-function Patient() {
+function AllPatients() {
     const nav = useNavigate();
     const [patientDetails, setPatientDetails]: any = useState({});
     const {patientIdEncrypt} = useParams();
     const [deletionMessage, setDeletionMessage] = useState("");
     const [intervals, setIntervals] = useState("all");
     const patientId = decrypt(patientIdEncrypt);
-    const [selectedPatient, setSelectedPatient]: any = useState("");
+    const [selectedPatient, setSelectedPatient]: any = useState("all");
     const [allPatients, setAllPatients] = useState([]);
     const [endDate, setEndDate] = useState(moment());
     const [selectedFromDate, setSelectedFromDate] = useState<Date>(new Date());
@@ -67,8 +66,10 @@ function Patient() {
     const [isPrimary, setIsPrimary] = useState(false);
     const [sex, setSex] = useState("a");
     const [data, setData] = useState<metric[]>(sampleData());
-    const [graphData, setGraphData] = useState({ data: data });
-    const [multiPatientsGraph, setmultiPatientsGraph] = useState<any>(LineGraphbyMetrics(graphData));
+    const headers = ["Date", "Step Length (km)", "Double Support Time (%)", "Walking Speed (kpm)", "Walking Asymmetry (%)", "Distance Walked (km)", " Step Count (s)"];
+    const graphData = { data: data };
+    
+    // pass the `graphData` object as the props to `LineGraph`
     
 
     const handleFromDateChange = (date: Date) => {
@@ -112,23 +113,10 @@ function Patient() {
         }
         if (interval === "all") {
             console.log("hello");
+            return;
         }
         ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
-            .then((data: any) => {
-                const allMetrics: any = [];
-                data.metrics.forEach((m: any) => {
-                    const currMetric = {
-                        "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
-                        "metric_name": m.metric_name,
-                        "timestamp": m.timestamp,
-                        "metric_value": m.metric_value
-                    };
-                    allMetrics.push(currMetric);
-                });
-                console.log(allMetrics);
-                setGraphData({"data": allMetrics});
-                // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
-            })
+            .then((data) => console.log(data))
             .catch((err) => console.log());
         return;
     };
@@ -148,6 +136,7 @@ function Patient() {
                             "is_primary": pat.is_primary};
                         if(pat.patient_id === patientId) {
                             currPatientId = patientId;
+                            console.log(pat);
                             if (pat.is_primary) {
                                 currIsPrimary = true;
                             }
@@ -156,7 +145,6 @@ function Patient() {
                     }
                 });
                 setAllPatients(patientArray);
-                setSelectedPatient(currPatientId);
                 setIsPrimary(currIsPrimary);
             })
             .catch((err: any) => console.log(err));
@@ -327,8 +315,7 @@ function Patient() {
                         <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
                     </>:null}
                     <div className="padding"></div>
-                    {multiPatientsGraph}
-                    <div className="padding"></div>
+                    {MuliPatientGraph(graphData)}
                 </div>
 
             </div>
@@ -336,4 +323,4 @@ function Patient() {
     );
 }
 
-export default Patient;
+export default AllPatients;

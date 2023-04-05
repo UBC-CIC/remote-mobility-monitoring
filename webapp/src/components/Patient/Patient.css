@@ -31,6 +31,7 @@ html, body {
 .patient-container .date {
     text-align: center;
     width: 50%;
+    font-size: 0.6em;
     padding: 6px;
     border-radius: 4px;
 }
@@ -77,8 +78,9 @@ html, body {
 
 .patient-container .unlink {
     height: 32px;
-    width: 10%;
     border-radius: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
     background-color: #CC2727;
     color: #fff;
     border: 1px solid rgba(255,255,255,.5);

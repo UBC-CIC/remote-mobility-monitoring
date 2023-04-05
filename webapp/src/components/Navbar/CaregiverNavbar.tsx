@@ -6,7 +6,7 @@ import {logout} from "../../helpers/Cognito";
 function CaregiverNavbar() {
     const nav = useNavigate();
     return (
-        <div className="navbar">
+        <div className="navbarr">
             Mobility Monitor
             <span className="navbar-items" onClick={(e) => {
                 nav("/dashboard");

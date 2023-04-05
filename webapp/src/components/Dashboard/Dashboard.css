@@ -74,8 +74,8 @@ html {
 
 .dashboard .entry {
     border: 2px solid rgba(77,71,195,0.05); 
-    min-height: 130px;
-    max-height: 130px;
+    min-height: 140px;
+    max-height: 140px;
     max-width: 80%;
     min-width: 80%;
     margin: 10%;
