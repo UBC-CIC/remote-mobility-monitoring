@@ -67,7 +67,7 @@ function NewDashboard(){
             <h2>Dashboard</h2>
             <h3>{data[0].patient_name}</h3>
 
-            <div className="linegraphs"  style={{ width: "90%", height: "150%", marginBottom: "40px" }}>
+            <div className="linegraphs"  style={{ width: "90%", height: "300%", marginBottom: "40px" }}>
                 {graph}
             </div>
 

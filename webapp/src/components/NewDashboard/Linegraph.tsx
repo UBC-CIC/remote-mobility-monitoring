@@ -24,10 +24,10 @@ const transformData = (data: any[]) => {
 const initialChartsOptionsState = {
     optionsLine1: {
         chart: {
-            id: "tw",
+            id: "chart",
             group: "social",
             type: "line",
-            height: 500,
+            height: 300,
         },
         title: {
             text: "Metrics Chart",
@@ -58,12 +58,12 @@ interface Props {
 }
 
 export default function LineGraph({ data }: Props) {
-    const [updatedOptionsFlag, setUpdatedOptionsFlag] = useState(false);
+    const [updatedOptionsFlag, setUpdatedOptionsFlag] = useState(true);
     const [selectedMetric, setSelectedMetric] = useState("all");
 
     useEffect(() => {
         if (updatedOptionsFlag) {
-            setUpdatedOptionsFlag(false);
+            setUpdatedOptionsFlag(true);
         }
     }, [updatedOptionsFlag]);
 
@@ -98,23 +98,14 @@ export default function LineGraph({ data }: Props) {
 
     return (
         <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "20px" }}>
-                <select value={selectedMetric} onChange={handleMetricSelect} style={{ fontSize: "14px" }}>
-                    <option value="all">All Metrics</option>
-                    {allSeries.map((series) => (
-                        <option key={series.name} value={series.name}>
-                            {series.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
             <ReactApexChart
                 options={options}
                 series={filteredSeries}
                 type="line"
                 height={300}
             />
+            <div style={{ textAlign: "center", fontSize: "14px",  fontWeight: "bold"  }}>Click the legend to show or hide a metric</div>
         </div>
+        
     );    
-
 }
