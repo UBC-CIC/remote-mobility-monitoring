@@ -12,6 +12,7 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetri
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.HandlerUtils.processApiGatewayRequest;
 
@@ -27,12 +28,18 @@ public class QueryMetricsHandler extends HandlerParent implements RequestHandler
             for (String patientId : patientIds) {
                 authService.caregiverHasPatient(rawId, patientId);
             }
-            String start = request.getQueryStringParameters().get(Const.START_NAME);
-            String end = request.getQueryStringParameters().get(Const.END_NAME);
+            Map<String, String> queryParameters = request.getQueryStringParameters();
             QueryMetricsRequestBody requestBody = QueryMetricsRequestBody.builder()
                     .patientIds(patientIds)
-                    .start(start)
-                    .end(end)
+                    .start(queryParameters.get(Const.START_NAME))
+                    .end(queryParameters.get(Const.END_NAME))
+                    .minAge(queryParameters.get(Const.MIN_AGE) == null ? null : Integer.parseInt(queryParameters.get(Const.MIN_AGE)))
+                    .maxAge(queryParameters.get(Const.MAX_AGE) == null ? null : Integer.parseInt(queryParameters.get(Const.MAX_AGE)))
+                    .maxHeight(queryParameters.get(Const.MAX_HEIGHT) == null ? null : Float.parseFloat(queryParameters.get(Const.MAX_HEIGHT)))
+                    .minHeight(queryParameters.get(Const.MIN_HEIGHT) == null ? null : Float.parseFloat(queryParameters.get(Const.MIN_HEIGHT)))
+                    .maxWeight(queryParameters.get(Const.MAX_WEIGHT) == null ? null : Float.parseFloat(queryParameters.get(Const.MAX_WEIGHT)))
+                    .minWeight(queryParameters.get(Const.MIN_WEIGHT) == null ? null : Float.parseFloat(queryParameters.get(Const.MIN_WEIGHT)))
+                    .sex(queryParameters.get(Const.SEX))
                     .build();
             QueryMetricsResponseBody responseBody = patientService.queryMetrics(requestBody);
             log.info("Responding to Query Metrics request with response body {}", responseBody);

@@ -68,7 +68,7 @@ public class PatientService {
         log.info("Creating Patient {}", body);
         Validator.validateCreatePatientRequestBody(body);
 
-        CognitoUser user = cognitoWrapper.createUserIfNotExistAndAddToGroup(body.getEmail(), PATIENT_GROUP_NAME);
+        CognitoUser user = cognitoWrapper.createUserIfNotExistAndAddToGroup(body.getEmail(), PATIENT_GROUP_NAME, null, false);
         cognitoWrapper.setPassword(body.getEmail(), body.getPassword());
         String patientId = PatientTable.ID_PREFIX + user.getId();
 
@@ -187,6 +187,7 @@ public class PatientService {
                 body.getPatientIds(),
                 body.getMinAge(),
                 body.getMaxAge(),
+                body.getSex(),
                 body.getMinHeight(),
                 body.getMaxHeight(),
                 body.getMinWeight(),

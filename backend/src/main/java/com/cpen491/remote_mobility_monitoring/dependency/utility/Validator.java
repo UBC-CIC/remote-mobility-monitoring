@@ -465,12 +465,18 @@ public class Validator {
 
     public static void validateQueryMetricsRequestBody(QueryMetricsRequestBody body) {
         Validate.notNull(body, QUERY_METRICS_NULL_ERROR_MESSAGE);
-        validateIds(body.getPatientIds());
-        for (String patientId : body.getPatientIds()) {
-            validatePatientId(patientId);
+        if (body.getPatientIds() != null && !body.getPatientIds().isEmpty()){
+            validateIds(body.getPatientIds());
+            for (String patientId : body.getPatientIds()) {
+                validatePatientId(patientId);
+            }
         }
-        validateTimestamp(body.getStart());
-        validateTimestamp(body.getEnd());
+        if (!isEmpty(body.getStart())) {
+            validateTimestamp(body.getStart());
+        }
+        if (!isEmpty(body.getEnd())) {
+            validateTimestamp(body.getEnd());
+        }
         if (!isEmpty(body.getSex())) {
             validateSex(body.getSex());
         }

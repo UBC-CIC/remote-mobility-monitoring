@@ -5,6 +5,7 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
 import com.cpen491.remote_mobility_monitoring.dependency.utility.Validator;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.timestreamquery.TimestreamQueryClient;
@@ -21,6 +22,7 @@ import software.amazon.awssdk.services.timestreamwrite.model.Record;
 import software.amazon.awssdk.services.timestreamwrite.model.RejectedRecordsException;
 import software.amazon.awssdk.services.timestreamwrite.model.WriteRecordsRequest;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,13 +41,14 @@ public class MetricsDao {
     private static final String WHERE_PATIENT_ID_FORMAT = " patient_id in (%s)";
     private static final String WHERE_TIME_AFTER= " %s > from_iso8601_timestamp('%s')";
     private static final String WHERE_TIME_BEFORE = " %s < from_iso8601_timestamp('%s')";
-    private static final String WHERE_DATE_AFTER = " %s > date('%s')";
-    private static final String WHERE_DATE_BEFORE = " %s < date('%s')";
-    private static final String WHERE_AGE_GREATER_THAN = " %s < ago(%dy)";
-    private static final String WHERE_AGE_LESS_THAN = " %s > ago(%dy)";
-    private static final String NUM_GREATER_THAN = " %s > %f";
-    private static final String NUM_LESS_THAN = " %s < %f";
+    private static final String WHERE_DATE_AFTER = " CAST(%s as date) > date('%s')";
+    private static final String WHERE_DATE_BEFORE = " CAST(%s as date) < date('%s')";
+    private static final String WHERE_AGE_GREATER_THAN = " CAST(%s as date) < date '%s'";
+    private static final String WHERE_AGE_LESS_THAN = " CAST(%s as date) > date '%s'";
+    private static final String NUM_GREATER_THAN = " CAST(%s as double) > %f";
+    private static final String NUM_LESS_THAN = " CAST(%s as double) < %f";
     private static final String ORDER_BY_TIME_FORMAT = " ORDER BY time";
+    private static final String EQUAL_FORMAT = " %s = '%s'";
     private String databaseName;
     @NonNull
     private String tableName;
@@ -109,21 +112,23 @@ public class MetricsDao {
      * Queries for Metrics based on patient IDs, start time, and end time.
      *
      * @param patientIds Patient Ids to query
-     * @param minAge Minimum age to query
-     * @param maxAge Maximum age to query
-     * @param minHeight Minimum height to query
-     * @param maxHeight Maximum height to query
-     * @param minWeight Minimum weight to query
-     * @param maxWeight Maximum weight to query
-     * @param start Start time to query
-     * @param end End time to query
+     * @param minAge     Minimum age to query
+     * @param maxAge     Maximum age to query
+     * @param sex
+     * @param minHeight  Minimum height to query
+     * @param maxHeight  Maximum height to query
+     * @param minWeight  Minimum weight to query
+     * @param maxWeight  Maximum weight to query
+     * @param start      Start time to query
+     * @param end        End time to query
      * @return {@link List}
      * @throws IllegalArgumentException
-     * @throws NullPointerException Above 2 exceptions are thrown if any of patientIds, start, or end are empty or invalid
+     * @throws NullPointerException     Above 2 exceptions are thrown if any of patientIds, start, or end are empty or invalid
      */
     public List<Metrics> query(List<String> patientIds,
                                Integer minAge,
                                Integer maxAge,
+                               String sex,
                                Float minHeight,
                                Float maxHeight,
                                Float minWeight,
@@ -148,11 +153,11 @@ public class MetricsDao {
         }
         if (minAge != null) {
             if (andAppend) queryString.append(" AND"); else andAppend = true;
-            queryString.append(String.format(WHERE_AGE_GREATER_THAN, MetricsTable.PATIENT_BIRTHDAY_NAME, minAge));
+            queryString.append(String.format(WHERE_DATE_BEFORE, MetricsTable.PATIENT_BIRTHDAY_NAME, LocalDate.now().minusYears(minAge)));
         }
         if (maxAge != null) {
             if (andAppend) queryString.append(" AND"); else andAppend = true;
-            queryString.append(String.format(WHERE_AGE_LESS_THAN, MetricsTable.PATIENT_BIRTHDAY_NAME, maxAge));
+            queryString.append(String.format(WHERE_DATE_AFTER, MetricsTable.PATIENT_BIRTHDAY_NAME, LocalDate.now().minusYears(maxAge)));
         }
         if (minHeight != null) {
             if (andAppend) queryString.append(" AND"); else andAppend = true;
@@ -178,6 +183,10 @@ public class MetricsDao {
             if (andAppend) queryString.append(" AND"); else andAppend = true;
             queryString.append(String.format(WHERE_TIME_BEFORE, MetricsTable.TIME_NAME, end));
         }
+        if (!isEmpty(sex)) {
+            if (andAppend) queryString.append(" AND"); else andAppend = true;
+            queryString.append(String.format(EQUAL_FORMAT, MetricsTable.PATIENT_SEX_NAME, sex));
+        }
         queryString.append(ORDER_BY_TIME_FORMAT);
         List<Metrics> metricsList = new ArrayList<>();
 
@@ -185,7 +194,7 @@ public class MetricsDao {
         "SELECT * FROM \"%s\".\"%s\" WHERE patient_id in (%s) " +
             "AND time between from_iso8601_timestamp('%s') and from_iso8601_timestamp('%s') ORDER BY time"
          */
-
+        log.info("Querying Timestream with query {}", queryString);
         QueryRequest request = QueryRequest.builder().queryString(queryString.toString()).build();
         QueryIterable iterable = queryClient.queryPaginator(request);
 
@@ -204,7 +213,7 @@ public class MetricsDao {
 
     // backwards compatability method
     public List<Metrics> query(List<String> patientIds, String start, String end) {
-        return query(patientIds, null, null, null, null, null, null, start, end);
+        return query(patientIds, null, null, null, null, null, null, null, start, end);
     }
 
     private static Metrics parseRow(List<ColumnInfo> columnInfos, Row row) {
