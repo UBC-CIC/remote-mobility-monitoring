@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import DatePicker from "react-datepicker";
+import React, { useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import "./NewDashboard.css";
 
 import sampleData from "./sampleData";
 //import Barchart from "./Barchart";
 import LineGraph from "./Linegraph";
-
 
 export interface Patient {
   patient_id: string;
@@ -29,7 +27,6 @@ export interface MetricsData {
   metrics: Metric[];
 }
 
-// This interface is only used for data filtering
 export interface metric {
     patient_name: string;
     metric_name: string;
@@ -117,7 +114,7 @@ function NewDashboard(){
 
 export default NewDashboard;
 
-
+/*
 // handler of exporting data to csv
 function handleExport(data: any[]) {
     // Create the CSV string
@@ -138,7 +135,7 @@ function handleExport(data: any[]) {
     link.click();
 }
 
-/*
+
             <div className="barcharts"  style={{ width: "80%", height: "50%" }}>
                 <Barchart data={metricsData} patients={patientsList} />
             </div>

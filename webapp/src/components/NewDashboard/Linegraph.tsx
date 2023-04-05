@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import "bootstrap/dist/css/bootstrap.min.css";
-import sampleData from "./sampleData";
+
 const transformData = (data: any[]) => {
     const series: Record<string, { name: string; data: { x: number; y: number }[] }> = {};
 
@@ -22,7 +22,7 @@ const transformData = (data: any[]) => {
 };
 
 const initialChartsOptionsState = {
-    optionsLine2: {
+    optionsLine1: {
         chart: {
             id: "tw",
             group: "social",
@@ -72,7 +72,7 @@ export default function LineGraph({ data }: Props) {
     }, [data]);
 
     const numSeries = data.length;
-    const colors = [        "#008FFB",        "#00E396",        "#FEB019",        "#FF4560",        "#775DD0",        "#546E7A",        "#26a69a",        "#D10CE8",    ];
+    const colors = ["#008FFB", "#00E396", "#FEB019", "#FF4560", "#775DD0", "#546E7A", "#26a69a", "#D10CE8"];
 
     const allSeries = transformData(data).map((series, index) => {
         return {
@@ -87,7 +87,7 @@ export default function LineGraph({ data }: Props) {
         : allSeries.filter((series) => series.name === selectedMetric);
 
     const options = {
-        ...initialChartsOptionsState.optionsLine2,
+        ...initialChartsOptionsState.optionsLine1,
         colors: filteredSeries.map((series) => series.color),
         series: filteredSeries,
     };
