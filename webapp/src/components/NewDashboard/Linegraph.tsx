@@ -92,10 +92,6 @@ export default function LineGraph({ data }: Props) {
         series: filteredSeries,
     };
 
-    const handleMetricSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedMetric(event.target.value);
-    };
-
     return (
         <div>
             <ReactApexChart
