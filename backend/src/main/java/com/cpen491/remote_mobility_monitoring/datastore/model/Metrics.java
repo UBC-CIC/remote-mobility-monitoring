@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,10 @@ public class Metrics {
     }
 
     private String patientId;
+    private String sex;
+    private String birthday;
+    private Float height;
+    private Float weight;
     private MeasureName measureName;
     private String measureValue;
     private String timestamp;

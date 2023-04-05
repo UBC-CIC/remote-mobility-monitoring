@@ -63,6 +63,10 @@ public final class Const {
         public static final String FIRST_NAME_NAME = ID_PREFIX + "first_name";
         public static final String LAST_NAME_NAME = ID_PREFIX + "last_name";
         public static final String PHONE_NUMBER_NAME = ID_PREFIX + "phone_number";
+        public static final String SEX = ID_PREFIX + "sex";
+        public static final String BIRTHDAY = ID_PREFIX + "birthday";
+        public static final String HEIGHT = ID_PREFIX + "height";
+        public static final String WEIGHT = ID_PREFIX + "weight";
         public static final String EMAIL_INDEX_NAME = EMAIL_NAME + INDEX_NAME_SUFFIX;
         public static final String DEVICE_ID_INDEX_NAME = DEVICE_ID_NAME + INDEX_NAME_SUFFIX;
         public static final List<Pair<String, String>> INDEX_NAMES_AND_KEYS = Arrays.asList(
@@ -73,6 +77,10 @@ public final class Const {
 
     public static class MetricsTable {
         public static final String PATIENT_ID_NAME = "patient_id";
+        public static final String PATIENT_SEX_NAME = "patient_sex";
+        public static final String PATIENT_BIRTHDAY_NAME = "patient_birthday";
+        public static final String PATIENT_HEIGHT_NAME = "patient_height";
+        public static final String PATIENT_WEIGHT_NAME = "patient_weight";
         public static final String MEASURE_NAME_NAME = "measure_name";
         public static final String MEASURE_VALUE_NAME = "measure_value";
         public static final String TIME_NAME = "time";

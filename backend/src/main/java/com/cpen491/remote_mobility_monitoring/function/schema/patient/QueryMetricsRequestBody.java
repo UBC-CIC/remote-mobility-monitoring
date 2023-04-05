@@ -20,4 +20,18 @@ public class QueryMetricsRequestBody {
     private String start;
     @SerializedName(Const.END_NAME)
     private String end;
+    @SerializedName(Const.SEX)
+    private String sex;
+    @SerializedName(Const.MIN_AGE)
+    private Integer minAge;
+    @SerializedName(Const.MAX_AGE)
+    private Integer maxAge;
+    @SerializedName(Const.MIN_HEIGHT)
+    private Float minHeight;
+    @SerializedName(Const.MAX_HEIGHT)
+    private Float maxHeight;
+    @SerializedName(Const.MIN_WEIGHT)
+    private Float minWeight;
+    @SerializedName(Const.MAX_WEIGHT)
+    private Float maxWeight;
 }

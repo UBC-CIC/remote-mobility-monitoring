@@ -2,6 +2,7 @@ package com.cpen491.remote_mobility_monitoring.function.schema.patient;
 
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Metrics.MeasureName;
+import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import com.cpen491.remote_mobility_monitoring.function.schema.Const;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
@@ -42,7 +43,7 @@ public class AddMetricsRequestBody {
         @SerializedName(MetricsTable.TIMESTAMP_NAME)
         private String timestamp;
 
-        public static List<Metrics> convertToMetrics(String patientId, AddMetricsSerialization serialization) {
+        public static List<Metrics> convertToMetrics(Patient patient, AddMetricsSerialization serialization) {
             List<Metrics> metricsList = new ArrayList<>();
 
             metricsList.add(Metrics.builder().measureName(MeasureName.STEP_LENGTH).measureValue(serialization.getStepLength()).build());
@@ -53,7 +54,11 @@ public class AddMetricsRequestBody {
             metricsList.add(Metrics.builder().measureName(MeasureName.STEP_COUNT).measureValue(serialization.getStepCount()).build());
 
             for (Metrics metrics : metricsList) {
-                metrics.setPatientId(patientId);
+                metrics.setPatientId(patient.getPid());
+                metrics.setHeight(patient.getHeight());
+                metrics.setWeight(patient.getWeight());
+                metrics.setSex(patient.getSex());
+                metrics.setBirthday(patient.getBirthday() == null ? null : patient.getBirthday().toString());
                 metrics.setTimestamp(serialization.getTimestamp());
             }
             return metricsList;

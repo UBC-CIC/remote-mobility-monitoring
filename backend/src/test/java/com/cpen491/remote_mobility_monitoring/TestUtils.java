@@ -8,6 +8,8 @@ import com.cpen491.remote_mobility_monitoring.datastore.model.Organization;
 import com.cpen491.remote_mobility_monitoring.datastore.model.Patient;
 import org.assertj.core.api.ThrowableAssert;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 public class TestUtils {
@@ -49,6 +51,23 @@ public class TestUtils {
     }
 
     public static Patient buildPatient(String pid, String sid, String email, String deviceId, String firstName, String lastName,
+                                       String phoneNumber, String sex, LocalDate birthday, Float height, Float weight) {
+        return Patient.builder()
+                .pid(pid)
+                .sid(sid)
+                .email(email)
+                .deviceId(deviceId)
+                .firstName(firstName)
+                .lastName(lastName)
+                .phoneNumber(phoneNumber)
+                .sex(sex)
+                .birthday(birthday)
+                .height(height)
+                .weight(weight)
+                .build();
+    }
+
+    public static Patient buildPatient(String pid, String sid, String email, String deviceId, String firstName, String lastName,
                                        String phoneNumber) {
         return Patient.builder()
                 .pid(pid)
@@ -58,6 +77,10 @@ public class TestUtils {
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber(phoneNumber)
+                .sex(null)
+                .birthday(null)
+                .height(null)
+                .weight(null)
                 .build();
     }
 

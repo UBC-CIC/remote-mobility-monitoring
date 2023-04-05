@@ -16,6 +16,7 @@ public final class Const {
     public static final String CAREGIVER_ID_NAME = "caregiver_id";
     public static final String PATIENT_ID_NAME = "patient_id";
     public static final String PASSWORD_NAME = "password";
+    public static final String SUPPRESS_EMAIL_NAME = "suppress_email";
     public static final String IS_PRIMARY_NAME = "is_primary";
     public static final String AUTH_CODE_NAME = "auth_code";
     public static final String VERIFIED_NAME = "verified";
@@ -26,6 +27,13 @@ public final class Const {
     public static final String METRICS_NAME = "metrics";
     public static final String START_NAME = "start";
     public static final String END_NAME = "end";
+    public static final String MIN_AGE = "min_age";
+    public static final String MAX_AGE = "max_age";
+    public static final String MIN_HEIGHT = "min_height";
+    public static final String MAX_HEIGHT = "max_height";
+    public static final String MIN_WEIGHT = "min_weight";
+    public static final String MAX_WEIGHT = "max_weight";
+    public static final String SEX = "sex";
     public static final String METRIC_NAME_NAME = "metric_name";
     public static final String METRIC_VALUE_NAME = "metric_value";
     public static final String TIMESTAMP_NAME = "timestamp";
@@ -34,4 +42,8 @@ public final class Const {
     public static final String SUB_NAME = "sub";
     public static final String SEND_EMAIL = "send_email";
     public static final String MESSAGE_NAME = "message";
+    public static final String PATIENT_BIRTHDAY = "birthday";
+    public static final String PATIENT_SEX = "sex";
+    public static final String PATIENT_HEIGHT = "height";
+    public static final String PATIENT_WEIGHT = "weight";
 }

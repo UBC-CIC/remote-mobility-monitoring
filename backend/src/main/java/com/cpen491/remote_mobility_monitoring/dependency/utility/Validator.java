@@ -30,9 +30,11 @@ import com.cpen491.remote_mobility_monitoring.function.schema.patient.QueryMetri
 import com.cpen491.remote_mobility_monitoring.function.schema.patient.UpdatePatientRequestBody;
 import org.apache.commons.lang3.Validate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,6 +45,7 @@ import static com.cpen491.remote_mobility_monitoring.datastore.model.Const.Patie
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.ADMIN_GROUP_NAME;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.CAREGIVER_GROUP_NAME;
 import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrapper.PATIENT_GROUP_NAME;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class Validator {
     public static final String PID_BLANK_ERROR_MESSAGE = "pid must be present";
@@ -51,6 +54,8 @@ public class Validator {
     public static final String NAME_BLANK_ERROR_MESSAGE = "name must be present";
     public static final String EMAIL_BLANK_ERROR_MESSAGE = "email must be present";
     public static final String PASSWORD_BLANK_ERROR_MESSAGE = "password must be present";
+    public static final String USERNAME_BLANK_ERROR_MESSAGE = "username must be present";
+    public static final String EMAIL_OR_USERNAME_BLANK_ERROR_MESSAGE = "email or username must be present";
     public static final String FIRST_NAME_BLANK_ERROR_MESSAGE = "first_name must be present";
     public static final String LAST_NAME_BLANK_ERROR_MESSAGE = "last_name must be present";
     public static final String TITLE_BLANK_ERROR_MESSAGE = "title must be present";
@@ -111,11 +116,14 @@ public class Validator {
     public static final String DELETE_CAREGIVER_NULL_ERROR_MESSAGE = "Delete caregiver request body must not be null";
     public static final String CREATE_PATIENT_NULL_ERROR_MESSAGE = "Create patient request body must not be null";
     public static final String GET_PATIENT_NULL_ERROR_MESSAGE = "Get patient request body must not be null";
+    public static final String BIRTHDAY_INVALID_ERROR_MESSAGE = "Birthday is not in iso8601 format";
     public static final String GET_ALL_CAREGIVERS_NULL_ERROR_MESSAGE = "Get all caregivers request body must not be null";
     public static final String ADD_METRICS_NULL_ERROR_MESSAGE = "Add metrics request body must not be null";
     public static final String QUERY_METRICS_NULL_ERROR_MESSAGE = "Query metrics request body must not be null";
     public static final String UPDATE_PATIENT_NULL_ERROR_MESSAGE = "Update patient request body must not be null";
     public static final String DELETE_PATIENT_NULL_ERROR_MESSAGE = "Delete patient request body must not be null";
+    public static final String INVALID_SEX_MESSAGE = "Invalid Sex";
+    public static final Set<String> VALID_SEXES = new HashSet<>(Arrays.asList("M", "F", "O"));
 
     public static void validatePidEqualsSid(String pid, String sid) {
         Validate.notBlank(pid, PID_BLANK_ERROR_MESSAGE);
@@ -295,6 +303,9 @@ public class Validator {
         validateFirstName(patient.getFirstName());
         validateLastName(patient.getLastName());
         validatePhoneNumber(patient.getPhoneNumber());
+        if (!isEmpty(patient.getSex())) {
+            validateSex(patient.getSex());
+        }
     }
 
     public static void validateMetricsList(List<Metrics> metrics) {
@@ -414,6 +425,26 @@ public class Validator {
         validateFirstName(body.getFirstName());
         validateLastName(body.getLastName());
         validatePhoneNumber(body.getPhoneNumber());
+        if (!isEmpty(body.getBirthday())) {
+            validateBirthday(body.getBirthday());
+        }
+        if (!isEmpty(body.getSex())) {
+            validateSex(body.getSex());
+        }
+    }
+
+    private static void validateBirthday(String birthday) {
+        try {
+            LocalDate.parse(birthday);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(BIRTHDAY_INVALID_ERROR_MESSAGE);
+        }
+    }
+
+    private static void validateSex(String sex) {
+        if (!VALID_SEXES.contains(sex)) {
+            throw new IllegalArgumentException(INVALID_SEX_MESSAGE);
+        }
     }
 
     public static void validateGetPatientRequestBody(GetPatientRequestBody body) {
@@ -434,12 +465,21 @@ public class Validator {
 
     public static void validateQueryMetricsRequestBody(QueryMetricsRequestBody body) {
         Validate.notNull(body, QUERY_METRICS_NULL_ERROR_MESSAGE);
-        validateIds(body.getPatientIds());
-        for (String patientId : body.getPatientIds()) {
-            validatePatientId(patientId);
+        if (body.getPatientIds() != null && !body.getPatientIds().isEmpty()){
+            validateIds(body.getPatientIds());
+            for (String patientId : body.getPatientIds()) {
+                validatePatientId(patientId);
+            }
         }
-        validateTimestamp(body.getStart());
-        validateTimestamp(body.getEnd());
+        if (!isEmpty(body.getStart())) {
+            validateTimestamp(body.getStart());
+        }
+        if (!isEmpty(body.getEnd())) {
+            validateTimestamp(body.getEnd());
+        }
+        if (!isEmpty(body.getSex())) {
+            validateSex(body.getSex());
+        }
     }
 
     public static void validateUpdatePatientRequestBody(UpdatePatientRequestBody body) {

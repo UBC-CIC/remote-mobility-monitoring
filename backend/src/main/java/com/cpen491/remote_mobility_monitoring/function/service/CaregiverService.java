@@ -46,6 +46,7 @@ import static com.cpen491.remote_mobility_monitoring.dependency.auth.CognitoWrap
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.getCurrentUtcTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.parseTime;
 import static com.cpen491.remote_mobility_monitoring.dependency.utility.TimeUtils.secondsBetweenTimes;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -78,8 +79,8 @@ public class CaregiverService {
         Validator.validateCreateCaregiverRequestBody(body);
 
         organizationDao.findById(body.getOrganizationId());
-
-        CognitoUser user = cognitoWrapper.createUserIfNotExistAndAddToGroup(body.getEmail(), CAREGIVER_GROUP_NAME);
+        CognitoUser user;
+        user = cognitoWrapper.createUserIfNotExistAndAddToGroup(body.getEmail(), CAREGIVER_GROUP_NAME, body.getPassword(), !body.isSuppressEmail());
         String caregiverId = CaregiverTable.ID_PREFIX + user.getId();
 
         Caregiver caregiver = Caregiver.builder()

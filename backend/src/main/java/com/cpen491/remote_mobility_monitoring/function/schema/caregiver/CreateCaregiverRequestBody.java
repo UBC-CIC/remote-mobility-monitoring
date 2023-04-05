@@ -24,4 +24,9 @@ public class CreateCaregiverRequestBody {
     private String phoneNumber;
     @SerializedName(Const.ORGANIZATION_ID_NAME)
     private String organizationId;
+    @SerializedName(Const.PASSWORD_NAME)
+    private String password;
+    @SerializedName(Const.SUPPRESS_EMAIL_NAME)
+    private boolean suppressEmail;
+
 }

@@ -84,10 +84,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -135,7 +132,7 @@ class PatientServiceTest {
 
     @Test
     public void testCreatePatient_HappyCase() {
-        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString(), nullable(String.class), anyBoolean()))
                 .thenReturn(new CognitoUser(PATIENT_ID_NO_PREFIX, PASSWORD));
 
         CreatePatientRequestBody requestBody = buildCreatePatientRequestBody();
@@ -156,7 +153,7 @@ class PatientServiceTest {
     @Test
     public void testCreatePatient_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
-        Mockito.doThrow(toThrow).when(cognitoWrapper).createUserIfNotExistAndAddToGroup(anyString(), anyString());
+        Mockito.doThrow(toThrow).when(cognitoWrapper).createUserIfNotExistAndAddToGroup(anyString(), anyString(), nullable(String.class), anyBoolean());
 
         CreatePatientRequestBody requestBody = buildCreatePatientRequestBody();
         assertThatThrownBy(() -> cut.createPatient(requestBody)).isSameAs(toThrow);
@@ -164,7 +161,7 @@ class PatientServiceTest {
 
     @Test
     public void testCreatePatient_WHEN_PatientDaoCreateThrows_THEN_ThrowSameException() {
-        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString(), nullable(String.class), anyBoolean()))
                 .thenReturn(new CognitoUser(PATIENT_ID_NO_PREFIX, PASSWORD));
 
         NullPointerException toThrow = new NullPointerException();
@@ -287,6 +284,7 @@ class PatientServiceTest {
 
     @Test
     public void testAddMetrics_HappyCase() {
+        Mockito.when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
         AddMetricsSerialization serialization1 = buildAddMetricsSerialization(METRIC_VALUES1);
         AddMetricsSerialization serialization2 = buildAddMetricsSerialization(METRIC_VALUES2);
         List<AddMetricsSerialization> serializations = Arrays.asList(serialization1, serialization2);
@@ -317,6 +315,7 @@ class PatientServiceTest {
     public void testAddMetrics_WHEN_MetricsDaoAddThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
         Mockito.doThrow(toThrow).when(metricsDao).add(anyList());
+        Mockito.when(patientDao.findById(anyString())).thenReturn(buildPatientDefault());
 
         List<AddMetricsSerialization> serializations = Arrays.asList(buildAddMetricsSerialization(METRIC_VALUES1));
         AddMetricsRequestBody requestBody = buildAddMetricsRequestBody(serializations);
@@ -415,7 +414,17 @@ class PatientServiceTest {
         Metrics metrics3 = buildMetricsDefault(MeasureName.WALKING_SPEED, METRIC_VALUES1[2]);
         metrics3.setPatientId(PATIENT_ID2);
         List<Metrics> metricsList = Arrays.asList(metrics1, metrics2, metrics3);
-        when(metricsDao.query(anyList(), anyString(), anyString())).thenReturn(metricsList);
+        when(metricsDao.query(
+                anyList(),
+                nullable(Integer.class),
+                nullable(Integer.class),
+                nullable(String.class),
+                nullable(Float.class),
+                nullable(Float.class),
+                nullable(Float.class),
+                nullable(Float.class),
+                anyString(),
+                anyString())).thenReturn(metricsList);
 
         QueryMetricsRequestBody requestBody = buildQueryMetricsRequestBody();
         QueryMetricsResponseBody responseBody = cut.queryMetrics(requestBody);
@@ -430,7 +439,17 @@ class PatientServiceTest {
     @Test
     public void testQueryMetrics_WHEN_MetricsDaoQueryThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
-        Mockito.doThrow(toThrow).when(metricsDao).query(anyList(), anyString(), anyString());
+        Mockito.doThrow(toThrow).when(metricsDao).query(
+                anyList(),
+                nullable(Integer.class),
+                nullable(Integer.class),
+                nullable(String.class),
+                nullable(Float.class),
+                nullable(Float.class),
+                nullable(Float.class),
+                nullable(Float.class),
+                anyString(),
+                anyString());
 
         QueryMetricsRequestBody requestBody = buildQueryMetricsRequestBody();
         assertThatThrownBy(() -> cut.queryMetrics(requestBody)).isSameAs(toThrow);
@@ -453,15 +472,10 @@ class PatientServiceTest {
         ids5.add(PATIENT_ID);
         return Stream.of(
                 Arguments.of(null, QUERY_METRICS_NULL_ERROR_MESSAGE),
-                Arguments.of(buildQueryMetricsRequestBody(null, TIMESTAMP, TIMESTAMP), IDS_NULL_ERROR_MESSAGE),
                 Arguments.of(buildQueryMetricsRequestBody(ids2, TIMESTAMP, TIMESTAMP), PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildQueryMetricsRequestBody(ids3, TIMESTAMP, TIMESTAMP), PATIENT_ID_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildQueryMetricsRequestBody(ids4, TIMESTAMP, TIMESTAMP), PATIENT_ID_INVALID_ERROR_MESSAGE),
-                Arguments.of(buildQueryMetricsRequestBody(ids5, null, TIMESTAMP), TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildQueryMetricsRequestBody(ids5, "", TIMESTAMP), TIMESTAMP_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildQueryMetricsRequestBody(ids5, INVALID_TIMESTAMP, TIMESTAMP), TIMESTAMP_INVALID_ERROR_MESSAGE),
-                Arguments.of(buildQueryMetricsRequestBody(ids5, TIMESTAMP, null), TIMESTAMP_BLANK_ERROR_MESSAGE),
-                Arguments.of(buildQueryMetricsRequestBody(ids5, TIMESTAMP, ""), TIMESTAMP_BLANK_ERROR_MESSAGE),
                 Arguments.of(buildQueryMetricsRequestBody(ids5, TIMESTAMP, INVALID_TIMESTAMP), TIMESTAMP_INVALID_ERROR_MESSAGE)
         );
     }

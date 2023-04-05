@@ -78,9 +78,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -125,7 +123,7 @@ public class CaregiverServiceTest {
 
     @Test
     public void testCreateCaregiver_HappyCase() {
-        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString(), isNull(), anyBoolean()))
                 .thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
 
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
@@ -156,7 +154,7 @@ public class CaregiverServiceTest {
     @Test
     public void testCreateCaregiver_WHEN_CognitoWrapperThrows_THEN_ThrowSameException() {
         NullPointerException toThrow = new NullPointerException();
-        Mockito.doThrow(toThrow).when(cognitoWrapper).createUserIfNotExistAndAddToGroup(anyString(), anyString());
+        Mockito.doThrow(toThrow).when(cognitoWrapper).createUserIfNotExistAndAddToGroup(anyString(), anyString(), isNull(), anyBoolean());
 
         CreateCaregiverRequestBody requestBody = buildCreateCaregiverRequestBody();
         assertThatThrownBy(() -> cut.createCaregiver(requestBody)).isSameAs(toThrow);
@@ -164,7 +162,7 @@ public class CaregiverServiceTest {
 
     @Test
     public void testCreateCaregiver_WHEN_CaregiverDaoCreateThrows_THEN_ThrowSameException() {
-        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString()))
+        when(cognitoWrapper.createUserIfNotExistAndAddToGroup(anyString(), anyString(), isNull(), anyBoolean()))
                 .thenReturn(new CognitoUser(CAREGIVER_ID_NO_PREFIX, PASSWORD));
 
         NullPointerException toThrow = new NullPointerException();

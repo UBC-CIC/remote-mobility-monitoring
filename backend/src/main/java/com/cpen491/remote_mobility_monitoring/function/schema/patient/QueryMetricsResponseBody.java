@@ -26,6 +26,14 @@ public class QueryMetricsResponseBody {
     public static class QueryMetricsSerialization {
         @SerializedName(Const.PATIENT_ID_NAME)
         private String patientId;
+        @SerializedName(Const.PATIENT_SEX)
+        private String sex;
+        @SerializedName(Const.PATIENT_BIRTHDAY)
+        private String birthday;
+        @SerializedName(Const.PATIENT_HEIGHT)
+        private Float height;
+        @SerializedName(Const.PATIENT_WEIGHT)
+        private Float weight;
         @SerializedName(Const.METRIC_NAME_NAME)
         private String metricName;
         @SerializedName(Const.METRIC_VALUE_NAME)
@@ -36,6 +44,10 @@ public class QueryMetricsResponseBody {
         public static List<QueryMetricsSerialization> convertFromMetrics(List<Metrics> metrics) {
             return metrics.stream().map(metric -> QueryMetricsSerialization.builder()
                     .patientId(metric.getPatientId())
+                    .sex(metric.getSex())
+                    .birthday(metric.getBirthday())
+                    .height(metric.getHeight())
+                    .weight(metric.getWeight())
                     .metricName(metric.getMeasureName().type)
                     .metricValue(metric.getMeasureValue())
                     .timestamp(metric.getTimestamp())

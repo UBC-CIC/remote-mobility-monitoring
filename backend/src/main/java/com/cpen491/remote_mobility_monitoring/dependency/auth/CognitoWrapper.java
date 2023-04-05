@@ -28,6 +28,8 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Slf4j
 @RequiredArgsConstructor
 public class CognitoWrapper {
@@ -58,22 +60,41 @@ public class CognitoWrapper {
      *
      * @param email The email of the user
      * @param groupName The Cognito group
+     * @param password The password of the user
+     * @param sendEmail Whether to email the user
+     * @return {@link CognitoUser}
+     * @throws CognitoException If Cognito get, create, or add user to group fails and throws an exception
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if email or group is empty or invalid
+     */
+    public CognitoUser createUserIfNotExistAndAddToGroup(String email, String groupName, String password, boolean sendEmail) {
+        Validator.validateEmail(email);
+        Validator.validateGroupName(groupName);
+
+        if (isBlank(password)) {
+            password = "PASS.word" + UUID.randomUUID();
+        }
+
+        CognitoUser user = getUser(email);
+        if (user == null) {
+            user = createUser(email, password, sendEmail);
+        }
+        addUserToGroup(email, groupName);
+
+        return user;
+    }
+
+    /**
+     * Creates a user in Cognito if user with email and randomly generated password if it does not already exist and adds the user to group.
+     * @param email The email of the user
+     * @param groupName The Cognito group
      * @return {@link CognitoUser}
      * @throws CognitoException If Cognito get, create, or add user to group fails and throws an exception
      * @throws IllegalArgumentException
      * @throws NullPointerException Above 2 exceptions are thrown if email or group is empty or invalid
      */
     public CognitoUser createUserIfNotExistAndAddToGroup(String email, String groupName) {
-        Validator.validateEmail(email);
-        Validator.validateGroupName(groupName);
-
-        CognitoUser user = getUser(email);
-        if (user == null) {
-            user = createUser(email);
-        }
-        addUserToGroup(email, groupName);
-
-        return user;
+        return createUserIfNotExistAndAddToGroup(email, groupName, "PASS.word" + UUID.randomUUID(), true);
     }
 
     /**
@@ -86,11 +107,26 @@ public class CognitoWrapper {
      * @throws NullPointerException Above 2 exceptions are thrown if email is empty
      */
     public CognitoUser createUser(String email) {
+        // TODO: come up with better way of generating password
+        return createUser(email, "PASS.word" + UUID.randomUUID(), true);
+    }
+
+    /**
+     * Creates a user in Cognito, specifying a password and whether to send an email.
+     *
+     * @param email the email of the user
+     * @param password the password of the user
+     * @param sendEmail whether to email the user with the welcome message
+     * @return {@link CognitoUser}
+     * @throws CognitoException If Cognito create user fails and throws an exception
+     * @throws IllegalArgumentException
+     * @throws NullPointerException Above 2 exceptions are thrown if email is empty
+     */
+    public CognitoUser createUser(String email, String password, boolean sendEmail) {
         log.info("Creating user with email {} in Cognito", email);
         Validator.validateEmail(email);
 
-        String password = "PASS.word" + UUID.randomUUID();
-        AdminCreateUserRequest request = AdminCreateUserRequest.builder()
+        AdminCreateUserRequest.Builder requestBuilder = AdminCreateUserRequest.builder()
                 .desiredDeliveryMediums(DeliveryMediumType.EMAIL)
                 .username(email)
                 .userAttributes(
@@ -98,8 +134,14 @@ public class CognitoWrapper {
                         AttributeType.builder().name("email").value(email).build()
                 )
                 .userPoolId(userpoolId)
-                .temporaryPassword(password)
-                .build();
+                .temporaryPassword(password);
+
+        if (!sendEmail) {
+            requestBuilder.messageAction("SUPPRESS");
+        }
+
+        AdminCreateUserRequest request = requestBuilder.build();
+
         try {
             AdminCreateUserResponse response = cognitoIdentityProviderClient.adminCreateUser(request);
             String id = getId(response.user().attributes());
