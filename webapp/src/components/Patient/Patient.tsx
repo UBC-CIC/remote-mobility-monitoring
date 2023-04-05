@@ -90,28 +90,7 @@ function Patient() {
     const [tableData, setTableData]: any = useState({});
 
     const generatePDF = () => {
-        const div = document.getElementById("step-count");
-        const pdf = new jsPDF();          
-        const width = pdf.internal.pageSize.getWidth()*0.8;
-        const height = pdf.internal.pageSize.getHeight()*0.25;
-        if (div) {
-            htmlToImage.toPng(div, { quality: 0.95 })
-                .then(function (dataUrl) {
-                    const link = document.createElement("a");
-                    link.download = "my-image-name.jpeg";
-                    pdf.addImage(dataUrl, "PNG", 0, 0, width, height);
-                    pdf.save("download.pdf"); 
-                });
-        }
-        // div = document.querySelector("#walk-speed");
-        // html2canvas(div).then((canvas) => {
-        // const imgWidth = 208;
-        // const imgHeight = canvas.height * imgWidth / canvas.width;
-        // const imgData = canvas.toDataURL("img/png");
-        // pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        // });
-        // pdf.save("download.pdf");
-
+        window.print();
     };
 
     
@@ -792,6 +771,7 @@ function Patient() {
                     {selectedPatient !== "all"? <>
                         <button className="unlink" type='submit' onClick={handleDelete}>Unlink Patient</button>
                         <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
+                        <button className="share" onClick={generatePDF} type='submit'>Export Patient</button>
                     </>:null}
                     <div id="data">
                         <div className="padding"></div>
