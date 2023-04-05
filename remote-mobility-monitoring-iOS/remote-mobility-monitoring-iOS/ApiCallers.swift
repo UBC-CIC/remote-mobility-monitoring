@@ -61,15 +61,24 @@ func verifyPatient(patientId: String, caregiverId: String, authCode: String, idT
     task.resume()
 }
 
-func createPatient(email: String, password: String, firstName: String, lastName: String, phoneNumber: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+func createPatient(email: String, password: String, firstName: String, lastName: String, phoneNumber: String, sex: String, height: Double, weight: Double, birthday: Date, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+    let dateFormatter = ISO8601DateFormatter()
+    dateFormatter.formatOptions = [.withFullDate]
+    let birthdayDateString = dateFormatter.string(from: birthday)
+    
     let endpoint = baseUrl + "/patients"
     let body: [String: Any] = [
         "email": email,
         "password": password,
         "first_name": firstName,
         "last_name": lastName,
-        "phone_number": phoneNumber
+        "phone_number": phoneNumber,
+        "sex": sex,
+        "height": height,
+        "weight": weight,
+        "birthday": birthdayDateString,
     ]
+    
     guard let url = URL(string: endpoint) else {
         completion(.failure(NSError(domain: "InvalidEndpoint", code: 0, userInfo: nil)))
         return
@@ -120,7 +129,12 @@ func addMetrics(idToken: String, patientId: String, metrics: [[String: Any]], co
         "patient_id": patientId,
         "metrics": metrics
     ]
-
+    
+    print("Add Metrics")
+    print(patientId)
+    print(body)
+    print(idToken)
+    
     guard let url = URL(string: endpoint) else {
         completion(.failure(NSError(domain: "InvalidEndpoint", code: 0, userInfo: nil)))
         return

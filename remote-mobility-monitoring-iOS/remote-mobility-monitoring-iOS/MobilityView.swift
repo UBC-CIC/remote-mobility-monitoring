@@ -223,7 +223,7 @@ struct MobilityView: View {
                                 RoundedRectangle(cornerRadius: CardStyling.cornerRadius)
                                     .fill(CardStyling.foreGroundColor)
                                     .shadow(radius: CardStyling.shadow)
-                                    .frame(height: geo.size.height * 0.8)
+                                    .frame(height: geo.size.height * 0.9)
                                     .overlay(
                                         HStack {
                                             Image(metric.logo)
@@ -236,15 +236,18 @@ struct MobilityView: View {
                                             Spacer()
                                             Text("\(metric.value)")
                                         }
+                                        .padding(.trailing, 16)
                                     )
                             }
                         }
                     }.onAppear {
                         healthStore.setUpHealthStore()
                     }.onChange(of: deepLinkURL.url) { newUrlValue in
-                        if let url = deepLinkURL.url {
+                        print(deepLinkURL)
+                        if deepLinkURL.url != nil {
+                            print("asdfasdfasdf")
                             // move to verification page
-                            selectedView = 2;
+                            selectedView = 1;
                         }
                     }
                     
