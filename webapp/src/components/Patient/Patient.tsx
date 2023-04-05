@@ -15,6 +15,17 @@ import sampleData from "../NewDashboard/sampleData";
 import {encrypt} from "../../helpers/Crypto";
 import LineGraphbyMetrics, {metrics, initialChartsOptionsState,initialChartsOptionsState1, initialChartsOptionsState2, transformData} from "../NewDashboard/GraphForMultipatients";
 import ReactApexChart from "react-apexcharts";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
+import { toPng, toJpeg, toBlob, toPixelData, toSvg } from "html-to-image";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./Patient.css";
@@ -76,6 +87,33 @@ function Patient() {
     const [doubleSupportData, setDoubleSupportData]: any = useState(null);
     const [asymmetryData, setAssymetryData]: any = useState(null);
     const [distanceWalkedData, setDistanceWalkedData]: any = useState(null);
+    const [tableData, setTableData]: any = useState({});
+
+    const generatePDF = () => {
+        const div = document.getElementById("step-count");
+        const pdf = new jsPDF();          
+        const width = pdf.internal.pageSize.getWidth()*0.8;
+        const height = pdf.internal.pageSize.getHeight()*0.25;
+        if (div) {
+            htmlToImage.toPng(div, { quality: 0.95 })
+                .then(function (dataUrl) {
+                    const link = document.createElement("a");
+                    link.download = "my-image-name.jpeg";
+                    pdf.addImage(dataUrl, "PNG", 0, 0, width, height);
+                    pdf.save("download.pdf"); 
+                });
+        }
+        // div = document.querySelector("#walk-speed");
+        // html2canvas(div).then((canvas) => {
+        // const imgWidth = 208;
+        // const imgHeight = canvas.height * imgWidth / canvas.width;
+        // const imgData = canvas.toDataURL("img/png");
+        // pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        // });
+        // pdf.save("download.pdf");
+
+    };
+
     
 
     const handleFromDateChange = (date: Date) => {
@@ -142,6 +180,7 @@ function Patient() {
                 const allDoubleSupport: any = [];
                 const allAssymetry: any = [];
                 const allDistanceWalked: any = [];
+                const dateMetrics: any = {};
                 data.metrics.forEach((m: any) => {
                     const currMetric = {
                         "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
@@ -149,6 +188,13 @@ function Patient() {
                         "timestamp": m.timestamp,
                         "metric_value": m.metric_value
                     };
+                    if (!dateMetrics[m.timestamp]) {
+                        dateMetrics[m.timestamp] = {};
+                        dateMetrics[m.timestamp][m.metric_name] = m.metric_value;
+                    }
+                    else {
+                        dateMetrics[m.timestamp][m.metric_name] = m.metric_value;
+                    }
                     if(m.metric_name === "step_count") {
                         allStepCount.push(currMetric);
                     }
@@ -180,6 +226,8 @@ function Patient() {
                 setDoubleSupportData(allDoubleSupport);
                 setAssymetryData(allAssymetry);
                 setDistanceWalkedData(allDistanceWalked);
+                setTableData(dateMetrics);
+                console.log(dateMetrics);
 
                 // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
             })
@@ -288,7 +336,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "",
+                text: "Walking Asymmetry",
                 align: "left",
             },
             yaxis: {
@@ -327,7 +375,6 @@ function Patient() {
                     height={300}
                 />
                 <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
-                    {"Walking Assymetry"}
                 </div>
             </div>
         );
@@ -348,7 +395,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "",
+                text: "Distance Walked",
                 align: "left",
             },
             yaxis: {
@@ -387,7 +434,6 @@ function Patient() {
                     height={300}
                 />
                 <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
-                    {"Distance Walked"}
                 </div>
             </div>
         );
@@ -408,7 +454,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "",
+                text: "Double Support Time",
                 align: "left",
             },
             yaxis: {
@@ -447,7 +493,6 @@ function Patient() {
                     height={300}
                 />
                 <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
-                    {"Double Support Time"}
                 </div>
             </div>
         );
@@ -468,7 +513,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "",
+                text: "Step Length",
                 align: "left",
             },
             yaxis: {
@@ -507,7 +552,6 @@ function Patient() {
                     height={300}
                 />
                 <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
-                    {"Step Length"}
                 </div>
             </div>
         );
@@ -529,7 +573,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "",
+                text: "Walking Speed",
                 align: "left",
             },
             yaxis: {
@@ -568,7 +612,6 @@ function Patient() {
                     height={300}
                 />
                 <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
-                    {"Walking Speed"}
                 </div>
             </div>
         );
@@ -590,7 +633,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "Step Count Chart",
+                text: "Step Count",
                 align: "left",
             },
             yaxis: {
@@ -629,7 +672,6 @@ function Patient() {
                     height={300}
                 />
                 <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
-                    {"Step Count"}
                 </div>
             </div>
         );
@@ -751,37 +793,81 @@ function Patient() {
                         <button className="unlink" type='submit' onClick={handleDelete}>Unlink Patient</button>
                         <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
                     </>:null}
-                    <div className="padding"></div>
-                    {stepCountData !== null? <>
-                        {buildStepCountChart(stepCountData)}
+                    <div id="data">
                         <div className="padding"></div>
-                        <Divider/>
-                    </>:null}
-                    <div className="padding"></div>
-                    {walkingSpeedData !== null? <>{buildWalkingSpeedChart(walkingSpeedData)}
+                        <div id="step-count">
+                            {stepCountData !== null? <>
+                                {buildStepCountChart(stepCountData)}
+                                <div className="padding"></div>
+                                <Divider/>
+                            </>:null}
+                        </div>
+                        <div id="walk-speed">
+                            <div className="padding"></div>
+                            {walkingSpeedData !== null? <>{buildWalkingSpeedChart(walkingSpeedData)}
+                                <div className="padding"></div>
+                                <Divider/>
+                            </>:null}
+                        </div>
+                        <div id="step-length">
+                            <div className="padding"></div>
+                            {stepLengthData !== null? <>{buildStepLengthChart(stepLengthData)}
+                                <div className="padding"></div>
+                                <Divider/>
+                            </>:null}
+                        </div>
+                        <div id="double">
+                            <div className="padding"></div>
+                            {doubleSupportData !== null? <>{buildDoubleSupportChart(doubleSupportData)}
+                                <div className="padding"></div>
+                                <Divider/>
+                            </>:null}
+                        </div>
                         <div className="padding"></div>
-                        <Divider/>
-                    </>:null}
-                    <div className="padding"></div>
-                    {stepLengthData !== null? <>{buildStepLengthChart(stepLengthData)}
+                        <div id="asy">
+                            {asymmetryData !== null?<> {buildAssymetryChart(asymmetryData)}
+                                <div className="padding"></div>
+                                <Divider/>
+                            </>:null}
+                        </div>
                         <div className="padding"></div>
-                        <Divider/>
-                    </>:null}
-                    <div className="padding"></div>
-                    {doubleSupportData !== null? <>{buildDoubleSupportChart(doubleSupportData)}
+                        <div id="dist">
+                            {distanceWalkedData !== null?<> {buildDistanceWalkedChart(distanceWalkedData)}
+                                <div className="padding"></div>
+                                <Divider/>
+                            </>:null}
+                        </div>
                         <div className="padding"></div>
-                        <Divider/>
-                    </>:null}
-                    <div className="padding"></div>
-                    {asymmetryData !== null?<> {buildAssymetryChart(asymmetryData)}
-                        <div className="padding"></div>
-                        <Divider/>
-                    </>:null}
-                    <div className="padding"></div>
-                    {distanceWalkedData !== null?<> {buildDistanceWalkedChart(distanceWalkedData)}
-                        <div className="padding"></div>
-                        <Divider/>
-                    </>:null}
+                        <TableContainer component={Paper}>
+                            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Step Count</TableCell>
+                                        <TableCell align="right">Walking Speed</TableCell>
+                                        <TableCell align="right">Step Length</TableCell>
+                                        <TableCell align="right">Double Support Time</TableCell>
+                                        <TableCell align="right">Walking Assymetry</TableCell>
+                                        <TableCell align="right">Distance Walked</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {Object.keys(tableData).map((time) => {
+                                        return <TableRow
+                                            key={time}
+                                            sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                                        >
+                                            <TableCell align="right">{Math.round(tableData[time]["step_count"]*100)/100}</TableCell>
+                                            <TableCell align="right">{Math.round(tableData[time]["walking_speed"]*100)/100}</TableCell>
+                                            <TableCell align="right">{Math.round(tableData[time]["step_length"]*100)/100}</TableCell>
+                                            <TableCell align="right">{Math.round(tableData[time]["double_support_time"]*100)/100}</TableCell>
+                                            <TableCell align="right">{Math.round(tableData[time]["walking_asymmetry"]*100)/100}</TableCell>
+                                            <TableCell align="right">{Math.round(tableData[time]["distance_walked"]*100)/100}</TableCell>
+                                        </TableRow>;
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </div>
                 </div>
 
             </div>
