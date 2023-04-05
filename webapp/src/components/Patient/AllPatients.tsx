@@ -226,13 +226,13 @@ function AllPatients() {
                                     size="small" 
                                     label="Min Height (cm)"
                                     value={minHeight}
-                                    style = {{width: 140}}
+                                    style = {{width: 130}}
                                 ></TextField>
                                 <TextField className="filter-text"
                                     size="small" 
                                     label="Max Height (cm)"
                                     value={maxHeight}
-                                    style = {{width: 140}}
+                                    style = {{width: 130}}
                                 ></TextField>
                             </div>
                             <div className="padding"></div>
@@ -241,13 +241,13 @@ function AllPatients() {
                                     size="small" 
                                     label="Min Weight (kg)"
                                     value={minWeight}
-                                    style = {{width: 140}}
+                                    style = {{width: 130}}
                                 ></TextField>
                                 <TextField className="filter-text"
                                     size="small" 
                                     label="Max Weight (kg)"
                                     value={maxWeight}
-                                    style = {{width: 140}}
+                                    style = {{width: 130}}
                                 ></TextField>
                             </div>
                             <div className="padding"></div>
