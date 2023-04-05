@@ -195,7 +195,6 @@ export const ServiceHandler = {
             const endDateIso = endDate.substring(0, 10).concat("T23:59:59");
             url = url.concat(`end=${endDateIso}`);
         }
-        console.log(url);
 
 
         const req = fetch(url, {

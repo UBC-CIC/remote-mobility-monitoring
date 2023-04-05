@@ -74,6 +74,8 @@ function Patient() {
     const [walkingSpeedData, setWalkingSpeedData]: any = useState(null);
     const [stepLengthData, setStepLengthData]: any = useState(null);
     const [doubleSupportData, setDoubleSupportData]: any = useState(null);
+    const [asymmetryData, setAssymetryData]: any = useState(null);
+    const [distanceWalkedData, setDistanceWalkedData]: any = useState(null);
     
 
     const handleFromDateChange = (date: Date) => {
@@ -125,6 +127,12 @@ function Patient() {
             start = startDate;
             end = endDate;
         }
+        setStepCountData(null);
+        setWalkingSpeedData(null);
+        setStepLengthData(null);
+        setDoubleSupportData(null);
+        setAssymetryData(null);
+        setDistanceWalkedData(null);
         ServiceHandler.queryMetrics(selectedPatients, start.toISOString(), end.toISOString())
             .then((data: any) => {
                 const allMetrics: any = [];
@@ -132,6 +140,8 @@ function Patient() {
                 const allWalkingSpeed: any = [];
                 const allStepLength: any = [];
                 const allDoubleSupport: any = [];
+                const allAssymetry: any = [];
+                const allDistanceWalked: any = [];
                 data.metrics.forEach((m: any) => {
                     const currMetric = {
                         "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
@@ -152,6 +162,12 @@ function Patient() {
                     else if (m.metric_name === "double_support_time") {
                         allDoubleSupport.push(currMetric);
                     }
+                    else if (m.metric_name === "walking_asymmetry") {
+                        allAssymetry.push(currMetric);
+                    }
+                    else if (m.metric_name === "distance_walked") {
+                        allDistanceWalked.push(currMetric);
+                    }
                     else {
                         console.log(m.metric_name);
                     }
@@ -162,8 +178,9 @@ function Patient() {
                 setWalkingSpeedData(allWalkingSpeed);
                 setStepLengthData(allStepLength);
                 setDoubleSupportData(allDoubleSupport);
+                setAssymetryData(allAssymetry);
+                setDistanceWalkedData(allDistanceWalked);
 
-                console.log(allStepCount);
                 // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
             })
             .catch((err) => console.log(err));
@@ -256,6 +273,126 @@ function Patient() {
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     };
 
+    const buildAssymetryChart = (asymmetryData: any) => {
+        const asymmetrySeries = transformData(asymmetryData, "walking_asymmetry").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const walkingSpeedOptions = {
+            chart: {
+                id: "asymmetryChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...walkingSpeedOptions,
+            colors: asymmetrySeries.map(() => getRandomColor()),
+            series: asymmetrySeries,
+        };
+
+        return (
+            <div key={"asymmetry"}>
+                <ReactApexChart
+                    options={options as any}
+                    series={asymmetrySeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                    {"Walking Assymetry"}
+                </div>
+            </div>
+        );
+
+    };
+    const buildDistanceWalkedChart = (distanceWalked: any) => {
+        const distanceWalkedSeries = transformData(distanceWalked, "distance_walked").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const distanceWalkedOptions = {
+            chart: {
+                id: "distanceWalkedChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...distanceWalkedOptions,
+            colors: distanceWalkedSeries.map(() => getRandomColor()),
+            series: distanceWalkedSeries,
+        };
+
+        return (
+            <div key={"distance"}>
+                <ReactApexChart
+                    options={options as any}
+                    series={distanceWalkedSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                    {"Distance Walked"}
+                </div>
+            </div>
+        );
+
+    };
     const buildDoubleSupportChart = (doubleSupportData: any) => {
         const doubleSupportSeries = transformData(doubleSupportData, "double_support_time").map((series: any, idx: any) => {
             return {
@@ -263,7 +400,7 @@ function Patient() {
                 color: getRandomColor(),
             };
         });
-        const walkingSpeedOptions = {
+        const doubleSupportOptions = {
             chart: {
                 id: "doubleSupportChart",
                 group: "social",
@@ -296,7 +433,7 @@ function Patient() {
             },
         };
         const options = {
-            ...walkingSpeedOptions,
+            ...doubleSupportOptions,
             colors: doubleSupportSeries.map(() => getRandomColor()),
             series: doubleSupportSeries,
         };
@@ -378,7 +515,6 @@ function Patient() {
     };
 
     const buildWalkingSpeedChart = (walkingSpeedData: any) => {
-        console.log(stepCountData);
         const walkingSpeedSeries = transformData(walkingSpeedData, "walking_speed").map((series: any, idx: any) => {
             return {
                 ...series,
@@ -440,7 +576,6 @@ function Patient() {
     };
 
     const buildStepCountChart = (stepCountData: any) => {
-        console.log(stepCountData);
         const stepCountSeries = transformData(stepCountData, "step_count").map((series: any, idx: any) => {
             return {
                 ...series,
@@ -617,21 +752,36 @@ function Patient() {
                         <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
                     </>:null}
                     <div className="padding"></div>
-                    {stepCountData !== null? buildStepCountChart(stepCountData):null}
+                    {stepCountData !== null? <>
+                        {buildStepCountChart(stepCountData)}
+                        <div className="padding"></div>
+                        <Divider/>
+                    </>:null}
                     <div className="padding"></div>
-                    <Divider/>
+                    {walkingSpeedData !== null? <>{buildWalkingSpeedChart(walkingSpeedData)}
+                        <div className="padding"></div>
+                        <Divider/>
+                    </>:null}
                     <div className="padding"></div>
-                    {walkingSpeedData !== null? buildWalkingSpeedChart(walkingSpeedData):null}
+                    {stepLengthData !== null? <>{buildStepLengthChart(stepLengthData)}
+                        <div className="padding"></div>
+                        <Divider/>
+                    </>:null}
                     <div className="padding"></div>
-                    <Divider/>
+                    {doubleSupportData !== null? <>{buildDoubleSupportChart(doubleSupportData)}
+                        <div className="padding"></div>
+                        <Divider/>
+                    </>:null}
                     <div className="padding"></div>
-                    {stepLengthData !== null? buildStepLengthChart(stepLengthData):null}
+                    {asymmetryData !== null?<> {buildAssymetryChart(asymmetryData)}
+                        <div className="padding"></div>
+                        <Divider/>
+                    </>:null}
                     <div className="padding"></div>
-                    <Divider/>
-                    <div className="padding"></div>
-                    {doubleSupportData !== null? buildDoubleSupportChart(doubleSupportData):null}
-                    <div className="padding"></div>
-                    <Divider/>
+                    {distanceWalkedData !== null?<> {buildDistanceWalkedChart(distanceWalkedData)}
+                        <div className="padding"></div>
+                        <Divider/>
+                    </>:null}
                 </div>
 
             </div>

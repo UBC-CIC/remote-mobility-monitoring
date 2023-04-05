@@ -136,7 +136,6 @@ function AllPatients() {
                             "is_primary": pat.is_primary};
                         if(pat.patient_id === patientId) {
                             currPatientId = patientId;
-                            console.log(pat);
                             if (pat.is_primary) {
                                 currIsPrimary = true;
                             }
