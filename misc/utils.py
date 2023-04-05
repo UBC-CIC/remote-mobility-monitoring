@@ -14,7 +14,7 @@ def random_email(length: int = 10, email_domain: str | None = None) -> str:
 
 # Generate random valid phone number
 def random_phone_number(country_code: str = '+1') -> str:
-    return country_code.join(random.choices(string.digits, k=10))
+    return country_code + ''.join(random.choices(string.digits, k=10))
 
 
 def random_string(length: int = 10, lower_letters: bool = True, upper_letters: bool = True, digits: bool = True,

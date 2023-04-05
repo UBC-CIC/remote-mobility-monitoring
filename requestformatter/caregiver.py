@@ -22,5 +22,6 @@ def create(email=None, first_name=None, last_name=None, title=None, phone_number
         "last_name": last_name,
         "title": title,
         "phone_number": phone_number,
-        "organization_id": org_id
+        "organization_id": org_id,
+        "suppress_email": True
     }
