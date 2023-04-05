@@ -24,6 +24,39 @@ export const transformData = (data: any[], metric: string) => {
   
     return Object.values(series);
 };
+
+export const initialChartsOptionsState2 = {
+    chart: {
+        id: "chart2",
+        group: "social",
+        type: "line",
+        height: 300,
+    },
+    title: {
+        text: "Metrics Chart",
+        align: "left",
+    },
+    yaxis: {
+        labels: {
+            minWidth: 40,
+            formatter: function (value: any) {
+                return Math.round((value + Number.EPSILON) * 100) / 100;
+            },
+        },
+    },
+    xaxis: {
+        type: "datetime",
+        labels: {
+            rotate: -45,
+            rotateAlways: false,
+            format: "MM.dd.yy",
+            offsetX: 90,
+        },
+        title: {
+            text: "Date",
+        },
+    },
+};
   
 
 export const initialChartsOptionsState1 = {
@@ -40,6 +73,9 @@ export const initialChartsOptionsState1 = {
     yaxis: {
         labels: {
             minWidth: 40,
+            formatter: function (value: any) {
+                return Math.round((value + Number.EPSILON) * 100) / 100;
+            },
         },
     },
     xaxis: {
@@ -69,6 +105,9 @@ export const initialChartsOptionsState = {
     yaxis: {
         labels: {
             minWidth: 40,
+            formatter: function (value: any) {
+                return Math.round((value + Number.EPSILON) * 100) / 100;
+            },
         },
     },
     xaxis: {

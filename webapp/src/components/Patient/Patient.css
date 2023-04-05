@@ -61,8 +61,9 @@ html, body {
 
 .patient-container .share {
     height: 32px;
-    width: 10%;
     border-radius: 5px;
+    padding-left:8px;
+    padding-right: 8px;
     background-color: #4D47C3;
     color: #fff;
     border: 1px solid rgba(255,255,255,.5);

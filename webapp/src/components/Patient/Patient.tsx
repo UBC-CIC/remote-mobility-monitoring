@@ -13,7 +13,7 @@ import {ToggleButton, ToggleButtonGroup, TextField} from "@mui/material";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker";
 import sampleData from "../NewDashboard/sampleData";
 import {encrypt} from "../../helpers/Crypto";
-import LineGraphbyMetrics, {metrics, initialChartsOptionsState,initialChartsOptionsState1, transformData} from "../NewDashboard/GraphForMultipatients";
+import LineGraphbyMetrics, {metrics, initialChartsOptionsState,initialChartsOptionsState1, initialChartsOptionsState2, transformData} from "../NewDashboard/GraphForMultipatients";
 import ReactApexChart from "react-apexcharts";
 
 import "react-datepicker/dist/react-datepicker.css";
@@ -56,7 +56,7 @@ function Patient() {
     const [deletionMessage, setDeletionMessage] = useState("");
     const [intervals, setIntervals] = useState("all");
     const patientId = decrypt(patientIdEncrypt);
-    const [selectedPatient, setSelectedPatient]: any = useState("");
+    const [selectedPatient, setSelectedPatient]: any = useState(patientId);
     const [allPatients, setAllPatients] = useState([]);
     const [endDate, setEndDate] = useState(moment());
     const [selectedFromDate, setSelectedFromDate] = useState<Date>(new Date());
@@ -70,6 +70,10 @@ function Patient() {
     const [data, setData] = useState<metric[]>(sampleData());
     const graphData = { data: data };
     const [multiPatientsGraph, setmultiPatientsGraph] = useState<any>(LineGraphbyMetrics(graphData));
+    const [stepCountData, setStepCountData]: any = useState(null);
+    const [walkingSpeedData, setWalkingSpeedData]: any = useState(null);
+    const [stepLengthData, setStepLengthData]: any = useState(null);
+    const [doubleSupportData, setDoubleSupportData]: any = useState(null);
     
 
     const handleFromDateChange = (date: Date) => {
@@ -111,45 +115,59 @@ function Patient() {
         else {
             selectedPatients.push(selectedPatient);
         }
+        let end = new Date();
+        let start = new Date();
         if (interval === "all") {
+            start.setFullYear(end.getFullYear()-300);
             startDate.setMonth(endDate.getMonth()-1);
-            console.log(selectedPatients);
-            ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
-                .then((data: any) => {
-                    const allMetrics: any = [];
-                    data.metrics.forEach((m: any) => {
-                        const currMetric = {
-                            "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
-                            "metric_name": m.metric_name,
-                            "timestamp": m.timestamp,
-                            "metric_value": m.metric_value
-                        };
-                        allMetrics.push(currMetric);
-                    });
-                    setData(allMetrics);
-                // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
-                })
-                .catch((err) => console.log(err));
         }
         else {
-            ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
-                .then((data: any) => {
-                    const allMetrics: any = [];
-                    data.metrics.forEach((m: any) => {
-                        const currMetric = {
-                            "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
-                            "metric_name": m.metric_name,
-                            "timestamp": m.timestamp,
-                            "metric_value": m.metric_value
-                        };
-                        allMetrics.push(currMetric);
-                    });
-                    setData(allMetrics);
-                // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
-                })
-                .catch((err) => console.log(err));
-
+            start = startDate;
+            end = endDate;
         }
+        ServiceHandler.queryMetrics(selectedPatients, start.toISOString(), end.toISOString())
+            .then((data: any) => {
+                const allMetrics: any = [];
+                const allStepCount: any = [];
+                const allWalkingSpeed: any = [];
+                const allStepLength: any = [];
+                const allDoubleSupport: any = [];
+                data.metrics.forEach((m: any) => {
+                    const currMetric = {
+                        "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
+                        "metric_name": m.metric_name,
+                        "timestamp": m.timestamp,
+                        "metric_value": m.metric_value
+                    };
+                    if(m.metric_name === "step_count") {
+                        allStepCount.push(currMetric);
+                    }
+                    else if (m.metric_name === "walking_speed") {
+                        allWalkingSpeed.push(currMetric);
+
+                    }
+                    else if (m.metric_name === "step_length"){
+                        allStepLength.push(currMetric);
+                    }
+                    else if (m.metric_name === "double_support_time") {
+                        allDoubleSupport.push(currMetric);
+                    }
+                    else {
+                        console.log(m.metric_name);
+                    }
+                    allMetrics.push(currMetric);
+                });
+                setData(allMetrics);
+                setStepCountData(allStepCount);
+                setWalkingSpeedData(allWalkingSpeed);
+                setStepLengthData(allStepLength);
+                setDoubleSupportData(allDoubleSupport);
+
+                console.log(allStepCount);
+                // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
+            })
+            .catch((err) => console.log(err));
+        return;
     };
 
 
@@ -196,7 +214,7 @@ function Patient() {
 
     useEffect(() => {
         queryDateMetrics(intervals, selectedFromDate, selectedToDate);
-    }, [selectedPatient]);
+    }, [selectedPatient, patientDetails]);
 
     const handleIntervals = (e: any) => {
         const interval = e.target.value;
@@ -238,42 +256,250 @@ function Patient() {
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     };
 
-    const charts = metrics.map((metric: any) => {
-        const allSeries = transformData(data, metric).map((series: any, idx: any) => {
+    const buildDoubleSupportChart = (doubleSupportData: any) => {
+        const doubleSupportSeries = transformData(doubleSupportData, "double_support_time").map((series: any, idx: any) => {
             return {
                 ...series,
                 color: getRandomColor(),
             };
         });
-
-        let options = {
-            ...initialChartsOptionsState,
-            colors: allSeries.map(() => getRandomColor()),
-            series: allSeries,
+        const walkingSpeedOptions = {
+            chart: {
+                id: "doubleSupportChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...walkingSpeedOptions,
+            colors: doubleSupportSeries.map(() => getRandomColor()),
+            series: doubleSupportSeries,
         };
 
-        if (metric === "step_length") {
-            options = {
-                ...initialChartsOptionsState1,
-                colors: allSeries.map(() => getRandomColor()),
-                series: allSeries,
-            };
-        }
-
         return (
-            <div key={metric}>
+            <div key={"double-support"}>
                 <ReactApexChart
                     options={options as any}
-                    series={allSeries as any}
+                    series={doubleSupportSeries as any}
                     type="line"
                     height={300}
                 />
                 <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
-                    {metric}
+                    {"Double Support Time"}
                 </div>
             </div>
         );
-    });
+
+    };
+    const buildStepLengthChart = (stepLengthData: any) => {
+        const stepLengthSeries = transformData(stepLengthData, "step_length").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const walkingSpeedOptions = {
+            chart: {
+                id: "stepLengthChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...walkingSpeedOptions,
+            colors: stepLengthSeries.map(() => getRandomColor()),
+            series: stepLengthSeries,
+        };
+
+        return (
+            <div key={"step-length"}>
+                <ReactApexChart
+                    options={options as any}
+                    series={stepLengthSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                    {"Step Length"}
+                </div>
+            </div>
+        );
+
+    };
+
+    const buildWalkingSpeedChart = (walkingSpeedData: any) => {
+        console.log(stepCountData);
+        const walkingSpeedSeries = transformData(walkingSpeedData, "walking_speed").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const walkingSpeedOptions = {
+            chart: {
+                id: "walkingSpeedChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...walkingSpeedOptions,
+            colors: walkingSpeedSeries.map(() => getRandomColor()),
+            series: walkingSpeedSeries,
+        };
+
+        return (
+            <div key={"step-count"}>
+                <ReactApexChart
+                    options={options as any}
+                    series={walkingSpeedSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                    {"Walking Speed"}
+                </div>
+            </div>
+        );
+
+    };
+
+    const buildStepCountChart = (stepCountData: any) => {
+        console.log(stepCountData);
+        const stepCountSeries = transformData(stepCountData, "step_count").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const stepCountOptions = {
+            chart: {
+                id: "stepCountChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "Step Count Chart",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...stepCountOptions,
+            colors: stepCountSeries.map(() => getRandomColor()),
+            series: stepCountSeries,
+        };
+
+        return (
+            <div key={"walking-speed"}>
+                <ReactApexChart
+                    options={options as any}
+                    series={stepCountSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                    {"Step Count"}
+                </div>
+            </div>
+        );
+
+    };
 
     return (
         <>
@@ -391,8 +617,21 @@ function Patient() {
                         <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
                     </>:null}
                     <div className="padding"></div>
-                    {charts}
+                    {stepCountData !== null? buildStepCountChart(stepCountData):null}
                     <div className="padding"></div>
+                    <Divider/>
+                    <div className="padding"></div>
+                    {walkingSpeedData !== null? buildWalkingSpeedChart(walkingSpeedData):null}
+                    <div className="padding"></div>
+                    <Divider/>
+                    <div className="padding"></div>
+                    {stepLengthData !== null? buildStepLengthChart(stepLengthData):null}
+                    <div className="padding"></div>
+                    <Divider/>
+                    <div className="padding"></div>
+                    {doubleSupportData !== null? buildDoubleSupportChart(doubleSupportData):null}
+                    <div className="padding"></div>
+                    <Divider/>
                 </div>
 
             </div>
