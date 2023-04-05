@@ -27,7 +27,7 @@ const initialChartsOptionsState = {
             id: "tw",
             group: "social",
             type: "line",
-            height: 300,
+            height: 500,
         },
         title: {
             text: "Metrics Chart",
@@ -43,10 +43,11 @@ const initialChartsOptionsState = {
             labels: {
                 rotate: -45,
                 rotateAlways: false,
-                format: "dd.MM.yy",
+                format: "MM.dd.yy",
+                offsetX: 90, 
             },
             title: {
-                text: "Date Time",
+                text: "Date",
             },
         },
     },
@@ -97,7 +98,7 @@ export default function LineGraph({ data }: Props) {
 
     return (
         <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "20px" }}>
                 <select value={selectedMetric} onChange={handleMetricSelect} style={{ fontSize: "14px" }}>
                     <option value="all">All Metrics</option>
                     {allSeries.map((series) => (

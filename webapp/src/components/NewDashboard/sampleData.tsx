@@ -17,8 +17,8 @@ function sampleData(){
         for (let j = 0; j < metrics.length; j++) {
             const metricName = metrics[j];
     
-            for (let k = 0; k < 5; k++) {
-                const date = new Date(2022, 10, k + 1).toISOString();
+            for (let k = 0; k < 10; k++) {
+                const date = new Date(2023, 3, k + 1).toISOString();
     
                 const metric = {
                     patient_name: patientName,
