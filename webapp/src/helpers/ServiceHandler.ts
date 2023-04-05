@@ -188,13 +188,16 @@ export const ServiceHandler = {
         console.log(endDateIso);
 
         const idToken = getIdToken();
+        console.log(idToken);
         const base_url = createBaseUrl("caregiver");
         let url = base_url.concat("/metrics?");
         for (const patientId of patientIdList) {
+            console.log(patientId);
             url = url.concat(`patients=${patientId}&`);
         }
         url = url.concat(`start=${startDateIso}&`);
         url = url.concat(`end=${endDateIso}`);
+        console.log(url);
         const req = fetch(url, {
             method: "GET", 
             mode: "cors", 

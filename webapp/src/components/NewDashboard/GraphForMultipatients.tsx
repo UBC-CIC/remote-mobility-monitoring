@@ -75,12 +75,12 @@ const initialChartsOptionsState = {
 };
 
 const metrics = [
-    "stepLength",
-    "doubleSupportTime",
-    "walkingSpeed",
-    "walkingAsymmetry",
-    "distanceWalked",
-    "stepCount",
+    "step_length",
+    "double_support_time",
+    "walking_speed",
+    "walking_asymmetry",
+    "distance_walked",
+    "step_count"
 ];
 
 // eslint-disable-next-line react/prop-types

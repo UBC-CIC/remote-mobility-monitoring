@@ -67,7 +67,7 @@ function Patient() {
     const [isPrimary, setIsPrimary] = useState(false);
     const [sex, setSex] = useState("a");
     const [data, setData] = useState<metric[]>(sampleData());
-    const [graphData, setGraphData] = useState({ data: data });
+    const graphData = { data: data };
     const [multiPatientsGraph, setmultiPatientsGraph] = useState<any>(LineGraphbyMetrics(graphData));
     
 
@@ -125,8 +125,7 @@ function Patient() {
                     };
                     allMetrics.push(currMetric);
                 });
-                console.log(allMetrics);
-                setGraphData({"data": allMetrics});
+                // setGraphData({"data": allMetrics});
                 // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
             })
             .catch((err) => console.log());

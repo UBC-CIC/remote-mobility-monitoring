@@ -5,7 +5,7 @@ html, body {
 
 .patient-container {
     display: grid;
-    grid-template-columns: 22% 78%;
+    grid-template-columns: 22% 75%;
     min-height: 600px;
     text-align: center;
 }
