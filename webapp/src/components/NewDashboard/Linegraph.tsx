@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sampleData from "./sampleData";
-
 const transformData = (data: any[]) => {
     const series: Record<string, { name: string; data: { x: number; y: number }[] }> = {};
 
@@ -20,10 +19,6 @@ const transformData = (data: any[]) => {
     });
 
     return Object.values(series);
-};
-
-const initialChartsDataState = {
-    seriesLine2: transformData(sampleData()),
 };
 
 const initialChartsOptionsState = {
@@ -57,8 +52,11 @@ const initialChartsOptionsState = {
     },
 };
 
-export default function LineGraph() {
-    const [chartsDataState, setChartsDataState] = useState(initialChartsDataState);
+interface Props {
+  data: any[];
+}
+
+export default function LineGraph({ data }: Props) {
     const [updatedOptionsFlag, setUpdatedOptionsFlag] = useState(false);
     const [selectedMetric, setSelectedMetric] = useState("all");
 
@@ -69,25 +67,13 @@ export default function LineGraph() {
     }, [updatedOptionsFlag]);
 
     useEffect(() => {
-        setChartsDataState({
-            seriesLine2: transformData(sampleData()),
-        });
         setUpdatedOptionsFlag(true);
-    }, []);
+    }, [data]);
 
-    const numSeries = chartsDataState.seriesLine2.length;
-    const colors = [
-        "#008FFB",
-        "#00E396",
-        "#FEB019",
-        "#FF4560",
-        "#775DD0",
-        "#546E7A",
-        "#26a69a",
-        "#D10CE8",
-    ];
+    const numSeries = data.length;
+    const colors = [        "#008FFB",        "#00E396",        "#FEB019",        "#FF4560",        "#775DD0",        "#546E7A",        "#26a69a",        "#D10CE8",    ];
 
-    const allSeries = chartsDataState.seriesLine2.map((series, index) => {
+    const allSeries = transformData(data).map((series, index) => {
         return {
             ...series,
             color: colors[index % numSeries],
@@ -131,4 +117,3 @@ export default function LineGraph() {
     );    
 
 }
-

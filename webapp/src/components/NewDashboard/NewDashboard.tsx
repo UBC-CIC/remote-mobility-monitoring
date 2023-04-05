@@ -30,7 +30,7 @@ export interface MetricsData {
 }
 
 // This interface is only used for data filtering
-interface metric {
+export interface metric {
     patient_name: string;
     metric_name: string;
     metric_value: string;
@@ -56,13 +56,22 @@ function NewDashboard(){
         return date.toLocaleDateString();
     };
 
+    const uniqueTimestamps: string[] = [];
+
+    // create an object with a `data` property
+    const graphData = { data: data };
+    
+    // pass the `graphData` object as the props to `LineGraph`
+    const [graph, setGraph] = useState<any>(LineGraph(graphData));
+    
+
     return (
         <div className="Dashboard">
             <h2>Dashboard</h2>
             <h3>{data[0].patient_name}</h3>
 
             <div className="linegraphs"  style={{ width: "100%", height: "150%", marginBottom: "40px" }}>
-                <LineGraph />
+                {graph}
             </div>
 
             <table style={{ margin: "0 auto", width: "80%" }}>
@@ -74,26 +83,37 @@ function NewDashboard(){
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((metric, index) => (
-                        <React.Fragment key={metric.timestamp}>
-                            <tr>
-                                <td>{formatDate(metric.timestamp)}</td>
-                                <td>{getMetricValue("stepLength", metric.timestamp)}</td>
-                                <td>{getMetricValue("doubleSupportTime", metric.timestamp)}</td>
-                                <td>{getMetricValue("walkingSpeed", metric.timestamp)}</td>
-                                <td>{getMetricValue("walkingAsymmetry", metric.timestamp)}</td>
-                                <td>{getMetricValue("distanceWalked", metric.timestamp)}</td>
-                                <td>{getMetricValue("stepCount", metric.timestamp)}</td>
-                            </tr>
-                            {index !== data.length - 1 && <tr style={{ backgroundColor: "#eee" }}><td colSpan={7} style={{ height: "1px" }}></td></tr>}
-                        </React.Fragment>
-                    ))}
+                    {data.map((metric) => {
+                        const timestamp = metric.timestamp;
+                        if (uniqueTimestamps.includes(timestamp)) {
+                            return null; // skip this row
+                        } else {
+                            uniqueTimestamps.push(timestamp);
+                            return (
+                                <React.Fragment key={timestamp}>
+                                    <tr>
+                                        <td>{formatDate(timestamp)}</td>
+                                        <td>{getMetricValue("stepLength", timestamp)}</td>
+                                        <td>{getMetricValue("doubleSupportTime", timestamp)}</td>
+                                        <td>{getMetricValue("walkingSpeed", timestamp)}</td>
+                                        <td>{getMetricValue("walkingAsymmetry", timestamp)}</td>
+                                        <td>{getMetricValue("distanceWalked", timestamp)}</td>
+                                        <td>{getMetricValue("stepCount", timestamp)}</td>
+                                    </tr>
+                                    <tr style={{ backgroundColor: "#eee" }}>
+                                        <td colSpan={7} style={{ height: "1px" }}></td>
+                                    </tr>
+                                </React.Fragment>
+                            );
+                        }
+                    })}
                 </tbody>
             </table>
 
         </div>
     );
 }
+
 
 export default NewDashboard;
 
