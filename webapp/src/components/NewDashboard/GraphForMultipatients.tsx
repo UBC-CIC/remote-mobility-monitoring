@@ -2,26 +2,8 @@ import React, { useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import "./Graph.css";
 
-interface DataObject {
-    patient_name: string;
-    metric_name: string;
-    metric_value: string;
-    timestamp: string;
-  }
-  
-  interface Props {
-    data: DataObject[];
-  }
-
-interface Series {
-    [patientName: string]: {
-      name: string;
-      data: { x: number; y: number }[];
-    };
-  }
-  
-const transformData = (data: any[], metric: string) => {
-    const series: Series = {};
+export const transformData = (data: any[], metric: string) => {
+    const series: any = {};
   
     data.forEach((item) => {
         const { patient_name, metric_name, metric_value, timestamp } = item;
@@ -44,7 +26,36 @@ const transformData = (data: any[], metric: string) => {
 };
   
 
-const initialChartsOptionsState = {
+export const initialChartsOptionsState1 = {
+    chart: {
+        id: "chart1",
+        group: "social",
+        type: "line",
+        height: 300,
+    },
+    title: {
+        text: "Metrics Chart",
+        align: "left",
+    },
+    yaxis: {
+        labels: {
+            minWidth: 40,
+        },
+    },
+    xaxis: {
+        type: "datetime",
+        labels: {
+            rotate: -45,
+            rotateAlways: false,
+            format: "MM.dd.yy",
+            offsetX: 90,
+        },
+        title: {
+            text: "Date",
+        },
+    },
+};
+export const initialChartsOptionsState = {
     chart: {
         id: "chart",
         group: "social",
@@ -74,7 +85,7 @@ const initialChartsOptionsState = {
     },
 };
 
-const metrics = [
+export const metrics = [
     "step_length",
     "double_support_time",
     "walking_speed",
@@ -84,7 +95,7 @@ const metrics = [
 ];
 
 // eslint-disable-next-line react/prop-types
-export default function LineGraphbyMetrics({ data }: Props) {
+export default function LineGraphbyMetrics({ data }: any) {
 
     const getRandomColor = () => {
         const hue = Math.floor(Math.random() * 360);
@@ -95,7 +106,7 @@ export default function LineGraphbyMetrics({ data }: Props) {
     };
 
     const charts = metrics.map((metric, index) => {
-        const allSeries = transformData(data, metric).map((series, idx) => {
+        const allSeries = transformData(data, metric).map((series:any, idx:any) => {
             return {
                 ...series,
                 color: getRandomColor(),

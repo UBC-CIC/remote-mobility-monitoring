@@ -180,24 +180,24 @@ export const ServiceHandler = {
         return addCallbacks(req);
 
     },
-    queryMetrics: (patientIdList: string[], startDate: string, endDate: string) => {
-        const startDateIso = startDate.substring(0, 10).concat("T00:00:00");
-
-        const endDateIso = endDate.substring(0, 10).concat("T23:59:59");
-        console.log(startDateIso);
-        console.log(endDateIso);
-
+    queryMetrics: (patientIdList: string[], startDate: string|null, endDate: string|null) => {
         const idToken = getIdToken();
-        console.log(idToken);
         const base_url = createBaseUrl("caregiver");
         let url = base_url.concat("/metrics?");
         for (const patientId of patientIdList) {
-            console.log(patientId);
             url = url.concat(`patients=${patientId}&`);
         }
-        url = url.concat(`start=${startDateIso}&`);
-        url = url.concat(`end=${endDateIso}`);
+        if (startDate) {
+            const startDateIso = startDate.substring(0, 10).concat("T00:00:00");
+            url = url.concat(`start=${startDateIso}&`);
+        }
+        if (endDate) {
+            const endDateIso = endDate.substring(0, 10).concat("T23:59:59");
+            url = url.concat(`end=${endDateIso}`);
+        }
         console.log(url);
+
+
         const req = fetch(url, {
             method: "GET", 
             mode: "cors", 

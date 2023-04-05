@@ -13,7 +13,8 @@ import {ToggleButton, ToggleButtonGroup, TextField} from "@mui/material";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker";
 import sampleData from "../NewDashboard/sampleData";
 import {encrypt} from "../../helpers/Crypto";
-import LineGraphbyMetrics from "../NewDashboard/GraphForMultipatients";
+import LineGraphbyMetrics, {metrics, initialChartsOptionsState,initialChartsOptionsState1, transformData} from "../NewDashboard/GraphForMultipatients";
+import ReactApexChart from "react-apexcharts";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./Patient.css";
@@ -111,25 +112,44 @@ function Patient() {
             selectedPatients.push(selectedPatient);
         }
         if (interval === "all") {
-            console.log("hello");
-        }
-        ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
-            .then((data: any) => {
-                const allMetrics: any = [];
-                data.metrics.forEach((m: any) => {
-                    const currMetric = {
-                        "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
-                        "metric_name": m.metric_name,
-                        "timestamp": m.timestamp,
-                        "metric_value": m.metric_value
-                    };
-                    allMetrics.push(currMetric);
-                });
-                // setGraphData({"data": allMetrics});
+            startDate.setMonth(endDate.getMonth()-1);
+            console.log(selectedPatients);
+            ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
+                .then((data: any) => {
+                    const allMetrics: any = [];
+                    data.metrics.forEach((m: any) => {
+                        const currMetric = {
+                            "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
+                            "metric_name": m.metric_name,
+                            "timestamp": m.timestamp,
+                            "metric_value": m.metric_value
+                        };
+                        allMetrics.push(currMetric);
+                    });
+                    setData(allMetrics);
                 // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
-            })
-            .catch((err) => console.log());
-        return;
+                })
+                .catch((err) => console.log(err));
+        }
+        else {
+            ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
+                .then((data: any) => {
+                    const allMetrics: any = [];
+                    data.metrics.forEach((m: any) => {
+                        const currMetric = {
+                            "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
+                            "metric_name": m.metric_name,
+                            "timestamp": m.timestamp,
+                            "metric_value": m.metric_value
+                        };
+                        allMetrics.push(currMetric);
+                    });
+                    setData(allMetrics);
+                // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
+                })
+                .catch((err) => console.log(err));
+
+        }
     };
 
 
@@ -209,6 +229,51 @@ function Patient() {
 
         }
     };
+
+    const getRandomColor = () => {
+        const hue = Math.floor(Math.random() * 360);
+        const saturation = Math.floor(Math.random() * 100) + 1;
+        const lightness = Math.floor(Math.random() * 60) + 20;
+      
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+
+    const charts = metrics.map((metric: any) => {
+        const allSeries = transformData(data, metric).map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+
+        let options = {
+            ...initialChartsOptionsState,
+            colors: allSeries.map(() => getRandomColor()),
+            series: allSeries,
+        };
+
+        if (metric === "step_length") {
+            options = {
+                ...initialChartsOptionsState1,
+                colors: allSeries.map(() => getRandomColor()),
+                series: allSeries,
+            };
+        }
+
+        return (
+            <div key={metric}>
+                <ReactApexChart
+                    options={options as any}
+                    series={allSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                    {metric}
+                </div>
+            </div>
+        );
+    });
 
     return (
         <>
@@ -326,7 +391,7 @@ function Patient() {
                         <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
                     </>:null}
                     <div className="padding"></div>
-                    {multiPatientsGraph}
+                    {charts}
                     <div className="padding"></div>
                 </div>
 
