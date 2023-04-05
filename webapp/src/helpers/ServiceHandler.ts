@@ -81,17 +81,20 @@ export const ServiceHandler = {
     deletePatient: (patientId: string) => {
         const idToken = getIdToken();
         const base_url = createBaseUrl("caregiver");
-        const url = base_url.concat("/patients/").concat(patientId);
+        const url = base_url.concat("/caregivers/").concat(getCaregiverId())
+            .concat("/patients/").concat(patientId);
         const req = fetch(url, {
             method: "DELETE", 
             mode: "cors", 
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
-        return addCallbacks(req);
+        return req;
+
     },
     getAllPatients: () => {
         const idToken = getIdToken();

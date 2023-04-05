@@ -2,8 +2,9 @@ import React, {useState, useEffect} from "react";
 import {FaArrowRight, FaSearch} from "react-icons/fa";
 import { useNavigate, useParams} from "react-router-dom";
 import {ServiceHandler} from "../../helpers/ServiceHandler";
-import AdminNavbar from "../Navbar/AdminNavbar";
+import CaregiverNavbar from "../Navbar/CaregiverNavbar";
 import "./SharePatient.css";
+import {FaArrowLeft} from "react-icons/fa";
 import {decrypt} from "../../helpers/Crypto";
 
 type caregiver = {
@@ -74,7 +75,11 @@ function SharePatient() {
     };
     return (
         <>
-            <AdminNavbar/>
+            <CaregiverNavbar/>
+            <div className="share-icon" onClick={() => {
+                const url = `/dashboard/patient/${patientIdEncrypt}`;
+                nav(url);
+            }}><FaArrowLeft size="15px"/> Back</div>
             <div className="share-patient">
                 <h2>Choose a caregiver to share the patient&apos;s metrics with:</h2>
                 <svg xmlns="search" width="1.3em" height="1.3em" viewBox="0 -4 24 24"><path fill="currentColor" 

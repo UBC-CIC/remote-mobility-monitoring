@@ -9,7 +9,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import {ToggleButton, ToggleButtonGroup} from "@mui/material";
+import {ToggleButton, ToggleButtonGroup, TextField} from "@mui/material";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Patient.css";
@@ -20,21 +20,32 @@ function Patient() {
     const [patientDetails, setPatientDetails]: any = useState({});
     const {patientIdEncrypt} = useParams();
     const [deletionMessage, setDeletionMessage] = useState("");
-    const [intervals, setIntervals] = useState("1D");
+    const [intervals, setIntervals] = useState("all");
     const patientId = decrypt(patientIdEncrypt);
     const [selectedPatient, setSelectedPatient]: any = useState("");
     const [allPatients, setAllPatients] = useState([]);
     const [endDate, setEndDate] = useState(moment());
     const [selectedFromDate, setSelectedFromDate] = useState<Date>(new Date());
     const [selectedToDate, setSelectedToDate] = useState<Date>(new Date());
+    const [minHeight, setMinHeight] = useState(0);
+    const [maxHeight, setMaxHeight] = useState(280);
+    const [minWeight, setMinWeight] = useState(0);
+    const [maxWeight, setMaxWeight] = useState(500);
+    const [isPrimary, setIsPrimary] = useState(false);
+    const [sex, setSex] = useState("a");
 
     const handleFromDateChange = (date: Date) => {
         if (date > selectedToDate) {
             return;
         }
         setSelectedFromDate(date);
-        queryDateMetrics(date, selectedToDate);
+        queryDateMetrics("C", date, selectedToDate);
         setIntervals("C");
+    };
+
+    const handleSexUpdate =  (e: any) => {
+        const updatedSex = e.target.value;
+        setSex(updatedSex);
     };
 
     const handleToDateChange = (date: Date) => {
@@ -42,12 +53,31 @@ function Patient() {
             return;
         }
         setSelectedToDate(date);
-        queryDateMetrics(selectedFromDate, date);
+        queryDateMetrics("C", selectedFromDate, date);
         setIntervals("C");
     };
 
-    const queryDateMetrics = (startDate: Date, endDate: Date) => {
-        ServiceHandler.queryMetrics([selectedPatient], selectedFromDate.toISOString(), selectedToDate.toISOString())
+    const handleDelete = () => {
+        ServiceHandler.deletePatient(patientId)
+            .then((data) => {
+                alert("Patient unlinked");
+                nav("/dashboard");
+            });
+    };
+
+    const queryDateMetrics = (interval:string, startDate: Date, endDate: Date) => {
+        const selectedPatients: any = [];
+        if (selectedPatient === "all") {
+            allPatients.forEach((pat: any) => selectedPatients.push(pat.patient_id));
+        }
+        else {
+            selectedPatients.push(selectedPatient);
+        }
+        if (interval === "all") {
+            console.log("hello");
+            return;
+        }
+        ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
             .then((data) => console.log(data))
             .catch((err) => console.log());
         return;
@@ -55,24 +85,37 @@ function Patient() {
 
 
     const getAllPatients = () => {
+        ServiceHandler.getAllPatients();
+        let currPatientId = "all";
+        let currIsPrimary = false;
         ServiceHandler.getAllPatients()
             .then((data: any) => {
                 const patientArray:any = [];
                 data.patients.forEach((pat: any) => {
                     if (pat.verified===null || pat.verified===true) {
-                        const toAdd = {"patient_id": pat.patient_id, "name": `${pat.first_name} ${pat.last_name}`};
+                        const toAdd = {"patient_id": pat.patient_id, 
+                            "name": `${pat.first_name} ${pat.last_name}`,
+                            "is_primary": pat.is_primary};
+                        if(pat.patient_id === patientId) {
+                            currPatientId = patientId;
+                            console.log(pat);
+                            if (pat.is_primary) {
+                                currIsPrimary = true;
+                            }
+                        }
                         patientArray.push(toAdd);
                     }
                 });
                 setAllPatients(patientArray);
-                setSelectedPatient(patientId);
+                setSelectedPatient(currPatientId);
+                setIsPrimary(currIsPrimary);
             })
-            .catch((err) => console.log(err));
+            .catch((err: any) => console.log(err));
     };
 
     useEffect(() => {
         const date = new Date();
-        date.setDate(date.getDate() - 1);
+        date.setDate(date.getDate() - 7);
         setSelectedFromDate(date);
         getAllPatients();
         if (!patientId) return;
@@ -84,22 +127,16 @@ function Patient() {
     }, []);
 
     useEffect(() => {
-        queryDateMetrics(selectedFromDate, selectedToDate);
+        queryDateMetrics(intervals, selectedFromDate, selectedToDate);
     }, [selectedPatient]);
 
     const handleIntervals = (e: any) => {
         const interval = e.target.value;
         setIntervals(interval);
-        if (interval === "C") {
-            return;
-        }
         const toDate = new Date();
         setSelectedToDate(toDate);
         const date = new Date();
-        if (interval === "1D") {
-            date.setDate(date.getDate() - 1);
-        }
-        else if (interval === "1W") {
+        if (interval === "1W") {
             date.setDate(date.getDate() - 7);
         }
         else if (interval === "1M") {
@@ -109,19 +146,18 @@ function Patient() {
             date.setFullYear(date.getFullYear() - 1);
         }
         setSelectedFromDate(date);
-        queryDateMetrics(date, toDate);
+        queryDateMetrics(interval, date, toDate);
     };
 
     const handlePatientChange = (e: any) => {
         setSelectedPatient(e.target.value);
-    };
-
-    const handleDeletePatient = () => {
-        ServiceHandler.deletePatient(patientId!)
-            .then((data: any) => {
-                setDeletionMessage(data.message);
-            })
-            .catch((err: any) => console.log(err));
+        let currIsPrimary = false;
+        allPatients.forEach((pat: any) => {
+            if(pat.patient_id === e.target.value && pat.is_primary === true) {
+                currIsPrimary = true;
+            }
+            setIsPrimary(currIsPrimary);
+        });
     };
 
     return (
@@ -139,11 +175,65 @@ function Patient() {
                             label="Patient"
                             onChange={handlePatientChange}
                         >
+                            <MenuItem value={"all"}>All Patients</MenuItem>
                             {allPatients.map((pat: any) => <MenuItem key={pat.patient_id} 
                                 value={pat.patient_id}>{pat.name}</MenuItem>)}
                         </Select>
                     </FormControl>
+                    {selectedPatient === "all"?
+                        <>
+                            <div className="padding"></div>
+                            <div>
+                                <TextField className="filter-text"
+                                    size="small" 
+                                    label="Min Height (cm)"
+                                    value={minHeight}
+                                    style = {{width: 140}}
+                                ></TextField>
+                                <TextField className="filter-text"
+                                    size="small" 
+                                    label="Max Height (cm)"
+                                    value={maxHeight}
+                                    style = {{width: 140}}
+                                ></TextField>
+                            </div>
+                            <div className="padding"></div>
+                            <div>
+                                <TextField className="filter-text"
+                                    size="small" 
+                                    label="Min Weight (kg)"
+                                    value={minWeight}
+                                    style = {{width: 140}}
+                                ></TextField>
+                                <TextField className="filter-text"
+                                    size="small" 
+                                    label="Max Weight (kg)"
+                                    value={maxWeight}
+                                    style = {{width: 140}}
+                                ></TextField>
+                            </div>
+                            <div className="padding"></div>
+                            <FormControl>
+                                <InputLabel id="sex-label">Sex</InputLabel>
+                                <Select className="sex"
+                                    labelId="sex-label"
+                                    id="sex-select"
+                                    value={sex}
+                                    label="Patient"
+                                    onChange={handleSexUpdate}
+                                >
+                                    <MenuItem value={"a"}>All</MenuItem>
+                                    <MenuItem value={"m"}>Male</MenuItem>
+                                    <MenuItem value={"f"}>Female</MenuItem>
+                                    <MenuItem value={"o"}>Other</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </>:null}
                     <div className="padding"></div>
+                    <Divider/>
+                    <div className="padding"></div>
+                    <label className="time-label">Timespan For Metrics:</label>
+                    <div className="padding2"></div>
                     <ToggleButtonGroup
                         color="primary"
                         value={intervals}
@@ -151,30 +241,41 @@ function Patient() {
                         onChange={handleIntervals}
                         aria-label="Platform"
                     >
-                        <ToggleButton value="1D">1D</ToggleButton>
+                        <ToggleButton value="all">All Time</ToggleButton>
                         <ToggleButton value="1W">1W</ToggleButton>
                         <ToggleButton value="1M">1M</ToggleButton>
                         <ToggleButton value="1Y">1Y</ToggleButton>
-                        <ToggleButton value="C">C</ToggleButton>
+                        <ToggleButton value="C">Custom</ToggleButton>
                     </ToggleButtonGroup>
                     <div className="padding"></div>
-                    <label className="date-label">From:</label>
-                    <DatePicker
-                        className="date"
-                        selected={selectedFromDate}
-                        onChange={handleFromDateChange}
-                        dateFormat="dd/MM/yyyy"
-                    />
+                    {intervals !== "all"?
+                        <>
+                            <label className="date-label">From:</label>
+                            <DatePicker
+                                className="date"
+                                selected={selectedFromDate}
+                                onChange={handleFromDateChange}
+                                dateFormat="dd/MM/yyyy"
+                            />
+                            <div className="padding"></div>
+                            <label className="date-label">To:</label>
+                            <DatePicker
+                                className="date"
+                                selected={selectedToDate}
+                                onChange={handleToDateChange}
+                                dateFormat="dd/MM/yyyy"
+                            />
+                        </>:null}
                     <div className="padding"></div>
-                    <label className="date-label">To:</label>
-                    <DatePicker
-                        className="date"
-                        selected={selectedToDate}
-                        onChange={handleToDateChange}
-                        dateFormat="dd/MM/yyyy"
-                    />
+                    <Divider/>
+                    <div className="padding"></div>
                 </div>
-                <div className="data">{selectedPatient}</div>
+                <div className="data">
+                    {selectedPatient !== "all"? <>
+                        <button className="unlink" type='submit' onClick={handleDelete}>Unlink Patient</button>
+                        <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
+                    </>:null}
+                </div>
 
             </div>
         </>

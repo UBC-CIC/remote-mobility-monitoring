@@ -14,6 +14,20 @@ html, body {
     font-size: 0.8em;
 }
 
+.patient-container .time-label {
+    font-size: 0.8em;
+    text-align: right;
+    margin-left: -40%;
+}
+.patient-container .sex {
+    min-width: 120px;
+}
+
+.patient-container .filter-text {
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
 .patient-container .date {
     text-align: center;
     width: 50%;
@@ -33,4 +47,47 @@ html, body {
 
 .patient-container .padding {
     min-height: 20px;
+}
+
+.patient-container .padding2 {
+    min-height: 10px;
+}
+
+.data {
+    text-align: left;
+}
+
+
+.patient-container .share {
+    height: 32px;
+    width: 10%;
+    border-radius: 5px;
+    background-color: #4D47C3;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 0.8em ;
+    margin-top: 1%;
+    margin-left: 1%;
+}
+
+.patient-container .share:hover {
+    cursor: pointer;
+    background-color: #554FCA;
+}
+
+.patient-container .unlink {
+    height: 32px;
+    width: 10%;
+    border-radius: 5px;
+    background-color: #CC2727;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 0.8em ;
+    margin-top: 1%;
+    margin-left: 1%;
+}
+
+.patient-container .unlink:hover {
+    cursor: pointer;
+    background-color: #DD3232;
 }
