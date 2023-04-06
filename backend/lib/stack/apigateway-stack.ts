@@ -117,7 +117,7 @@ export class ApiGatewayStack extends cdk.Stack {
     caregiver_patient_accept.addMethod('POST', acceptPatientPrimaryFunctionIntegration, methodOptions) // POST /caregivers/{caregiver_id}/patients/{patient_id}/accept
 
     const patients = api.root.addResource('patients');
-    patients.addMethod('POST', createPatientFunctionIntegration, methodOptions); // POST /patients
+    patients.addMethod('POST', createPatientFunctionIntegration, {}); // POST /patients
     const patient_id = patients.addResource('{patient_id}');
     patient_id.addResource('caregivers').addMethod('GET', getAllCaregiversFunctionIntegration, methodOptions); // GET /patients/{patient_id}/caregivers
     patient_id.addMethod('GET', getPatientFunctionIntegration, methodOptions); // GET /patients/{patient_id}
