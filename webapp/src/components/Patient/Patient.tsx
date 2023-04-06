@@ -206,7 +206,6 @@ function Patient() {
                 setAssymetryData(allAssymetry);
                 setDistanceWalkedData(allDistanceWalked);
                 setTableData(dateMetrics);
-                console.log(dateMetrics);
 
                 // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
             })
@@ -315,7 +314,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "Walking Asymmetry",
+                text: "",
                 align: "left",
             },
             yaxis: {
@@ -347,6 +346,7 @@ function Patient() {
 
         return (
             <div key={"asymmetry"}>
+                <div className="chart-title">Walking Assymetry</div>
                 <ReactApexChart
                     options={options as any}
                     series={asymmetrySeries as any}
@@ -374,7 +374,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "Distance Walked",
+                text: "",
                 align: "left",
             },
             yaxis: {
@@ -406,6 +406,7 @@ function Patient() {
 
         return (
             <div key={"distance"}>
+                <div className="chart-title">Distance Walked</div>
                 <ReactApexChart
                     options={options as any}
                     series={distanceWalkedSeries as any}
@@ -433,7 +434,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "Double Support Time",
+                text: "",
                 align: "left",
             },
             yaxis: {
@@ -465,6 +466,7 @@ function Patient() {
 
         return (
             <div key={"double-support"}>
+                <div className="chart-title">Double Support Time</div>
                 <ReactApexChart
                     options={options as any}
                     series={doubleSupportSeries as any}
@@ -492,7 +494,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "Step Length",
+                text: "",
                 align: "left",
             },
             yaxis: {
@@ -524,6 +526,7 @@ function Patient() {
 
         return (
             <div key={"step-length"}>
+                <div className="chart-title">Step Length</div>
                 <ReactApexChart
                     options={options as any}
                     series={stepLengthSeries as any}
@@ -552,7 +555,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "Walking Speed",
+                text: "",
                 align: "left",
             },
             yaxis: {
@@ -584,6 +587,7 @@ function Patient() {
 
         return (
             <div key={"step-count"}>
+                <div className="chart-title">Walking Speed</div>
                 <ReactApexChart
                     options={options as any}
                     series={walkingSpeedSeries as any}
@@ -612,7 +616,7 @@ function Patient() {
                 height: 300,
             },
             title: {
-                text: "Step Count",
+                text: "",
                 align: "left",
             },
             yaxis: {
@@ -644,6 +648,7 @@ function Patient() {
 
         return (
             <div key={"walking-speed"}>
+                <div className="chart-title">Step Count</div>
                 <ReactApexChart
                     options={options as any}
                     series={stepCountSeries as any}
@@ -818,35 +823,36 @@ function Patient() {
                             </>:null}
                         </div>
                         <div className="padding"></div>
-                        <TableContainer component={Paper}>
-                            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Step Count</TableCell>
-                                        <TableCell align="right">Walking Speed</TableCell>
-                                        <TableCell align="right">Step Length</TableCell>
-                                        <TableCell align="right">Double Support Time</TableCell>
-                                        <TableCell align="right">Walking Assymetry</TableCell>
-                                        <TableCell align="right">Distance Walked</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {Object.keys(tableData).map((time) => {
-                                        return <TableRow
-                                            key={time}
-                                            sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                                        >
-                                            <TableCell align="right">{Math.round(tableData[time]["step_count"]*100)/100}</TableCell>
-                                            <TableCell align="right">{Math.round(tableData[time]["walking_speed"]*100)/100}</TableCell>
-                                            <TableCell align="right">{Math.round(tableData[time]["step_length"]*100)/100}</TableCell>
-                                            <TableCell align="right">{Math.round(tableData[time]["double_support_time"]*100)/100}</TableCell>
-                                            <TableCell align="right">{Math.round(tableData[time]["walking_asymmetry"]*100)/100}</TableCell>
-                                            <TableCell align="right">{Math.round(tableData[time]["distance_walked"]*100)/100}</TableCell>
-                                        </TableRow>;
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        {Object.keys(tableData).length > 0?
+                            <TableContainer component={Paper}>
+                                <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Step Count</TableCell>
+                                            <TableCell align="right">Walking Speed</TableCell>
+                                            <TableCell align="right">Step Length</TableCell>
+                                            <TableCell align="right">Double Support Time</TableCell>
+                                            <TableCell align="right">Walking Assymetry</TableCell>
+                                            <TableCell align="right">Distance Walked</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {Object.keys(tableData).map((time) => {
+                                            return <TableRow
+                                                key={time}
+                                                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                                            >
+                                                <TableCell align="right">{Math.round(tableData[time]["step_count"]*100)/100}</TableCell>
+                                                <TableCell align="right">{Math.round(tableData[time]["walking_speed"]*100)/100}</TableCell>
+                                                <TableCell align="right">{Math.round(tableData[time]["step_length"]*100)/100}</TableCell>
+                                                <TableCell align="right">{Math.round(tableData[time]["double_support_time"]*100)/100}</TableCell>
+                                                <TableCell align="right">{Math.round(tableData[time]["walking_asymmetry"]*100)/100}</TableCell>
+                                                <TableCell align="right">{Math.round(tableData[time]["distance_walked"]*100)/100}</TableCell>
+                                            </TableRow>;
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>:null}
                     </div>
                 </div>
 
