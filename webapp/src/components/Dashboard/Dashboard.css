@@ -134,10 +134,8 @@ html {
 }
 
 .dashboard .add {
-    position: absolute;
-    bottom: 10%;
-    width: 15%;
-    left: 42.5%;
+    margin-left: 62%;
+    width: 28%;
     border-radius: 5px;
     background-color: #4D47C3;
     color: #fff;
@@ -146,10 +144,8 @@ html {
     height: 42px;
 }
 .dashboard .addl {
-    position: absolute;
-    bottom: 30%;
-    width: 15%;
-    left: 42.5%;
+    margin-right: 70%;
+    width: 35%;
     border-radius: 5px;
     background-color: #4D47C3;
     color: #fff;
@@ -181,3 +177,16 @@ html {
     background-color: #D55454;
 }
 
+.dashboard .button-grid {
+    display:grid;
+    grid-template-columns: 50% 50%;
+    align-items: center;
+    margin-top: 28%;
+}
+
+.dashboard .button-grid2 {
+    display:grid;
+    grid-template-columns: 50% 50%;
+    align-items: center;
+    margin-top: 15%;
+}

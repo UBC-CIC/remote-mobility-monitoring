@@ -104,8 +104,16 @@ function CaregiverDashboard() {
                     })} 
                 </div>
                 <br/>
-                <button className={filteredPatients.length <= 4 ? "addl": "add"}
-                    onClick={(e) => nav("/addpatient")}>Add New Patient</button>
+                <div className={filteredPatients.length < 4? "button-grid2": "button-grid"}>
+                    <div>
+                        <button className={"add"}
+                            onClick={(e) => nav("/addpatient")}>Add a New Patient</button>
+                    </div>
+                    <div>
+                        <button className={"addl"}
+                            onClick={(e) => nav("allPatients")}>View All Patient Metrics</button>
+                    </div>
+                </div>
             </div>
         </>
     );
