@@ -180,7 +180,8 @@ export const ServiceHandler = {
         return addCallbacks(req);
 
     },
-    queryMetrics: (patientIdList: string[], startDate: string|null, endDate: string|null) => {
+    queryMetrics: (patientIdList: string[], startDate: string|null, endDate: string|null, 
+        minHeight = 0, maxHeight = 280, minWeight = 0, maxWeight = 500, sex="A") => {
         const idToken = getIdToken();
         const base_url = createBaseUrl("caregiver");
         let url = base_url.concat("/metrics?");
@@ -194,6 +195,13 @@ export const ServiceHandler = {
         if (endDate) {
             const endDateIso = endDate.substring(0, 10).concat("T23:59:59");
             url = url.concat(`end=${endDateIso}`);
+        }
+        url = url.concat(`&min_height=${minHeight}`);
+        url = url.concat(`&max_height=${maxHeight}`);
+        url = url.concat(`&min_weight=${minWeight}`);
+        url = url.concat(`&max_weight=${maxWeight}`);
+        if (sex !== "A") {
+            url = url.concat(`&sex=${sex}`);
         }
 
 

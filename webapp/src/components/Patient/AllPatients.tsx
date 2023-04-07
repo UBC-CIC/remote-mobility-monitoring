@@ -12,9 +12,11 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import {ToggleButton, ToggleButtonGroup, TextField} from "@mui/material";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker";
 import sampleData from "../NewDashboard/sampleData";
+import ReactApexChart from "react-apexcharts";
 import {encrypt} from "../../helpers/Crypto";
 import MuliPatientGraph from "../NewDashboard/GraphForMultipatients";
 import "react-datepicker/dist/react-datepicker.css";
+import LineGraphbyMetrics, { transformData} from "../NewDashboard/GraphForMultipatients";
 import "./Patient.css";
 
 export interface Patient {
@@ -59,25 +61,30 @@ function AllPatients() {
     const [endDate, setEndDate] = useState(moment());
     const [selectedFromDate, setSelectedFromDate] = useState<Date>(new Date());
     const [selectedToDate, setSelectedToDate] = useState<Date>(new Date());
-    const [minHeight, setMinHeight] = useState(0);
-    const [maxHeight, setMaxHeight] = useState(280);
-    const [minWeight, setMinWeight] = useState(0);
-    const [maxWeight, setMaxWeight] = useState(500);
+    const [minHeight, setMinHeight] = useState("0");
+    const [maxHeight, setMaxHeight] = useState("280");
+    const [minWeight, setMinWeight] = useState("0");
+    const [maxWeight, setMaxWeight] = useState("500");
     const [isPrimary, setIsPrimary] = useState(false);
-    const [sex, setSex] = useState("a");
+    const [sex, setSex] = useState("A");
     const [data, setData] = useState<metric[]>(sampleData());
+    const [nameMap, setNameMap]: any = useState({});
     const headers = ["Date", "Step Length (km)", "Double Support Time (%)", "Walking Speed (kpm)", "Walking Asymmetry (%)", "Distance Walked (km)", " Step Count (s)"];
+    const [stepCountData, setStepCountData]: any = useState(null);
+    const [walkingSpeedData, setWalkingSpeedData]: any = useState(null);
+    const [stepLengthData, setStepLengthData]: any = useState(null);
+    const [doubleSupportData, setDoubleSupportData]: any = useState(null);
+    const [asymmetryData, setAssymetryData]: any = useState(null);
+    const [distanceWalkedData, setDistanceWalkedData]: any = useState(null);
     const graphData = { data: data };
     
     // pass the `graphData` object as the props to `LineGraph`
-    
-
+    //
     const handleFromDateChange = (date: Date) => {
         if (date > selectedToDate) {
             return;
         }
         setSelectedFromDate(date);
-        queryDateMetrics("C", date, selectedToDate);
         setIntervals("C");
     };
 
@@ -91,7 +98,6 @@ function AllPatients() {
             return;
         }
         setSelectedToDate(date);
-        queryDateMetrics("C", selectedFromDate, date);
         setIntervals("C");
     };
 
@@ -103,20 +109,92 @@ function AllPatients() {
             });
     };
 
-    const queryDateMetrics = (interval:string, startDate: Date, endDate: Date) => {
+    const queryDateMetrics = () => {
+        let minWeightNumber = minWeight.replace(/[^0-9.]+/g, "").replace(/^(\d*\.\d*)\..*/, "$1");
+        let minHeightNumber = minHeight.replace(/[^0-9.]+/g, "").replace(/^(\d*\.\d*)\..*/, "$1");
+        let maxWeightNumber =  maxWeight.replace(/[^0-9.]+/g, "").replace(/^(\d*\.\d*)\..*/, "$1");
+        let maxHeightNumber =  maxHeight.replace(/[^0-9.]+/g, "").replace(/^(\d*\.\d*)\..*/, "$1");
+        if (minHeightNumber === "") {
+            minHeightNumber = "0";
+        }
+        if (minWeightNumber === "") {
+            minWeightNumber = "0";
+        }
+        if (maxHeightNumber === "") {
+            maxHeightNumber = "0";
+        }
+        if (maxWeightNumber === "") {
+            maxWeightNumber = "0";
+        }
+        setMinWeight(minWeightNumber);
+        setMinHeight(minHeightNumber);
+        setMaxWeight(maxWeightNumber);
+        setMaxHeight(maxHeightNumber);
+
         const selectedPatients: any = [];
-        if (selectedPatient === "all") {
-            allPatients.forEach((pat: any) => selectedPatients.push(pat.patient_id));
+        allPatients.forEach((pat: any) => selectedPatients.push(pat.patient_id));
+        let end = new Date();
+        let start = new Date();
+        if (intervals === "all") {
+            start.setFullYear(end.getFullYear()-300);
         }
         else {
-            selectedPatients.push(selectedPatient);
+            start = selectedFromDate;
+            end = selectedToDate;
         }
-        if (interval === "all") {
-            console.log("hello");
-            return;
-        }
-        ServiceHandler.queryMetrics(selectedPatients, startDate.toISOString(), endDate.toISOString())
-            .then((data) => console.log(data))
+        setStepCountData(null);
+        setWalkingSpeedData(null);
+        setStepLengthData(null);
+        setDoubleSupportData(null);
+        setAssymetryData(null);
+        setDistanceWalkedData(null);
+        ServiceHandler.queryMetrics(selectedPatients, start.toISOString(), end.toISOString(), Number(minHeightNumber), 
+            Number(maxHeightNumber), Number(minWeightNumber), Number(maxWeightNumber), sex)
+            .then((data: any) => {
+                console.log(data);
+                const allStepCount: any = [];
+                const allWalkingSpeed: any = [];
+                const allStepLength: any = [];
+                const allDoubleSupport: any = [];
+                const allAssymetry: any = [];
+                const allDistanceWalked: any = [];
+                data.metrics.forEach((m: any) => {
+                    const currMetric = {
+                        "patient_name": nameMap[m.patient_id],
+                        "metric_name": m.metric_name,
+                        "timestamp": m.timestamp,
+                        "metric_value": m.metric_value
+                    };
+                    if(m.metric_name === "step_count") {
+                        allStepCount.push(currMetric);
+                    }
+                    else if (m.metric_name === "walking_speed") {
+                        allWalkingSpeed.push(currMetric);
+
+                    }
+                    else if (m.metric_name === "step_length"){
+                        allStepLength.push(currMetric);
+                    }
+                    else if (m.metric_name === "double_support_time") {
+                        allDoubleSupport.push(currMetric);
+                    }
+                    else if (m.metric_name === "walking_asymmetry") {
+                        allAssymetry.push(currMetric);
+                    }
+                    else if (m.metric_name === "distance_walked") {
+                        allDistanceWalked.push(currMetric);
+                    }
+                    else {
+                        console.log(m.metric_name);
+                    }
+                });
+                setStepCountData(allStepCount);
+                setWalkingSpeedData(allWalkingSpeed);
+                setStepLengthData(allStepLength);
+                setDoubleSupportData(allDoubleSupport);
+                setAssymetryData(allAssymetry);
+                setDistanceWalkedData(allDistanceWalked);
+            })
             .catch((err) => console.log());
         return;
     };
@@ -126,6 +204,7 @@ function AllPatients() {
         ServiceHandler.getAllPatients();
         let currPatientId = "all";
         let currIsPrimary = false;
+        const currNameMap:any = {};
         ServiceHandler.getAllPatients()
             .then((data: any) => {
                 const patientArray:any = [];
@@ -141,10 +220,12 @@ function AllPatients() {
                             }
                         }
                         patientArray.push(toAdd);
+                        currNameMap[pat.patient_id] = `${pat.first_name} ${pat.last_name}`;
                     }
                 });
                 setAllPatients(patientArray);
                 setIsPrimary(currIsPrimary);
+                setNameMap(currNameMap);
             })
             .catch((err: any) => console.log(err));
     };
@@ -163,8 +244,8 @@ function AllPatients() {
     }, []);
 
     useEffect(() => {
-        queryDateMetrics(intervals, selectedFromDate, selectedToDate);
-    }, [selectedPatient]);
+        queryDateMetrics();
+    }, [nameMap, intervals, selectedToDate, selectedFromDate]);
 
     const handleIntervals = (e: any) => {
         const interval = e.target.value;
@@ -182,7 +263,6 @@ function AllPatients() {
             date.setFullYear(date.getFullYear() - 1);
         }
         setSelectedFromDate(date);
-        queryDateMetrics(interval, date, toDate);
     };
 
     const handlePatientChange = (e: any) => {
@@ -196,6 +276,381 @@ function AllPatients() {
             window.location.reload();
 
         }
+    };
+
+    const getRandomColor = () => {
+        const hue = Math.floor(Math.random() * 360);
+        const saturation = Math.floor(Math.random() * 100) + 1;
+        const lightness = Math.floor(Math.random() * 60) + 20;
+      
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+
+    const buildWalkingSpeedChart = (walkingSpeedData: any) => {
+        const walkingSpeedSeries = transformData(walkingSpeedData, "walking_speed").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const walkingSpeedOptions = {
+            chart: {
+                id: "walkingSpeedChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...walkingSpeedOptions,
+            colors: walkingSpeedSeries.map(() => getRandomColor()),
+            series: walkingSpeedSeries,
+        };
+
+        return (
+            <div key={"step-count"}>
+                <div className="chart-title">Walking Speed</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={walkingSpeedSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
+    };
+
+    const buildStepCountChart = (stepCountData: any) => {
+        console.log("here");
+        const stepCountSeries = transformData(stepCountData, "step_count").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const stepCountOptions = {
+            chart: {
+                id: "stepCountChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...stepCountOptions,
+            colors: stepCountSeries.map(() => getRandomColor()),
+            series: stepCountSeries,
+        };
+
+        return (
+            <div key={"walking-speed"}>
+                <div className="chart-title">Step Count</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={stepCountSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
+    };
+
+    const buildStepLengthChart = (stepLengthData: any) => {
+        const stepLengthSeries = transformData(stepLengthData, "step_length").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const walkingSpeedOptions = {
+            chart: {
+                id: "stepLengthChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...walkingSpeedOptions,
+            colors: stepLengthSeries.map(() => getRandomColor()),
+            series: stepLengthSeries,
+        };
+
+        return (
+            <div key={"step-length"}>
+                <div className="chart-title">Step Length</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={stepLengthSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
+    };
+
+    const buildDoubleSupportChart = (doubleSupportData: any) => {
+        const doubleSupportSeries = transformData(doubleSupportData, "double_support_time").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const doubleSupportOptions = {
+            chart: {
+                id: "doubleSupportChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...doubleSupportOptions,
+            colors: doubleSupportSeries.map(() => getRandomColor()),
+            series: doubleSupportSeries,
+        };
+
+        return (
+            <div key={"double-support"}>
+                <div className="chart-title">Double Support Time</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={doubleSupportSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
+    };
+
+    const buildAssymetryChart = (asymmetryData: any) => {
+        const asymmetrySeries = transformData(asymmetryData, "walking_asymmetry").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const walkingSpeedOptions = {
+            chart: {
+                id: "asymmetryChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...walkingSpeedOptions,
+            colors: asymmetrySeries.map(() => getRandomColor()),
+            series: asymmetrySeries,
+        };
+
+        return (
+            <div key={"asymmetry"}>
+                <div className="chart-title">Walking Assymetry</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={asymmetrySeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
+    };
+
+    const buildDistanceWalkedChart = (distanceWalked: any) => {
+        const distanceWalkedSeries = transformData(distanceWalked, "distance_walked").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const distanceWalkedOptions = {
+            chart: {
+                id: "distanceWalkedChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...distanceWalkedOptions,
+            colors: distanceWalkedSeries.map(() => getRandomColor()),
+            series: distanceWalkedSeries,
+        };
+
+        return (
+            <div key={"distance"}>
+                <div className="chart-title">Distance Walked</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={distanceWalkedSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
     };
 
     return (
@@ -226,12 +681,14 @@ function AllPatients() {
                                     size="small" 
                                     label="Min Height (cm)"
                                     value={minHeight}
+                                    onChange={(e) => setMinHeight(e.target.value)}
                                     style = {{width: 130}}
                                 ></TextField>
                                 <TextField className="filter-text"
                                     size="small" 
                                     label="Max Height (cm)"
                                     value={maxHeight}
+                                    onChange={(e) => setMaxHeight(e.target.value)}
                                     style = {{width: 130}}
                                 ></TextField>
                             </div>
@@ -241,12 +698,14 @@ function AllPatients() {
                                     size="small" 
                                     label="Min Weight (kg)"
                                     value={minWeight}
+                                    onChange={(e) => setMinWeight(e.target.value)}
                                     style = {{width: 130}}
                                 ></TextField>
                                 <TextField className="filter-text"
                                     size="small" 
                                     label="Max Weight (kg)"
                                     value={maxWeight}
+                                    onChange={(e) => setMaxWeight(e.target.value)}
                                     style = {{width: 130}}
                                 ></TextField>
                             </div>
@@ -260,12 +719,15 @@ function AllPatients() {
                                     label="Patient"
                                     onChange={handleSexUpdate}
                                 >
-                                    <MenuItem value={"a"}>All</MenuItem>
-                                    <MenuItem value={"m"}>Male</MenuItem>
-                                    <MenuItem value={"f"}>Female</MenuItem>
-                                    <MenuItem value={"o"}>Other</MenuItem>
+                                    <MenuItem value={"A"}>All</MenuItem>
+                                    <MenuItem value={"M"}>Male</MenuItem>
+                                    <MenuItem value={"F"}>Female</MenuItem>
+                                    <MenuItem value={"O"}>Other</MenuItem>
                                 </Select>
                             </FormControl>
+                            <div className="padding"></div>
+                            <button className="share" onClick={() => queryDateMetrics()}>Filter Metrics</button>
+                            
                         </>:null}
                     <div className="padding"></div>
                     <Divider/>
@@ -309,12 +771,50 @@ function AllPatients() {
                     <div className="padding"></div>
                 </div>
                 <div className="data">
-                    {selectedPatient !== "all"? <>
-                        <button className="unlink" type='submit' onClick={handleDelete}>Unlink Patient</button>
-                        <button className="share" onClick={(e) => nav("share")} type='submit'>Share Patient</button>
-                    </>:null}
                     <div className="padding"></div>
-                    {MuliPatientGraph(graphData)}
+                    <div id="step-count">
+                        {stepCountData !== null? <>
+                            {buildStepCountChart(stepCountData)}
+                            <div className="padding"></div>
+                            <Divider/>
+                        </>:null}
+                    </div>
+                    <div id="walk-speed">
+                        <div className="padding"></div>
+                        {walkingSpeedData !== null? <>{buildWalkingSpeedChart(walkingSpeedData)}
+                            <div className="padding"></div>
+                            <Divider/>
+                        </>:null}
+                    </div>
+                    <div id="step-length">
+                        <div className="padding"></div>
+                        {stepLengthData !== null? <>{buildStepLengthChart(stepLengthData)}
+                            <div className="padding"></div>
+                            <Divider/>
+                        </>:null}
+                    </div>
+                    <div id="double">
+                        <div className="padding"></div>
+                        {doubleSupportData !== null? <>{buildDoubleSupportChart(doubleSupportData)}
+                            <div className="padding"></div>
+                            <Divider/>
+                        </>:null}
+                    </div>
+                    <div className="padding"></div>
+                    <div id="asy">
+                        {asymmetryData !== null?<> {buildAssymetryChart(asymmetryData)}
+                            <div className="padding"></div>
+                            <Divider/>
+                        </>:null}
+                    </div>
+                    <div className="padding"></div>
+                    <div id="dist">
+                        {distanceWalkedData !== null?<> {buildDistanceWalkedChart(distanceWalkedData)}
+                            <div className="padding"></div>
+                            <Divider/>
+                        </>:null}
+                    </div>
+                    <div className="padding"></div>
                 </div>
 
             </div>

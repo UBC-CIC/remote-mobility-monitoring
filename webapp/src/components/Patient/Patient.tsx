@@ -13,7 +13,7 @@ import {ToggleButton, ToggleButtonGroup, TextField} from "@mui/material";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker";
 import sampleData from "../NewDashboard/sampleData";
 import {encrypt} from "../../helpers/Crypto";
-import LineGraphbyMetrics, {metrics, initialChartsOptionsState,initialChartsOptionsState1, initialChartsOptionsState2, transformData} from "../NewDashboard/GraphForMultipatients";
+import LineGraphbyMetrics, { transformData} from "../NewDashboard/GraphForMultipatients";
 import ReactApexChart from "react-apexcharts";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -138,7 +138,6 @@ function Patient() {
         let start = new Date();
         if (interval === "all") {
             start.setFullYear(end.getFullYear()-300);
-            startDate.setMonth(endDate.getMonth()-1);
         }
         else {
             start = startDate;
@@ -152,6 +151,7 @@ function Patient() {
         setDistanceWalkedData(null);
         ServiceHandler.queryMetrics(selectedPatients, start.toISOString(), end.toISOString())
             .then((data: any) => {
+                console.log(data);
                 const allMetrics: any = [];
                 const allStepCount: any = [];
                 const allWalkingSpeed: any = [];
