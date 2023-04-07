@@ -234,10 +234,10 @@ public class MetricsDao {
                     metricsBuilder.birthday(datum.scalarValue());
                     break;
                 case MetricsTable.PATIENT_HEIGHT_NAME:
-                    metricsBuilder.height(Float.parseFloat(datum.scalarValue()));
+                    metricsBuilder.height(datum.scalarValue() == null ? null : Float.parseFloat(datum.scalarValue()));
                     break;
                 case MetricsTable.PATIENT_WEIGHT_NAME:
-                    metricsBuilder.weight(Float.parseFloat(datum.scalarValue()));
+                    metricsBuilder.weight(datum.scalarValue() == null ? null : Float.parseFloat(datum.scalarValue()));
                     break;
                 case MetricsTable.MEASURE_NAME_NAME:
                     metricsBuilder.measureName(MeasureName.convertToEnum(datum.scalarValue()));

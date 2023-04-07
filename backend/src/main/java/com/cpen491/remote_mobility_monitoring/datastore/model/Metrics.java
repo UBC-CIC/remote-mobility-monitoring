@@ -22,7 +22,8 @@ public class Metrics {
         WALKING_SPEED(MetricsTable.WALKING_SPEED_NAME),
         WALKING_ASYMMETRY(MetricsTable.WALKING_ASYMMETRY_NAME),
         DISTANCE_WALKED(MetricsTable.DISTANCE_WALKED_NAME),
-        STEP_COUNT(MetricsTable.STEP_COUNT_NAME);
+        STEP_COUNT(MetricsTable.STEP_COUNT_NAME),
+        WALKING_STEADINESS(MetricsTable.WALKING_STEADINESS_NAME);
 
         private static final Map<String, MeasureName> stringToEnumMap = new HashMap<>();
 

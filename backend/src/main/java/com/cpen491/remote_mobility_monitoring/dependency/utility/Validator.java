@@ -88,6 +88,8 @@ public class Validator {
     public static final String DISTANCE_WALKED_INVALID_ERROR_MESSAGE = "distance_walked is not a double";
     public static final String STEP_COUNT_BLANK_ERROR_MESSAGE = "step_count must be present";
     public static final String STEP_COUNT_INVALID_ERROR_MESSAGE = "step_count is not a double";
+    public static final String WALKING_STEADINESS_BLANK_ERROR_MESSAGE = "walking_steadiness must be present";
+    public static final String WALKING_STEADINESS_INVALID_ERROR_MESSAGE = "walking_steadiness is not an integer";
     public static final String TIMESTAMP_BLANK_ERROR_MESSAGE = "timestamp must be present";
     public static final String TIMESTAMP_INVALID_ERROR_MESSAGE = "timestamp is not an in iso8601 format";
     public static final String GROUP_NAME_BLANK_ERROR_MESSAGE = "group name must be present";
@@ -241,10 +243,23 @@ public class Validator {
         validateMetricsValue(stepCount, STEP_COUNT_BLANK_ERROR_MESSAGE, STEP_COUNT_INVALID_ERROR_MESSAGE);
     }
 
+    public static void validateWalkingSteadiness(String walkingSteadiness) {
+        validateMetricsValue(walkingSteadiness, WALKING_STEADINESS_BLANK_ERROR_MESSAGE, WALKING_STEADINESS_INVALID_ERROR_MESSAGE);
+    }
+
     private static void validateMetricsValue(String metricsValue, String blankErrorMessage, String invalidErrorMessage) {
         Validate.notBlank(metricsValue, blankErrorMessage);
         try {
             Double.parseDouble(metricsValue);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(invalidErrorMessage);
+        }
+    }
+
+    private static void validateMetricsValueInteger(String metricsValue, String blankErrorMessage, String invalidErrorMessage) {
+        Validate.notBlank(metricsValue, blankErrorMessage);
+        try {
+            Integer.parseInt(metricsValue);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(invalidErrorMessage);
         }
@@ -328,6 +343,7 @@ public class Validator {
         validateWalkingAsymmetry(metrics.getWalkingAsymmetry());
         validateDistanceWalked(metrics.getDistanceWalked());
         validateStepCount(metrics.getStepCount());
+        validateWalkingSteadiness(metrics.getWalkingSteadiness());
         validateTimestamp(metrics.getTimestamp());
     }
 

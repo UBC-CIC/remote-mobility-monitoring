@@ -40,6 +40,8 @@ public class AddMetricsRequestBody {
         private String distanceWalked;
         @SerializedName(MetricsTable.STEP_COUNT_NAME)
         private String stepCount;
+        @SerializedName(MetricsTable.WALKING_STEADINESS_NAME)
+        private String walkingSteadiness;
         @SerializedName(MetricsTable.TIMESTAMP_NAME)
         private String timestamp;
 
@@ -52,6 +54,7 @@ public class AddMetricsRequestBody {
             metricsList.add(Metrics.builder().measureName(MeasureName.WALKING_ASYMMETRY).measureValue(serialization.getWalkingAsymmetry()).build());
             metricsList.add(Metrics.builder().measureName(MeasureName.DISTANCE_WALKED).measureValue(serialization.getDistanceWalked()).build());
             metricsList.add(Metrics.builder().measureName(MeasureName.STEP_COUNT).measureValue(serialization.getStepCount()).build());
+            metricsList.add(Metrics.builder().measureName(MeasureName.WALKING_STEADINESS).measureValue(serialization.getWalkingSteadiness()).build());
 
             for (Metrics metrics : metricsList) {
                 metrics.setPatientId(patient.getPid());
