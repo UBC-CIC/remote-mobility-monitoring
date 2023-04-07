@@ -56,7 +56,6 @@ struct CognitoView: View {
         lastName = ""
         phoneNumber = ""
         birthday = Date()
-        sex = ""
         weight = 0
         height = 0
         validPassword = false
@@ -101,7 +100,7 @@ struct CognitoView: View {
                                     }
                                 }
                             } else {
-                                if (email == "" || password == "" || passwordAgain == "" || firstName == "" || lastName == "" || phoneNumber == "") {
+                                if (email == "" || password == "" || passwordAgain == "" || firstName == "" || lastName == "" || phoneNumber == "" || sex == "" || weight == 0 || height == 0) {
                                     displayMessage(message: "Please fill out all the required fields", loading: false)
                                 } else if (!validPassword) {
                                     displayMessage(message: "Please provide a strong password", loading: false)
@@ -379,6 +378,8 @@ struct SignUpFields: View {
                     .foregroundColor(height == 0 ? .secondary : .primary)
                 Text("cm")
             }
+            .padding(.bottom, 10)
+            .keyboardType(.numberPad)
         }
         .padding()
         .background(Color(.systemGray6))

@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct MobimonTheme {
-    static let purple = Color(UIColor(red: 54/255, green: 51/255, blue: 140/255, alpha: 1.0))
+    static let purple = Color(UIColor(red: 0.30, green: 0.28, blue: 0.76, alpha: 1.00))
 }
 
 struct ButtonStyling {
