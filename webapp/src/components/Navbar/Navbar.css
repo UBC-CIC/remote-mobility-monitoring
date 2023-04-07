@@ -1,0 +1,21 @@
+.navbar{
+    background-color: #303030;
+    height: 50%;
+    color: #EBEBEB;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    padding-left: 15px;
+    padding-right: 10px;
+}
+
+.navbar .navbar-items {
+    margin-left: 3%;
+}
+.navbar right {
+    margin-left: 3%;
+    text-align: right;
+}
+.navbar .navbar-items:hover {
+    color: #E3C55D;
+    cursor: pointer;
+}
