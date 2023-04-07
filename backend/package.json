@@ -1,0 +1,19 @@
+{
+  "name": "remote-mobility-monitoring-backend",
+  "version": "1.0.0",
+  "description": "Backend for the Remote Mobility Monitoring Webapp",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "trim_lambda_versions": "node build/script/trim-lambda-versions.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.262.0",
+    "aws-cdk-lib": "^2.60.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18"
+  }
+}
