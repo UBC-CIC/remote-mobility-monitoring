@@ -106,8 +106,8 @@ class PatientServiceTest {
     private static final String CAREGIVER_ID2 = "car-2";
     private static final String METRIC_VALUE = "0.0";
     private static final String INVALID_METRIC_VALUE = "0.0%";
-    private static final String[] METRIC_VALUES1 = new String[]{"1.0", "2.0", "3.0", "4.0", "5.0", "6.0"};
-    private static final String[] METRIC_VALUES2 = new String[]{"7.0", "8.0", "9.0", "10.0", "11.0", "12.0"};
+    private static final String[] METRIC_VALUES1 = new String[]{"1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0"};
+    private static final String[] METRIC_VALUES2 = new String[]{"7.0", "8.0", "9.0", "10.0", "11.0", "12.0", "13.0"};
     private static final String TIMESTAMP = getCurrentUtcTimeString();
     private static final String INVALID_TIMESTAMP = "2023-02-01 12:00:00";
     private static final String CREATED_AT = "2023-01-01";
@@ -298,12 +298,14 @@ class PatientServiceTest {
         expected.add(buildMetricsDefault(MeasureName.WALKING_ASYMMETRY, METRIC_VALUES1[3]));
         expected.add(buildMetricsDefault(MeasureName.DISTANCE_WALKED, METRIC_VALUES1[4]));
         expected.add(buildMetricsDefault(MeasureName.STEP_COUNT, METRIC_VALUES1[5]));
+        expected.add(buildMetricsDefault(MeasureName.WALKING_STEADINESS, METRIC_VALUES1[6]));
         expected.add(buildMetricsDefault(MeasureName.STEP_LENGTH, METRIC_VALUES2[0]));
         expected.add(buildMetricsDefault(MeasureName.DOUBLE_SUPPORT_TIME, METRIC_VALUES2[1]));
         expected.add(buildMetricsDefault(MeasureName.WALKING_SPEED, METRIC_VALUES2[2]));
         expected.add(buildMetricsDefault(MeasureName.WALKING_ASYMMETRY, METRIC_VALUES2[3]));
         expected.add(buildMetricsDefault(MeasureName.DISTANCE_WALKED, METRIC_VALUES2[4]));
         expected.add(buildMetricsDefault(MeasureName.STEP_COUNT, METRIC_VALUES2[5]));
+        expected.add(buildMetricsDefault(MeasureName.WALKING_STEADINESS, METRIC_VALUES2[6]));
 
         verify(metricsDao, times(1)).add(metricsListCaptor.capture());
         List<Metrics> metricsList = metricsListCaptor.getValue();
@@ -347,41 +349,41 @@ class PatientServiceTest {
     }
 
     private static Stream<Arguments> invalidInputsForAddMetrics2() {
-        AddMetricsSerialization invalidSerialization1 = buildAddMetricsSerialization(null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization1 = buildAddMetricsSerialization(null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations1 = Collections.singletonList(invalidSerialization1);
-        AddMetricsSerialization invalidSerialization2 = buildAddMetricsSerialization("", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization2 = buildAddMetricsSerialization("", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations2 = Collections.singletonList(invalidSerialization2);
-        AddMetricsSerialization invalidSerialization3 = buildAddMetricsSerialization(INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization3 = buildAddMetricsSerialization(INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations3 = Collections.singletonList(invalidSerialization3);
-        AddMetricsSerialization invalidSerialization4 = buildAddMetricsSerialization(METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization4 = buildAddMetricsSerialization(METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations4 = Collections.singletonList(invalidSerialization4);
-        AddMetricsSerialization invalidSerialization5 = buildAddMetricsSerialization(METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization5 = buildAddMetricsSerialization(METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations5 = Collections.singletonList(invalidSerialization5);
-        AddMetricsSerialization invalidSerialization6 = buildAddMetricsSerialization(METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization6 = buildAddMetricsSerialization(METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations6 = Collections.singletonList(invalidSerialization6);
-        AddMetricsSerialization invalidSerialization7 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization7 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations7 = Collections.singletonList(invalidSerialization7);
-        AddMetricsSerialization invalidSerialization8 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization8 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations8 = Collections.singletonList(invalidSerialization8);
-        AddMetricsSerialization invalidSerialization9 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization9 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations9 = Collections.singletonList(invalidSerialization9);
-        AddMetricsSerialization invalidSerialization10 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization10 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations10 = Collections.singletonList(invalidSerialization10);
-        AddMetricsSerialization invalidSerialization11 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization11 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations11 = Collections.singletonList(invalidSerialization11);
-        AddMetricsSerialization invalidSerialization12 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization12 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations12 = Collections.singletonList(invalidSerialization12);
-        AddMetricsSerialization invalidSerialization13 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization13 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations13 = Collections.singletonList(invalidSerialization13);
-        AddMetricsSerialization invalidSerialization14 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization14 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations14 = Collections.singletonList(invalidSerialization14);
-        AddMetricsSerialization invalidSerialization15 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization15 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations15 = Collections.singletonList(invalidSerialization15);
-        AddMetricsSerialization invalidSerialization16 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null);
+        AddMetricsSerialization invalidSerialization16 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, null, METRIC_VALUE);
         List<AddMetricsSerialization> serializations16 = Collections.singletonList(invalidSerialization16);
-        AddMetricsSerialization invalidSerialization17 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "");
+        AddMetricsSerialization invalidSerialization17 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, "", METRIC_VALUE);
         List<AddMetricsSerialization> serializations17 = Collections.singletonList(invalidSerialization17);
-        AddMetricsSerialization invalidSerialization18 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE);
+        AddMetricsSerialization invalidSerialization18 = buildAddMetricsSerialization(METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, METRIC_VALUE, INVALID_METRIC_VALUE, METRIC_VALUE);
         List<AddMetricsSerialization> serializations18 = Collections.singletonList(invalidSerialization18);
         List<AddMetricsSerialization> serializations19 = Collections.singletonList(null);
         return Stream.of(
@@ -678,11 +680,11 @@ class PatientServiceTest {
     }
 
     private static AddMetricsSerialization buildAddMetricsSerialization(String[] metricsValues) {
-        return buildAddMetricsSerialization(metricsValues[0], metricsValues[1], metricsValues[2], metricsValues[3], metricsValues[4], metricsValues[5]);
+        return buildAddMetricsSerialization(metricsValues[0], metricsValues[1], metricsValues[2], metricsValues[3], metricsValues[4], metricsValues[5], metricsValues[6]);
     }
 
     private static AddMetricsSerialization buildAddMetricsSerialization(String stepLength, String doubleSupportTime, String walkingSpeed,
-                                                                        String walkingAsymmetry, String distanceWalked, String stepCount) {
+                                                                        String walkingAsymmetry, String distanceWalked, String stepCount, String walkingSteadiness) {
         return AddMetricsSerialization.builder()
                 .stepLength(stepLength)
                 .doubleSupportTime(doubleSupportTime)
@@ -690,6 +692,7 @@ class PatientServiceTest {
                 .walkingAsymmetry(walkingAsymmetry)
                 .distanceWalked(distanceWalked)
                 .stepCount(stepCount)
+                .walkingSteadiness(walkingSteadiness)
                 .timestamp(TIMESTAMP)
                 .build();
     }

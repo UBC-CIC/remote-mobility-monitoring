@@ -44,6 +44,7 @@ public class HandlerUtils {
             return generateApiGatewayResponse(StatusCode.OK, responseBody);
         } catch (IllegalArgumentException | NullPointerException | DuplicateRecordException e) {
             log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());
+            log.error("Stack trace: ", e);
             return generateApiGatewayResponse(StatusCode.BAD_REQUEST, e.getMessage());
         } catch (JsonSyntaxException e) {
             log.error("Got {} error {}, responding with bad request", e.getClass(), e.getMessage());

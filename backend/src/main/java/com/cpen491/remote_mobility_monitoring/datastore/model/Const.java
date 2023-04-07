@@ -90,6 +90,7 @@ public final class Const {
         public static final String WALKING_ASYMMETRY_NAME = "walking_asymmetry";
         public static final String DISTANCE_WALKED_NAME = "distance_walked";
         public static final String STEP_COUNT_NAME = "step_count";
+        public static final String WALKING_STEADINESS_NAME = "walking_steadiness";
         public static final String TIMESTAMP_NAME = "timestamp";
     }
 }
