@@ -2,4 +2,9 @@
 
 [load-testing]
 organization_id=
-admin_token=
+CLIENT_ID=
+USERPOOL_ID=
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+DYNAMODB_TABLE=
+ORANIZATION_ID=
