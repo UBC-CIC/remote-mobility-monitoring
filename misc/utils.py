@@ -1,5 +1,6 @@
 import random
 import string
+from datetime import datetime
 
 email_domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'protonmail.com', 'icloud.com']
 titles = ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.']
@@ -17,6 +18,7 @@ def random_phone_number(country_code: str = '+1') -> str:
     return country_code + ''.join(random.choices(string.digits, k=10))
 
 
+# Generate random string
 def random_string(length: int = 10, lower_letters: bool = True, upper_letters: bool = True, digits: bool = True,
                   punctuation: bool = True) -> str:
     charset = ''
@@ -29,7 +31,31 @@ def random_string(length: int = 10, lower_letters: bool = True, upper_letters: b
     if punctuation:
         charset += string.punctuation
 
-    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+    ret_val = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+    if lower_letters:
+        ret_val += random.choice(string.ascii_lowercase)
+    if upper_letters:
+        ret_val += random.choice(string.ascii_uppercase)
+    if digits:
+        ret_val += random.choice(string.digits)
+    if punctuation:
+        ret_val += random.choice(string.punctuation)
+    return ret_val
+
+
+# Generate random sex
+def random_sex() -> str:
+    return random.choice(['M', 'F', 'O'])
+
+
+# Generate random date
+def random_date() -> str:
+    return str(random.randint(1900, 2010)) + '-' + str("%02d" % random.randint(1, 12)) + '-' + str(
+        "%02d" % random.randint(1, 28))
+
+# Generate current timestamp
+def current_timestamp() -> str:
+    return str(datetime.now().replace(microsecond=0).isoformat())
 
 
 def random_title() -> str:
