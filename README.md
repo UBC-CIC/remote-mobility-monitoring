@@ -3,13 +3,13 @@ Currently, there is no widely used mobility monitoring solution that can be used
 
 | Index                                                 | Description                                               |
 |:------------------------------------------------------|:----------------------------------------------------------| 
-| [High Level Architecture](#High-Level-Architecture)   | High level overview illustrating component interactions   |
-| [Deployment](#Deployment-Guides)                      | How to deploy the project                                 |
-| [User Guide](#User-Guide)                             | The working solution                                      |
-| [Pricing Estimation](#Pricing-Estimation)             | Pricing estimation for the solution                       |
-| [Changelog](#Changelog)                               | Any changes post publish                                  |
-| [Credits](#Credits)                                   | Credits for this project                                  |
-| [License](#License)                                   | License details                                           |
+| [High Level Architecture](#high-level-architecture)   | High level overview illustrating component interactions   |
+| [Deployment](#deployment-guides)                      | How to deploy the project                                 |
+| [User Guide](#user-guide)                             | The working solution                                      |
+| [Pricing Estimation](#pricing-estimation)             | Pricing estimation for the solution                       |
+| [Changelog](#changelog)                               | Any changes post publish                                  |
+| [Credits](#credits)                                   | Credits for this project                                  |
+| [License](#license)                                   | License details                                           |
 
 # High Level Architecture
 The following architecture diagram illustrates the various AWS components utilized to deliver the solution. For an in-depth explanation of the frontend and backend stacks, refer to [Architecture Deep Dive](docs/ArchitectureDeepDive.md).

@@ -82,7 +82,7 @@ cd remote-mobility-monitoring
         ![client_id](./images/client_id.png)
     * **Organization ID**
 
-        The organization id is the same as the one that was created during the [backend deployment](). If you have forgotten the org ID, you can follow these steps to retrieve it:
+        The organization id is the same as the one that was created during the [backend deployment](./BackendDeploymentGuide.md#create-an-organization). If you have forgotten the org ID, you can follow these steps to retrieve it:
         Navigate to Dynamo:
         ![dynamo](./images/dynamo.png)
         Click on tables on the left bar:
