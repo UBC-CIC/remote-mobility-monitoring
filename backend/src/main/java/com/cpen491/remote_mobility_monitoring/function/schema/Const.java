@@ -17,6 +17,7 @@ public final class Const {
     public static final String PATIENT_ID_NAME = "patient_id";
     public static final String PASSWORD_NAME = "password";
     public static final String SUPPRESS_EMAIL_NAME = "suppress_email";
+    public static final String SKIP_PASSWORD_CHANGE_NAME = "skip_password_change";
     public static final String IS_PRIMARY_NAME = "is_primary";
     public static final String AUTH_CODE_NAME = "auth_code";
     public static final String VERIFIED_NAME = "verified";

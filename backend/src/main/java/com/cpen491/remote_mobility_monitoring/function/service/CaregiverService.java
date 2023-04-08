@@ -93,6 +93,9 @@ public class CaregiverService {
                 .phoneNumber(body.getPhoneNumber())
                 .build();
         caregiverDao.create(caregiver, body.getOrganizationId());
+        if (body.isSkipPasswordChange()) {
+            cognitoWrapper.setPassword(body.getEmail(), body.getPassword());
+        }
 
         return CreateCaregiverResponseBody.builder()
                 .caregiverId(caregiverId)

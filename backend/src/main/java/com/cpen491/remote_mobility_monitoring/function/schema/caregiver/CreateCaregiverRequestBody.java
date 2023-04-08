@@ -28,5 +28,7 @@ public class CreateCaregiverRequestBody {
     private String password;
     @SerializedName(Const.SUPPRESS_EMAIL_NAME)
     private boolean suppressEmail;
+    @SerializedName(Const.SKIP_PASSWORD_CHANGE_NAME)
+    private boolean skipPasswordChange;
 
 }
