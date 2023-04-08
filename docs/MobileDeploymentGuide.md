@@ -106,4 +106,8 @@ struct MobimonEnv {
 
 **NOTE: The very first time you build and run the app on your device, the build will fail. To fix this, go to the settings app -> General -> VPN & Device Management -> Apple Development: YourAppleID@email.com and trust the developer.**
 
-<img src="./images/iphone_health_access.png" alt="image1" width="200" style="border: 1px solid black; padding: 5px;">
+<p align="center">
+  <kbd>
+    <img src="./images/iphone_health_access.png" alt="image1" width="200" style="border: 1px solid black; padding: 5px;">
+  </kbd>
+</p>

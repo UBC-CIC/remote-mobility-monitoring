@@ -27,9 +27,13 @@ You will be redirected to a page to fill in caregiver information. Once you are 
 
 When the patient first open the app, he/she needs to grant access to mobility metrics. Click on the bottom link to switch to the signup page. Fill out all the required fields then click `Sign Up` button. You'll be auto redirected back to the Sign In page with email and password filled out. Click the `Sign In` button to authenticate.
 
-<img src="./images/iphone_health_granted.png" alt="image1" width="200" style="border: 1px solid black; padding: 5px;">
-<img src="./images/iphone_signup.png" alt="image2" width="200" style="border: 1px solid black; padding: 5px;">
-<img src="./images/iphone_signin.png" alt="image3" width="200" style="border: 1px solid black; padding: 5px;">
+<table>
+  <tr>
+    <td><img src="./images/iphone_health_granted.png" alt="image1" width="200"></td>
+    <td><img src="./images/iphone_signup.png" alt="image2" width="200"></td>
+    <td><img src="./images/iphone_signin.png" alt="image3" width="200"></td>
+  </tr>
+</table>
 
 ## Caregiver links a patient
 
