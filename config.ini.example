@@ -1,10 +1,9 @@
 ; Rename this file to config.ini and fill in the values
 
 [load-testing]
-organization_id=
-CLIENT_ID=
-USERPOOL_ID=
-ADMIN_EMAIL=
-ADMIN_PASSWORD=
-DYNAMODB_TABLE=
-ORANIZATION_ID=
+CLIENT_ID=[Cognito Client ID]
+USERPOOL_ID=[Cognito Userpool ID]
+ADMIN_EMAIL=[Email of Org Admin]
+ADMIN_PASSWORD=[Password of Org Admin]
+DYNAMODB_TABLE=REMOTE_MOBILITY_MONITORING-dev
+ORANIZATION_ID=[Organization ID]
