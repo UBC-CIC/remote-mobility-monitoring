@@ -14,9 +14,9 @@
 		223F25C729C1BC970036539B /* Amplify in Frameworks */ = {isa = PBXBuildFile; productRef = 223F25C629C1BC970036539B /* Amplify */; };
 		2249F5ED2994F85200DC8503 /* ApiCallers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2249F5EC2994F85200DC8503 /* ApiCallers.swift */; };
 		2259546A29930D1900879733 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 2259546929930D1900879733 /* CodeScanner */; };
+		22606A0B29E052AF00CB097B /* HealthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22606A0A29E052AF00CB097B /* HealthStore.swift */; };
 		2262043129DA835900E48D46 /* LogoutButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2262043029DA835900E48D46 /* LogoutButtonView.swift */; };
 		227547B92980BD5100D12030 /* MobilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227547B82980BD5100D12030 /* MobilityView.swift */; };
-		2275C8F729C809B40087B6FB /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2275C8F629C809B40087B6FB /* AccountView.swift */; };
 		228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */; };
 		228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49C7296CB6510046DFD4 /* Assets.xcassets */; };
 		228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */; };
@@ -26,6 +26,8 @@
 		22A771112989097600BB170A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22A771102989097600BB170A /* HealthKit.framework */; };
 		22C4DCD629C45C6300E20F4F /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 22C4DCD529C45C6300E20F4F /* JWTDecode */; };
 		22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EE32102990AC8C0096DCA5 /* Styling.swift */; };
+		22EECF4C29DCDE1A0048A2B5 /* KeyboardModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */; };
+		22EECF4E29DCE4930048A2B5 /* PasswordFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */; };
 		A6DA5599FA0EAB5BD96A555A /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 7E24BC89C7EB37D42D3C4CC8 /* awsconfiguration.json */; };
 		FE240C055E5430A88E234154 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 436F2119FA28C571CA23CC2C /* amplifyconfiguration.json */; };
 /* End PBXBuildFile section */
@@ -45,10 +47,10 @@
 		2238C27529D93F9D00C65CDE /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		223F25C129C1B5750036539B /* CognitoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitoView.swift; sourceTree = "<group>"; };
 		2249F5EC2994F85200DC8503 /* ApiCallers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiCallers.swift; sourceTree = "<group>"; };
+		22606A0A29E052AF00CB097B /* HealthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthStore.swift; sourceTree = "<group>"; };
 		2262043029DA835900E48D46 /* LogoutButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoutButtonView.swift; sourceTree = "<group>"; };
 		227547B82980BD5100D12030 /* MobilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilityView.swift; sourceTree = "<group>"; };
 		2275C8F329C6A98F0087B6FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		2275C8F629C809B40087B6FB /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "remote-mobility-monitoring-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remote_mobility_monitoring_iOSApp.swift; sourceTree = "<group>"; };
 		228B49C7296CB6510046DFD4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -60,6 +62,8 @@
 		22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "remote-mobility-monitoring-iOS.entitlements"; sourceTree = "<group>"; };
 		22A771102989097600BB170A /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		22EE32102990AC8C0096DCA5 /* Styling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Styling.swift; sourceTree = "<group>"; };
+		22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardModifier.swift; sourceTree = "<group>"; };
+		22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordFieldsView.swift; sourceTree = "<group>"; };
 		436F2119FA28C571CA23CC2C /* amplifyconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; path = amplifyconfiguration.json; sourceTree = "<group>"; };
 		7E24BC89C7EB37D42D3C4CC8 /* awsconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; path = awsconfiguration.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -114,13 +118,15 @@
 				228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */,
 				2238C27329D914AD00C65CDE /* InitialLoadView.swift */,
 				223F25C129C1B5750036539B /* CognitoView.swift */,
+				22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */,
 				2290931A29C43008008C650A /* VerificationView.swift */,
 				227547B82980BD5100D12030 /* MobilityView.swift */,
 				2249F5EC2994F85200DC8503 /* ApiCallers.swift */,
 				22EE32102990AC8C0096DCA5 /* Styling.swift */,
-				2275C8F629C809B40087B6FB /* AccountView.swift */,
 				2238C27529D93F9D00C65CDE /* Helper.swift */,
+				22606A0A29E052AF00CB097B /* HealthStore.swift */,
 				2262043029DA835900E48D46 /* LogoutButtonView.swift */,
+				22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */,
 				228B49C7296CB6510046DFD4 /* Assets.xcassets */,
 				228B49C9296CB6510046DFD4 /* Preview Content */,
 				2295EFF329A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */,
@@ -279,9 +285,11 @@
 				2249F5ED2994F85200DC8503 /* ApiCallers.swift in Sources */,
 				22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */,
 				223F25C229C1B5750036539B /* CognitoView.swift in Sources */,
-				2275C8F729C809B40087B6FB /* AccountView.swift in Sources */,
 				2238C27629D93F9D00C65CDE /* Helper.swift in Sources */,
 				2262043129DA835900E48D46 /* LogoutButtonView.swift in Sources */,
+				22606A0B29E052AF00CB097B /* HealthStore.swift in Sources */,
+				22EECF4C29DCDE1A0048A2B5 /* KeyboardModifier.swift in Sources */,
+				22EECF4E29DCE4930048A2B5 /* PasswordFieldsView.swift in Sources */,
 				2238C27429D914AD00C65CDE /* InitialLoadView.swift in Sources */,
 				228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */,
 				2290931B29C43008008C650A /* VerificationView.swift in Sources */,
@@ -452,6 +460,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -488,6 +497,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
