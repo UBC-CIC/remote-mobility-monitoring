@@ -127,8 +127,6 @@ cd remote-mobility-monitoring
     ```
     Note that if you used a different profile instead of cic, then specify that profile name after the --profile flag instead of cic. 
 
-    Optionally, you can check that the files were uploaded correctly
-
 8. Next, we specify that the uploaded files should be a website with the index file index.html. To do so, run the following command:
     ```
     aws s3 website s3://<YOUR_BUCKET_NAME> --index-document index.html --error-document index.html --profile cic
