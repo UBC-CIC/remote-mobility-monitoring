@@ -14,7 +14,7 @@ class OrganizationTasks(TaskSet):
         self.organization_id = config.get_organization_id()
         pass
 
-    @task
+    @task(3)
     def get_organization(self):
         self.client.get(f'organizations/{self.organization_id}')
 

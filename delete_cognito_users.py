@@ -26,7 +26,7 @@ def main():
     page_iterator = paginator.paginate(UserPoolId=userPoolId)
 
     workers = []
-    for i in range(3):
+    for i in range(4):
         t = threading.Thread(target=delete_user, args=(cognito, userPoolId))
         t.start()
         workers.append(t)

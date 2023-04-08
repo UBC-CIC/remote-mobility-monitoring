@@ -61,7 +61,7 @@ def delete_user():
 
 def main():
     workers = []
-    for i in range(3):
+    for i in range(5):
         t = threading.Thread(target=delete_user)
         t.start()
         workers.append(t)

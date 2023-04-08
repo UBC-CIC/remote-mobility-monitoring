@@ -54,7 +54,7 @@ class CaregiverTasks(TaskSet):
                 print(response.text)
                 self.interrupt()
 
-    @task
+    @task(3)
     def get_caregiver(self):
         self.client.get(
             f'caregivers/{self.caregiver_id}',
@@ -62,7 +62,7 @@ class CaregiverTasks(TaskSet):
             headers={'Authorization': f"Bearer {self.caregiver_token}"}
         )
 
-    @task
+    @task(1)
     def add_patient(self):
         # Create Patient
         email = "LoadTest-" + utils.random_email()
@@ -110,7 +110,7 @@ class CaregiverTasks(TaskSet):
 
 
 
-    @task
+    @task(3)
     def remove_patients(self):
         while(len(self.patients) > 0):
             patient = self.patients.pop()
@@ -125,7 +125,7 @@ class CaregiverTasks(TaskSet):
                 headers={'Authorization': f"Bearer {patient[3]}"}
             )
 
-    @task
+    @task(3)
     def update_caregiver(self):
         self.client.put(
             f'caregivers/{self.caregiver_id}',
@@ -134,7 +134,7 @@ class CaregiverTasks(TaskSet):
             headers={'Authorization': f"Bearer {self.caregiver_token}"}
         )
 
-    @task
+    @task(3)
     def get_caregiver_patients(self):
         self.client.get(
             f'caregivers/{self.caregiver_id}/patients',
@@ -142,7 +142,7 @@ class CaregiverTasks(TaskSet):
             headers={'Authorization': f"Bearer {self.caregiver_token}"}
         )
 
-    @task
+    @task(4)
     def query_metrics(self):
         if len(self.patients) == 0:
             return

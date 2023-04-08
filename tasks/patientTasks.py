@@ -47,7 +47,7 @@ class PatientTasks(TaskSet):
                 print(response.text)
                 self.interrupt()
 
-    @task
+    @task(3)
     def update_patient(self):
         self.client.put(
             f'patients/{self.patient_id}',
@@ -56,7 +56,7 @@ class PatientTasks(TaskSet):
             headers={'Authorization': f"Bearer {self.patient_token}"}
         )
 
-    @task
+    @task(3)
     def get_patient(self):
         self.client.get(
             f'patients/{self.patient_id}',
@@ -64,7 +64,7 @@ class PatientTasks(TaskSet):
             headers={'Authorization': f"Bearer {self.patient_token}"}
         )
 
-    @task
+    @task(3)
     def add_metrics(self):
         self.client.post(
             f'metrics',
