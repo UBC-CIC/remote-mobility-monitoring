@@ -6,4 +6,4 @@ The application has three components: the back-end, the webapp, and the iOS app.
 | :-------------------------------------- | :--------------------------------------------------------------------------------------------- |
 | [Back-end](./BackendDeploymentGuide.md) | Deployment guide for the back-end. Deploy the back-end **first** before moving on to the rest. |
 | [Webapp](./WebappDeploymentGuide.md)    | Deployment guide for the webapp                                                                |
-| [iOS](.MobileDeploymentGuide.md)        | Deployment Guide for the iOS app                                                               |
+| [iOS](./MobileDeploymentGuide.md)       | Deployment Guide for the iOS app                                                               |

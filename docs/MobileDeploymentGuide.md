@@ -25,10 +25,10 @@ First, clone the GitHub repository onto your machine. To do this:
 git clone https://github.com/UBC-CIC/remote-mobility-monitoring.git
 ```
 
-The code should now be in the above folder. Now navigate into the remote-mobility-monitoring folder by running the following command:
+The code should now be in the above folder. Now navigate into the iOS folder by running the following command:
 
 ```bash
-cd remote-mobility-monitoring
+cd iOS
 ```
 
 # Step 2: iOS App Deployment
@@ -41,7 +41,7 @@ cd remote-mobility-monitoring
 
 ![alt text](images/xcode_startup.png)
 
-- Next navigate to the cloned repository and open the `remote-mobility-monitoring-iOS` folder
+- Next navigate to the cloned repository and open the `iOS-iOS` folder
 
 ![alt text](images/xcode_find_project.png)
 
@@ -71,7 +71,7 @@ cd remote-mobility-monitoring
 ```bash
 # Make sure to finish the Amplify Set Up guide above before proceeding
 
-cd remote-mobility-monitoring-iOS
+cd iOS-iOS
 
 amplify init
 # Choose AWS access keys for auth method
