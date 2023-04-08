@@ -6,7 +6,7 @@ Before you deploy, you must have the following in place:
 *  [AWS CLI](https://aws.amazon.com/cli/)
 *  [Node.js](https://nodejs.org/en/)
 
-Additionally, please complete the [backend deployment](./DeploymentGuide.md) first.
+Additionally, please complete the [backend deployment](./BackendDeploymentGuide.md) first.
 
 # Step 1: Clone The Repository
 First, clone the GitHub repository onto your machine. To do this:

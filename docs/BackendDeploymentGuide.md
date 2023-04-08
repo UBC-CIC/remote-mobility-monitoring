@@ -126,5 +126,3 @@ Like so:
 After clicking on the orange `Test` button, the admin should be created and an email containing the admin's temporary password should be sent to the admin's email address. The email should look like this:
 ![alt text](./images/admin_password_email.png)
 The admin can then use the temporary password to log in to the web app and change their password.
-
-# Step 3: Frontend Deployment
