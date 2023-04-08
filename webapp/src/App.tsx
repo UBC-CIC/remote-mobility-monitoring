@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import "./App.css";
 import LoginPage from "./components/LoginPage/LoginPage";
 import ForceChangePassword from "./components/LoginPage/ForceChangePassword";
@@ -20,6 +20,10 @@ import store from "./helpers/store";
 
 
 function App() {
+    useEffect(() => {
+        document.title = "Mobimon";
+    }, []);
+    
     return (
         <Provider store={store}>
             <Router>
