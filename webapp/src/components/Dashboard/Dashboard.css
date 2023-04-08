@@ -133,6 +133,38 @@ html {
     color: #4D47C3;
 }
 
+.dashboard .adda {
+    margin-left: 0%;
+    width: 15%;
+    border-radius: 5px;
+    background-color: #4D47C3;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 1em ;
+    height: 42px;
+    margin-top: 30%;
+}
+
+.dashboard .addla {
+    margin-left: 0%;
+    width: 15%;
+    border-radius: 5px;
+    background-color: #4D47C3;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 1em ;
+    height: 42px;
+    margin-top: 17%;
+}
+
+.adda:hover {
+    cursor: pointer;
+}
+
+.addla:hover {
+    cursor: pointer;
+}
+
 .dashboard .add {
     margin-left: 62%;
     width: 28%;
