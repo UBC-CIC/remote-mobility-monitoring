@@ -41,7 +41,7 @@ cd iOS
 
 ![alt text](images/xcode_startup.png)
 
-- Next navigate to the cloned repository and open the `iOS-iOS` folder
+- Next navigate to the cloned repository and open the `iOS` folder
 
 ![alt text](images/xcode_find_project.png)
 
@@ -71,7 +71,7 @@ cd iOS
 ```bash
 # Make sure to finish the Amplify Set Up guide above before proceeding
 
-cd iOS-iOS
+cd iOS
 
 amplify init
 # Choose AWS access keys for auth method
@@ -84,6 +84,18 @@ amplify push  # Push the changes to AWS
 
 **NOTE: For more information please visit [Amplify Set Up](https://docs.amplify.aws/lib/q/platform/ios/)**
 
+### Set up .env file
+
+- Move to `iOS/remote-mobility-monitoring-iOS` folder
+- Create a Swift file called Env.swift
+- Including the following content:
+
+```swift
+struct MobimonEnv {
+    static let baseUrl = "YOUR_AWS_BACKEND_URL"
+}
+```
+
 ### Deploying to your device/simulator
 
 - Plug in your iPhone to your Mac
@@ -94,6 +106,4 @@ amplify push  # Push the changes to AWS
 
 **NOTE: The very first time you build and run the app on your device, the build will fail. To fix this, go to the settings app -> General -> VPN & Device Management -> Apple Development: YourAppleID@email.com and trust the developer.**
 
-<div style="text-align: center;">
-  <img src="images/iphone_health_access.png" alt="iPhone Health Access" style="max-width: 30%; height: auto;">
-</div>
+<img src="./images/iphone_health_access.png" alt="image1" width="200" style="border: 1px solid black; padding: 5px;">

@@ -25,6 +25,7 @@
 		2295EFFC29A610B9008CD151 /* RegisterViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */; };
 		22A771112989097600BB170A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22A771102989097600BB170A /* HealthKit.framework */; };
 		22C4DCD629C45C6300E20F4F /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 22C4DCD529C45C6300E20F4F /* JWTDecode */; };
+		22EBC54F29E176A400948FBC /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EBC54E29E176A400948FBC /* Env.swift */; };
 		22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EE32102990AC8C0096DCA5 /* Styling.swift */; };
 		22EECF4C29DCDE1A0048A2B5 /* KeyboardModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */; };
 		22EECF4E29DCE4930048A2B5 /* PasswordFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */; };
@@ -61,6 +62,7 @@
 		2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewTests.swift; sourceTree = "<group>"; };
 		22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "remote-mobility-monitoring-iOS.entitlements"; sourceTree = "<group>"; };
 		22A771102989097600BB170A /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		22EBC54E29E176A400948FBC /* Env.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
 		22EE32102990AC8C0096DCA5 /* Styling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Styling.swift; sourceTree = "<group>"; };
 		22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardModifier.swift; sourceTree = "<group>"; };
 		22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordFieldsView.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				227547B82980BD5100D12030 /* MobilityView.swift */,
 				2249F5EC2994F85200DC8503 /* ApiCallers.swift */,
 				22EE32102990AC8C0096DCA5 /* Styling.swift */,
+				22EBC54E29E176A400948FBC /* Env.swift */,
 				2238C27529D93F9D00C65CDE /* Helper.swift */,
 				22606A0A29E052AF00CB097B /* HealthStore.swift */,
 				2262043029DA835900E48D46 /* LogoutButtonView.swift */,
@@ -282,6 +285,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				227547B92980BD5100D12030 /* MobilityView.swift in Sources */,
+				22EBC54F29E176A400948FBC /* Env.swift in Sources */,
 				2249F5ED2994F85200DC8503 /* ApiCallers.swift in Sources */,
 				22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */,
 				223F25C229C1B5750036539B /* CognitoView.swift in Sources */,

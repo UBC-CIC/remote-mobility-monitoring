@@ -7,10 +7,8 @@
 
 import Foundation
 
-let baseUrl = "https://tqd4aslpsj.execute-api.us-west-2.amazonaws.com/prod" // temporary
-
 func verifyPatient(patientId: String, caregiverId: String, authCode: String, idToken: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
-    let endpoint = baseUrl + "/caregivers/\(caregiverId)" + "/patients/\(patientId)/accept"
+    let endpoint = MobimonEnv.baseUrl + "/caregivers/\(caregiverId)" + "/patients/\(patientId)/accept"
     let body: [String: Any] = [
         "auth_code": authCode
     ]
@@ -66,7 +64,7 @@ func createPatient(email: String, password: String, firstName: String, lastName:
     dateFormatter.formatOptions = [.withFullDate]
     let birthdayDateString = dateFormatter.string(from: birthday)
     
-    let endpoint = baseUrl + "/patients"
+    let endpoint = MobimonEnv.baseUrl + "/patients"
     let body: [String: Any] = [
         "email": email,
         "password": password,
@@ -124,7 +122,7 @@ func createPatient(email: String, password: String, firstName: String, lastName:
 }
 
 func addMetrics(idToken: String, patientId: String, metrics: [[String: Any]], completion: @escaping (Result<[String: Any], Error>) -> Void) {
-    let endpoint = baseUrl + "/metrics"
+    let endpoint = MobimonEnv.baseUrl + "/metrics"
     let body: [String: Any] = [
         "patient_id": patientId,
         "metrics": metrics
@@ -182,7 +180,7 @@ func addMetrics(idToken: String, patientId: String, metrics: [[String: Any]], co
 }
 
 func getAllCaregiversForPatient(patientId: String, idToken: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
-    let endpoint = baseUrl + "/patients/\(patientId)/caregivers"
+    let endpoint = MobimonEnv.baseUrl + "/patients/\(patientId)/caregivers"
 
     guard let url = URL(string: endpoint) else {
         completion(.failure(NSError(domain: "InvalidEndpoint", code: 0, userInfo: nil)))

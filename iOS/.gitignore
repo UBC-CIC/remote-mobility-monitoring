@@ -111,3 +111,6 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
+
+# Ignore the .env file
+remote-mobility-monitoring-iOS/Env.swift
