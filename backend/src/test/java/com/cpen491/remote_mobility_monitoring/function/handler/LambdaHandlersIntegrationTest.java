@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminDeleteUserRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.io.IOException;
@@ -58,11 +59,11 @@ public class LambdaHandlersIntegrationTest {
     private static final String ORGANIZATION_NAME = "INTEGRATION_TEST_ORGANIZATION";
     private static final String ADMIN_ID = "adm-11111";
     private static final String NOT_EXISTS_ADMIN_ID = "adm-3535";
-    private static final String ADMIN_EMAIL = "adminTest1@email.com";
+    private static final String ADMIN_EMAIL = "adminIntegrationTest1@email.com";
     private static final String ADMIN_NAME = "AdminTest1";
     private static final String NOT_EXISTS_CAREGIVER_ID = "car-53135";
-    private static final String CAREGIVER_EMAIL1 = "caregiverTest1@email.com";
-    private static final String CAREGIVER_EMAIL2 = "caregiverTest2@email.com";
+    private static final String CAREGIVER_EMAIL1 = "caregiverIntegrationTest1@email.com";
+    private static final String CAREGIVER_EMAIL2 = "caregiverIntegrationTest2@email.com";
     private static final String CAREGIVER_NAME1 = "CaregiverTest1";
     private static final String CAREGIVER_NAME2 = "CaregiverTest2";
     private static final String CAREGIVER_UPDATED_NAME1 = "CaregiverTestOne";
@@ -70,10 +71,10 @@ public class LambdaHandlersIntegrationTest {
     private static final String CAREGIVER_UPDATED_TITLE = "ManagerTest";
     private static final String CAREGIVER_PHONE_NUMBER = "+1231231234";
     private static final String NOT_EXISTS_PATIENT_ID = "pat-12345";
-    private static final String PATIENT_EMAIL1 = "patientTest1@email.com";
-    private static final String PATIENT_EMAIL2 = "patientTest2@email.com";
-    private static final String PATIENT_EMAIL3 = "patientTest3@email.com";
-    private static final String NOT_EXISTS_PATIENT_EMAIL = "badPatientTest@email.com";
+    private static final String PATIENT_EMAIL1 = "patientIntegrationTest1@email.com";
+    private static final String PATIENT_EMAIL2 = "patientIntegrationTest2@email.com";
+    private static final String PATIENT_EMAIL3 = "patientIntegrationTest3@email.com";
+    private static final String NOT_EXISTS_PATIENT_EMAIL = "badPatientIntegrationTest@email.com";
     private static final String PATIENT_NAME1 = "PatientTest1";
     private static final String PATIENT_NAME2 = "PatientTest2";
     private static final String PATIENT_UPDATED_NAME2 = "PatientTestTwo";
@@ -128,25 +129,25 @@ public class LambdaHandlersIntegrationTest {
 
     @AfterAll
     public static void teardown() {
-        CognitoIdentityProviderClient cognitoClient = CognitoIdentityProviderClient.builder()
-                .region(Region.US_WEST_2)
-                .build();
-//        for (String email : new String[]{CAREGIVER_EMAIL1, CAREGIVER_EMAIL2, PATIENT_EMAIL1, PATIENT_EMAIL2, PATIENT_EMAIL3}) {
-//            AdminDeleteUserRequest request = AdminDeleteUserRequest.builder()
-//                    .username(email)
-//                    .userPoolId(COGNITO_USERPOOL_ID)
-//                    .build();
-//            try {
-//                cognitoClient.adminDeleteUser(request);
-//            } catch (Exception e) {
-//                System.out.printf("User with email %s does not exist%n", email);
-//            }
-//        }
-
         genericDao.delete(ORGANIZATION_ID);
         genericDao.delete(ADMIN_ID);
         for (String pid : idMap.values()) {
             genericDao.delete(pid);
+        }
+
+        CognitoIdentityProviderClient cognitoClient = CognitoIdentityProviderClient.builder()
+                .region(Region.US_WEST_2)
+                .build();
+        for (String email : new String[]{CAREGIVER_EMAIL1, CAREGIVER_EMAIL2, PATIENT_EMAIL1, PATIENT_EMAIL2, PATIENT_EMAIL3}) {
+            AdminDeleteUserRequest request = AdminDeleteUserRequest.builder()
+                    .username(email)
+                    .userPoolId(COGNITO_USERPOOL_ID)
+                    .build();
+            try {
+                cognitoClient.adminDeleteUser(request);
+            } catch (Exception e) {
+                System.out.printf("User with email %s does not exist%n", email);
+            }
         }
     }
 
