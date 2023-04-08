@@ -4,8 +4,8 @@ This is a load testing project for Mobimon. It uses [Locust](https://locust.io/)
 ## Prerequisites
 1. Install [Python](https://www.python.org/downloads/)
 2. Install requirements: `pip install -r requirements.txt`
-3. Retrieve admin token from Mobimon cognito pool
-4. Copy config.ini from config.ini.example and fill in the admin token and default organization id
+3. Retrieve admin username / password, and the client and userpool ID from Mobimon cognito pool
+4. Copy config.ini from config.ini.example and fill in appropriate fields
 
 ## Running Locust
 1. Run Locust: `locust -f user.py`
