@@ -43,7 +43,7 @@ npm run build
 
 4. Run the following command to spin up the AWS DynamoDB docker container for local testing:
 ```bash
-docker-compose up -docker
+docker-compose up -d
 ```
 
 5. Run the following command to build the Java AWS Lambda code:
