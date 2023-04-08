@@ -28,3 +28,13 @@ This is a load testing project for Mobimon. It uses [Locust](https://locust.io/)
 - `-E [TAG [TAG ...]]`: Exclude tests with the specified tag (ex `-E caregiver`)
 
 use `locust -h` to see all options
+
+## Running User Pruning Scripts
+Also included are two scripts to prune users from the AWS Cognito user pool, and the DynamoDB tables. These are useful 
+for cleaning up after a load test.
+To run the scripts, you must have the AWS CLI installed and configured with credentials that have access to the AWS 
+account where Mobimon is deployed.
+1. Run `python delete_cognito_users.py` to delete all loadtest users from the Cognito user pool
+2. Run `python delete_dynamodb_users.py` to delete all loadtest users from the DynamoDB tables
+Note: The scripts will delete all users with emails starting with "LoadTest". If you have other users in your Cognito
+user pool or DynamoDB tables with emails starting with "LoadTest", they will be deleted as well.
