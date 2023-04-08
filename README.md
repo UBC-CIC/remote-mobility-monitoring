@@ -6,6 +6,7 @@ Currently, there is no widely used mobility monitoring solution that can be used
 | [High Level Architecture](#High-Level-Architecture)   | High level overview illustrating component interactions   |
 | [Deployment](#Deployment-Guides)                      | How to deploy the project                                 |
 | [User Guide](#User-Guide)                             | The working solution                                      |
+| [Pricing Estimation](#Pricing-Estimation)             | Pricing estimation for the solution                       |
 | [Changelog](#Changelog)                               | Any changes post publish                                  |
 | [Credits](#Credits)                                   | Credits for this project                                  |
 | [License](#License)                                   | License details                                           |
@@ -20,6 +21,9 @@ To deploy this solution, please follow our [Deployment Guides](docs/DeploymentGu
 
 # User Guide
 For instructions on how to use the web app interface, refer to the [User Guide](docs/UserGuide.md).
+
+# Pricing Estimation
+For a sample pricing estimation, refer to the [Pricing Estimation](docs/PricingEstimation.md).
 
 # Changelog
 N/A
