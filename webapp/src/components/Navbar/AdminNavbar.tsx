@@ -14,7 +14,7 @@ function AdminNavbar() {
             <span className="navbar-items" onClick={(e) => {
                 nav("/addcaregiver");
             }}>Add Caregivers</span>
-            <span className="navbar-items" onClick={(e) => {
+            <span className="navbar-items-logout" onClick={(e) => {
                 logout();
                 nav("/login");
             }}>Logout</span>
