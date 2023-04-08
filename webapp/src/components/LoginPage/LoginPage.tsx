@@ -109,9 +109,9 @@ function LoginPage() {
             <div className='login user'>
                 <h2>Sign in</h2>
                 <div className='login-input'>
-                    <TextField color="secondary" fullWidth id="outlined-basic" label="Email" type="email" variant="outlined" onChange={(e) => setEmail(e.target.value)} />
+                    <TextField color="secondary" fullWidth id="outlined-basic" label="Email" type="email" variant="outlined" onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
                     <div className="login-padding"/>
-                    <TextField color="secondary" fullWidth id="outlined-basic" label="Password" type="password" variant="outlined" onChange={(e) => setPassword(e.target.value)} />
+                    <TextField color="secondary" fullWidth id="outlined-basic" label="Password" type="password" variant="outlined" onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
                     <div className="login-padding"/>
                     <div className='forgot'>Forgot password?</div>
                     <button type='submit' onClick={(e) => { handleSubmit(e); }}>Login</button>
