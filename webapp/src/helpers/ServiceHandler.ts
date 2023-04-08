@@ -1,5 +1,5 @@
 import React from "react";
-import {userTypes, getCaregiverId} from "./types";
+import {userTypes, getCaregiverId, getIdToken} from "./types";
 
 // Get userID from local storage
 const sub = localStorage.getItem("sub");
@@ -17,12 +17,19 @@ type response = {
     text: () => Promise<string>,
 }
 
+type date = {
+    year: number,
+    month: number,
+    day: number
+}
+
 /*
  * This is the ServiceHandler object that will be eported to be used by all the other
  * pages to make the relevant API calls to the backend.
 * */
 export const ServiceHandler = {
     addCaregiver: (firstName: string, lastName: string, email: string, contactNumber: string) => {
+        const idToken = getIdToken();
         /*
          * Add Caregiver API called by admin users to create new caregivers for their organization.
         * */
@@ -42,19 +49,21 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
             body: JSON.stringify(data),
         });
         return addCallbacks(req);
     },
-    addPatient: (firstName: string, lastName: string, contactNumber: string) => {
+    addPatient: (email: string) => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("caregiver");
-        const url = base_url.concat("/patients");
+        
+        const url = base_url.concat("/caregivers/").concat(getCaregiverId()).concat("/patients");
         const data = {
-            "first_name": firstName,
-            "last_name": lastName,
-            "phone_number": contactNumber,
+            "patient_email": email,
+            "send_email": true
         };
         const req = fetch(url, {
             method: "POST", 
@@ -62,27 +71,33 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
             body: JSON.stringify(data),
         });
         return addCallbacks(req);
     },
     deletePatient: (patientId: string) => {
+        const idToken = getIdToken();
         const base_url = createBaseUrl("caregiver");
-        const url = base_url.concat("/patients/").concat(patientId);
+        const url = base_url.concat("/caregivers/").concat(getCaregiverId())
+            .concat("/patients/").concat(patientId);
         const req = fetch(url, {
             method: "DELETE", 
             mode: "cors", 
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
-        return addCallbacks(req);
+        return req;
+
     },
     getAllPatients: () => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();
         const url = base_url.concat("/caregivers/").concat(caregiverId).concat("/patients");
@@ -92,12 +107,14 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);
     },
     getPatient: (patientId: string) => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("caregiver");
         const caregiverId = getCaregiverId();
         const url = base_url.concat("/patients/").concat(patientId);
@@ -107,12 +124,14 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);
     },
     getOrg: () => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("admin");
         if (!org_id) throw new Error("Check organization ID");
         const url = base_url.concat("/organizations/").concat(org_id);
@@ -122,12 +141,14 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);
     },
     deleteCaregiver: (carId: string) => {
+        const idToken = getIdToken();
         const base_url =createBaseUrl("admin");
         const url = base_url.concat("/caregivers/").concat(carId);
         const req = fetch(url, {
@@ -136,11 +157,66 @@ export const ServiceHandler = {
             cache: "no-cache", 
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
             },
         });
         return addCallbacks(req);
     },
+    sharePatient: (caregiverId: string, patientId: string) => {
+        const idToken = getIdToken();
+        const base_url =createBaseUrl("caregiver");
+        const url = base_url.concat(`/caregivers/${caregiverId}/patients/${patientId}`);
+        const req = fetch(url, {
+            method: "POST", 
+            mode: "cors", 
+            cache: "no-cache", 
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
+            },
+        });
+        return addCallbacks(req);
+
+    },
+    queryMetrics: (patientIdList: string[], startDate: string|null, endDate: string|null, 
+        minHeight = 0, maxHeight = 280, minWeight = 0, maxWeight = 500, sex="A") => {
+        const idToken = getIdToken();
+        const base_url = createBaseUrl("caregiver");
+        let url = base_url.concat("/metrics?");
+        for (const patientId of patientIdList) {
+            url = url.concat(`patients=${patientId}&`);
+        }
+        if (startDate) {
+            const startDateIso = startDate.substring(0, 10).concat("T00:00:00");
+            url = url.concat(`start=${startDateIso}&`);
+        }
+        if (endDate) {
+            const endDateIso = endDate.substring(0, 10).concat("T23:59:59");
+            url = url.concat(`end=${endDateIso}`);
+        }
+        url = url.concat(`&min_height=${minHeight}`);
+        url = url.concat(`&max_height=${maxHeight}`);
+        url = url.concat(`&min_weight=${minWeight}`);
+        url = url.concat(`&max_weight=${maxWeight}`);
+        if (sex !== "A") {
+            url = url.concat(`&sex=${sex}`);
+        }
+
+
+        const req = fetch(url, {
+            method: "GET", 
+            mode: "cors", 
+            cache: "no-cache", 
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": `Bearer ${idToken}`
+            },
+        });
+        return addCallbacks(req);
+    }
 };
 
 /*
@@ -170,7 +246,6 @@ const createBaseUrl = (loginType: string) => {
 * */
 const addCallbacks = (p: Promise<response>) => {
     return p.then((res: response) => {
-        console.log(res.status);
         if (res.status === 200) {
             return res.json();
         }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import "./App.css";
 import LoginPage from "./components/LoginPage/LoginPage";
 import ForceChangePassword from "./components/LoginPage/ForceChangePassword";
@@ -10,12 +10,20 @@ import CaregiverDashboard from "./components/Dashboard/CaregiverDashboard";
 import AdminDashboard from "./components/Dashboard/AdminDashboard";
 import Patient from "./components/Patient/Patient";
 import ProtectedRoute from "./helpers/ProtectedRoute";
+import VerifyPatient from "./components/VerifyPatient/VerifyPatient";
+import SharePatient from "./components/SharePatient/SharePatient";
+import AllPatients from "./components/Patient/AllPatients";
+import NewDashboard from "./components/NewDashboard/NewDashboard";
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./helpers/store";
 
 
 function App() {
+    useEffect(() => {
+        document.title = "Mobimon";
+    }, []);
+    
     return (
         <Provider store={store}>
             <Router>
@@ -42,8 +50,20 @@ function App() {
                     <Route path="/admindashboard" element={
                         <ProtectedRoute type="admin"><AdminDashboard/></ProtectedRoute>
                     }/>
-                    <Route path="/dashboard/patient/:patientId" element={
+                    <Route path="/dashboard/patient/:patientIdEncrypt" element={
                         <ProtectedRoute type="caregiver"><Patient/></ProtectedRoute>
+                    }/>
+                    <Route path="/dashboard/patient/:patientIdEncrypt/share" element={
+                        <ProtectedRoute type="caregiver"><SharePatient/></ProtectedRoute>
+                    }/>
+                    <Route path="/dashboard/verifyPatient/:emailEncrypt" element={
+                        <ProtectedRoute type="caregiver"><VerifyPatient/></ProtectedRoute>
+                    }/>
+                    <Route path="/dashboard/allPatients" element={
+                        <ProtectedRoute type="caregiver"><AllPatients/></ProtectedRoute>
+                    }/>
+                    <Route path="/newdashboard" element={
+                        <ProtectedRoute type="caregiver"><NewDashboard/></ProtectedRoute>
                     }/>
                 </Routes>
             </Router>

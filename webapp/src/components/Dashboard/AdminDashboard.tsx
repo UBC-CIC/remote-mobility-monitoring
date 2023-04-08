@@ -87,7 +87,7 @@ function AdminDashboard() {
                     })} 
                 </div>
                 <br/>
-                <button className={filteredCaregivers.length <= 4 ? "addl": "add"}
+                <button className={filteredCaregivers.length <= 4 ? "addla": "adda"}
                     onClick={(e) => nav("/addcaregiver")}>Add New Caregiver</button>
             </div>
 

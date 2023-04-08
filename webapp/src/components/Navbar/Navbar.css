@@ -1,4 +1,4 @@
-.navbar{
+.navbarr{
     background-color: #303030;
     height: 50%;
     color: #EBEBEB;
@@ -8,14 +8,17 @@
     padding-right: 10px;
 }
 
-.navbar .navbar-items {
+.navbarr .navbar-items {
     margin-left: 3%;
 }
-.navbar right {
-    margin-left: 3%;
-    text-align: right;
+.navbarr .navbar-items-logout {
+    margin-left: 62%;
 }
-.navbar .navbar-items:hover {
+.navbarr .navbar-items:hover {
+    color: #E3C55D;
+    cursor: pointer;
+}
+.navbarr .navbar-items-logout:hover {
     color: #E3C55D;
     cursor: pointer;
 }

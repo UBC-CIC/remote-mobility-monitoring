@@ -39,17 +39,20 @@
 }
 
 .login-page .login-input input {
-    height: 30px;
-    width: 93%;
+    height: 15px;
     padding-left: 12px;
-    margin-bottom: 15px;
     border-radius: 5px;
-    background-color: #F0EFFF;
+    background-color: rgb(240, 239, 255, 0.5);
     border: 1px solid rgba(255,255,255,.5);
-    font-size: 0.7em ;
+    font-size: 1em ;
 }
+
+.login-page .login-padding {
+    height: 20px;
+}
+
 .login-page .login-input input::placeholder {
-    color: #A7A3FF;
+    color: #000000;
 }
 
 .login-page .forgot {

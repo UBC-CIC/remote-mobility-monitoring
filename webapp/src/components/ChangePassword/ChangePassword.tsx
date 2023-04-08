@@ -5,6 +5,7 @@ import {createUser, createUserAndGetSession} from "../../helpers/Cognito";
 import {FaArrowLeft} from "react-icons/fa";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 import CaregiverNavbar from "../Navbar/CaregiverNavbar";
+import {TextField} from "@mui/material";
 
 function ChangePassword() {
     const [password, setPassword] = useState("");
@@ -58,9 +59,14 @@ function ChangePassword() {
                 <div></div>
                 <div className="wrapper">
                     <div className='login-input'>
-                        <input type='password' placeholder='Old Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setOldPassword(e.target.value)}></input>
-                        <input type='password' placeholder='New Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}></input>
-                        <input type='password' placeholder='Confirm Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setConfirmPassword(e.target.value)}></input>
+                        <div className="login-input-form">
+                            <TextField color='secondary' fullWidth variant='outlined' type='password' label='Old Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setOldPassword(e.target.value)} />
+                            <div className="pad"/>
+                            <TextField color='secondary' fullWidth variant='outlined' type='password' label='New Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setPassword(e.target.value)}/>
+                            <div className="pad"/>
+                            <TextField color='secondary' fullWidth variant='outlined' type='password' label='Confirm Password' onKeyUp={(e) => handleKey(e)} onChange={(e) => setConfirmPassword(e.target.value)}/>
+                            <div className="pad"/>
+                        </div>
                         {loading === true? 
                             <button type='submit' onClick={(e) => {return;}}>Loading</button>:
                             <button type='submit' onClick={(e) => handleSubmit()}>Change Password</button>}

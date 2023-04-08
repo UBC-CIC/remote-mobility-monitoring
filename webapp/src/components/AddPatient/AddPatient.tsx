@@ -7,6 +7,7 @@ import {ServiceHandler} from "../../helpers/ServiceHandler";
 import {getCaregiverId} from "../../helpers/types";
 import { QRCode } from "react-qr-svg";
 import CaregiverNavbar from "../Navbar/CaregiverNavbar";
+import {TextField} from "@mui/material";
 
 type response = {
     patient_id: string,
@@ -15,13 +16,10 @@ type response = {
 }
 
 function AddCaregiver() {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [contact, setContact] = useState("");
+    const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
-    const [patientId, setPatientID] = useState("");
     const [authCode, setAuthCode] = useState("");
     const caregiverId = getCaregiverId();
     const nav = useNavigate();
@@ -55,43 +53,17 @@ function AddCaregiver() {
     };
 
     const addPatient = () => {
-        if (!firstName) {
-            setError("First name cannot be empty");
-            return;
-        }
-        if (!lastName) {
-            setError("Last name cannot be empty");
-            return;
-        }
-        if (!contact) {
-            setError("Contact Number cannot be empty");
+        if (!email) {
+            setError("Email cannot be empty");
             return;
         }
         setError("");
-        ServiceHandler.addPatient(firstName, lastName, contact)
-            .then((res: any) => {
-                setPatientID(res.patient_id);
-                setAuthCode(res.auth_code);
-                console.log(res);
-                console.log(caregiverId);
+        ServiceHandler.addPatient(email)
+            .then((code: any) => {
+                setAuthCode(code.auth_code);
                 setSubmitted(true);
-                let succ = false;
-                const interval = setInterval(() => {
-                    ServiceHandler.getPatient(res.patient_id)
-                        .then((val: any) => {
-                            if (val.device_id && !succ) {
-                                succ = true;
-                                alert("Patient added");
-                                clearTimeout(interval);
-                                nav("/dashboard");
-                            }
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        });
-                }, 500);
             })
-            .catch((err: Error) => setError(err.message));
+            .catch(err => setError("A patient with this email does not exist"));
     };
 
     return (
@@ -99,14 +71,15 @@ function AddCaregiver() {
             <CaregiverNavbar/>
             <div className="add-patient">
                 <div className='wrapper'>
-                    <div className="icon" onClick={() => nav("/dashboard")}><FaArrowLeft size="15px"/> Home</div>
+                    <div className="icon" onClick={() => nav("/dashboard")}><FaArrowLeft size="15px"/> Dashboard</div>
                     {submitted === true? 
                         <>
                             <div className="text-wrapper">
-                                <h2>&nbsp;Add a patient</h2>
+                                <h2>&nbsp;Verify Patient</h2>
                                 <p className="desc">
-                            Please scan this QR code with your patient&#39;s Mobility Monitor app to 
-                            link them to your dashboard.
+                                    <b>Patient email: {email}</b><br/>
+                    Scan the qr code below using your patient&#39;s Mobility Monitor app to link them to your dashboard.
+                    Alternatively, we have also sent them an email with instructions if they wish to link their account remotely.
                                 </p>
                             </div>
                             <div className='qr-wrapper'>
@@ -114,14 +87,13 @@ function AddCaregiver() {
                                     level="Q"
                                     style={{ width: windowDimensions.width/6 }}
                                     value={JSON.stringify({
-                                        "caregiver_id": caregiverId,
                                         "auth_code": authCode,
-                                        "patient_id": patientId
+                                        "caregiver_id": caregiverId
                                     })}
                                 />
-                                <p className="or">or</p>
+                                <p className="or">Made a mistake?</p>
                                 <button id="or-button" onClick={(e) => {
-                                    setSubmitted(false);} }>Re-fill patient information</button>
+                                    setSubmitted(false);} }>Enter new email</button>
                             </div>
                         </>
                         : 
@@ -130,22 +102,16 @@ function AddCaregiver() {
                                 <h2>&nbsp;Add a patient</h2>
                                 <p className="desc">
                     Enter the patient&#39;s information and click on the add patient button. Next, 
-                    a QR code will be generated which you can scan from your patient&#39;s Mobility Monitor app.
+                    a QR code will be generated which you can scan from your patient&#39;s 
+                    Mobility Monitor app. Additionally, 
+                    we will send the patient an email with instructions if they choose to link remotely.
                     This will link your patient to your dashboard.</p>
                             </div>
                             <div className='form-wrapper'>
                                 <form onSubmit={handleSubmit} noValidate >
                                     <div className='username'>
-                                        <input type='text' placeholder="First Name" onChange={
-                                            (e) => setFirstName(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
-                                    </div>
-                                    <div className='username'>
-                                        <input type='text' placeholder="Last Name" onChange={
-                                            (e) => setLastName(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
-                                    </div>
-                                    <div className='contact_number'>
-                                        <input type='contact_number' name='contact number' placeholder="Contact number" onChange={
-                                            (e) => setContact(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
+                                        <TextField variant="outlined" color="secondary" type='text' label="Email" onChange={
+                                            (e) => setEmail(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
                                     </div>
                                     <div className='submit'>
                                         <button className="add-button" onClick={handleSubmit}>Add Patient</button>

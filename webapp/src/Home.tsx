@@ -6,6 +6,9 @@ import CaregiverNavbar from "./components/Navbar/CaregiverNavbar";
 
 function Home() {
     const nav = useNavigate();
+    React.useEffect(() => {
+        nav("/dashboard");
+    },[]);
     return (
         <div>
             <CaregiverNavbar/>

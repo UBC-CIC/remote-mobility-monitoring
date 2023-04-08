@@ -1,0 +1,638 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2238C27429D914AD00C65CDE /* InitialLoadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2238C27329D914AD00C65CDE /* InitialLoadView.swift */; };
+		2238C27629D93F9D00C65CDE /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2238C27529D93F9D00C65CDE /* Helper.swift */; };
+		223F25C229C1B5750036539B /* CognitoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 223F25C129C1B5750036539B /* CognitoView.swift */; };
+		223F25C529C1BC970036539B /* AWSCognitoAuthPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 223F25C429C1BC970036539B /* AWSCognitoAuthPlugin */; };
+		223F25C729C1BC970036539B /* Amplify in Frameworks */ = {isa = PBXBuildFile; productRef = 223F25C629C1BC970036539B /* Amplify */; };
+		2249F5ED2994F85200DC8503 /* ApiCallers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2249F5EC2994F85200DC8503 /* ApiCallers.swift */; };
+		2259546A29930D1900879733 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 2259546929930D1900879733 /* CodeScanner */; };
+		22606A0B29E052AF00CB097B /* HealthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22606A0A29E052AF00CB097B /* HealthStore.swift */; };
+		2262043129DA835900E48D46 /* LogoutButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2262043029DA835900E48D46 /* LogoutButtonView.swift */; };
+		227547B92980BD5100D12030 /* MobilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227547B82980BD5100D12030 /* MobilityView.swift */; };
+		228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */; };
+		228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49C7296CB6510046DFD4 /* Assets.xcassets */; };
+		228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */; };
+		2290931B29C43008008C650A /* VerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2290931A29C43008008C650A /* VerificationView.swift */; };
+		2295EFF529A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2295EFF429A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift */; };
+		2295EFFC29A610B9008CD151 /* RegisterViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */; };
+		22A771112989097600BB170A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22A771102989097600BB170A /* HealthKit.framework */; };
+		22C4DCD629C45C6300E20F4F /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 22C4DCD529C45C6300E20F4F /* JWTDecode */; };
+		22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EE32102990AC8C0096DCA5 /* Styling.swift */; };
+		22EECF4C29DCDE1A0048A2B5 /* KeyboardModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */; };
+		22EECF4E29DCE4930048A2B5 /* PasswordFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */; };
+		A6DA5599FA0EAB5BD96A555A /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 7E24BC89C7EB37D42D3C4CC8 /* awsconfiguration.json */; };
+		FE240C055E5430A88E234154 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 436F2119FA28C571CA23CC2C /* amplifyconfiguration.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2295EFF629A60FFD008CD151 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 228B49B8296CB64C0046DFD4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 228B49BF296CB64C0046DFD4;
+			remoteInfo = "remote-mobility-monitoring-iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2238C27329D914AD00C65CDE /* InitialLoadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialLoadView.swift; sourceTree = "<group>"; };
+		2238C27529D93F9D00C65CDE /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
+		223F25C129C1B5750036539B /* CognitoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitoView.swift; sourceTree = "<group>"; };
+		2249F5EC2994F85200DC8503 /* ApiCallers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiCallers.swift; sourceTree = "<group>"; };
+		22606A0A29E052AF00CB097B /* HealthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthStore.swift; sourceTree = "<group>"; };
+		2262043029DA835900E48D46 /* LogoutButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoutButtonView.swift; sourceTree = "<group>"; };
+		227547B82980BD5100D12030 /* MobilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilityView.swift; sourceTree = "<group>"; };
+		2275C8F329C6A98F0087B6FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "remote-mobility-monitoring-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remote_mobility_monitoring_iOSApp.swift; sourceTree = "<group>"; };
+		228B49C7296CB6510046DFD4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		2290931A29C43008008C650A /* VerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationView.swift; sourceTree = "<group>"; };
+		2295EFF229A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "remote-mobility-monitoring-iOS-tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2295EFF429A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = remote_mobility_monitoring_iOS_tests.swift; sourceTree = "<group>"; };
+		2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewTests.swift; sourceTree = "<group>"; };
+		22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "remote-mobility-monitoring-iOS.entitlements"; sourceTree = "<group>"; };
+		22A771102989097600BB170A /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		22EE32102990AC8C0096DCA5 /* Styling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Styling.swift; sourceTree = "<group>"; };
+		22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardModifier.swift; sourceTree = "<group>"; };
+		22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordFieldsView.swift; sourceTree = "<group>"; };
+		436F2119FA28C571CA23CC2C /* amplifyconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; path = amplifyconfiguration.json; sourceTree = "<group>"; };
+		7E24BC89C7EB37D42D3C4CC8 /* awsconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; path = awsconfiguration.json; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		228B49BD296CB64C0046DFD4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2259546A29930D1900879733 /* CodeScanner in Frameworks */,
+				223F25C729C1BC970036539B /* Amplify in Frameworks */,
+				22C4DCD629C45C6300E20F4F /* JWTDecode in Frameworks */,
+				22A771112989097600BB170A /* HealthKit.framework in Frameworks */,
+				223F25C529C1BC970036539B /* AWSCognitoAuthPlugin in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2295EFEF29A60FFD008CD151 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		228B49B7296CB64C0046DFD4 = {
+			isa = PBXGroup;
+			children = (
+				228B49C2296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */,
+				228B49C1296CB64C0046DFD4 /* Products */,
+				22A7710F2989097600BB170A /* Frameworks */,
+				2C277B7B47B7754B0F4B2018 /* AmplifyConfig */,
+			);
+			sourceTree = "<group>";
+		};
+		228B49C1296CB64C0046DFD4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */,
+				2295EFF229A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		228B49C2296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				2275C8F329C6A98F0087B6FB /* Info.plist */,
+				22A7710E2989097600BB170A /* remote-mobility-monitoring-iOS.entitlements */,
+				228B49C3296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift */,
+				2238C27329D914AD00C65CDE /* InitialLoadView.swift */,
+				223F25C129C1B5750036539B /* CognitoView.swift */,
+				22EECF4D29DCE4930048A2B5 /* PasswordFieldsView.swift */,
+				2290931A29C43008008C650A /* VerificationView.swift */,
+				227547B82980BD5100D12030 /* MobilityView.swift */,
+				2249F5EC2994F85200DC8503 /* ApiCallers.swift */,
+				22EE32102990AC8C0096DCA5 /* Styling.swift */,
+				2238C27529D93F9D00C65CDE /* Helper.swift */,
+				22606A0A29E052AF00CB097B /* HealthStore.swift */,
+				2262043029DA835900E48D46 /* LogoutButtonView.swift */,
+				22EECF4B29DCDE1A0048A2B5 /* KeyboardModifier.swift */,
+				228B49C7296CB6510046DFD4 /* Assets.xcassets */,
+				228B49C9296CB6510046DFD4 /* Preview Content */,
+				2295EFF329A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */,
+			);
+			path = "remote-mobility-monitoring-iOS";
+			sourceTree = "<group>";
+		};
+		228B49C9296CB6510046DFD4 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				228B49CA296CB6510046DFD4 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		2295EFF329A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */ = {
+			isa = PBXGroup;
+			children = (
+				2295EFF429A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift */,
+				2295EFFB29A610B9008CD151 /* RegisterViewTests.swift */,
+			);
+			path = "remote-mobility-monitoring-iOS-tests";
+			sourceTree = "<group>";
+		};
+		22A7710F2989097600BB170A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				22A771102989097600BB170A /* HealthKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2C277B7B47B7754B0F4B2018 /* AmplifyConfig */ = {
+			isa = PBXGroup;
+			children = (
+				7E24BC89C7EB37D42D3C4CC8 /* awsconfiguration.json */,
+				436F2119FA28C571CA23CC2C /* amplifyconfiguration.json */,
+			);
+			name = AmplifyConfig;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		228B49BF296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 228B49CE296CB6510046DFD4 /* Build configuration list for PBXNativeTarget "remote-mobility-monitoring-iOS" */;
+			buildPhases = (
+				228B49BC296CB64C0046DFD4 /* Sources */,
+				228B49BD296CB64C0046DFD4 /* Frameworks */,
+				228B49BE296CB64C0046DFD4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "remote-mobility-monitoring-iOS";
+			packageProductDependencies = (
+				2259546929930D1900879733 /* CodeScanner */,
+				223F25C429C1BC970036539B /* AWSCognitoAuthPlugin */,
+				223F25C629C1BC970036539B /* Amplify */,
+				22C4DCD529C45C6300E20F4F /* JWTDecode */,
+			);
+			productName = "remote-mobility-monitoring-iOS";
+			productReference = 228B49C0296CB64C0046DFD4 /* remote-mobility-monitoring-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2295EFF129A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2295EFFA29A60FFD008CD151 /* Build configuration list for PBXNativeTarget "remote-mobility-monitoring-iOS-tests" */;
+			buildPhases = (
+				2295EFEE29A60FFD008CD151 /* Sources */,
+				2295EFEF29A60FFD008CD151 /* Frameworks */,
+				2295EFF029A60FFD008CD151 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2295EFF729A60FFD008CD151 /* PBXTargetDependency */,
+			);
+			name = "remote-mobility-monitoring-iOS-tests";
+			productName = "remote-mobility-monitoring-iOS-tests";
+			productReference = 2295EFF229A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		228B49B8296CB64C0046DFD4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1310;
+				TargetAttributes = {
+					228B49BF296CB64C0046DFD4 = {
+						CreatedOnToolsVersion = 13.1;
+					};
+					2295EFF129A60FFD008CD151 = {
+						CreatedOnToolsVersion = 14.2;
+						TestTargetID = 228B49BF296CB64C0046DFD4;
+					};
+				};
+			};
+			buildConfigurationList = 228B49BB296CB64C0046DFD4 /* Build configuration list for PBXProject "remote-mobility-monitoring-iOS" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 228B49B7296CB64C0046DFD4;
+			packageReferences = (
+				2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */,
+				223F25C329C1BC970036539B /* XCRemoteSwiftPackageReference "amplify-swift" */,
+				22C4DCD429C45C6300E20F4F /* XCRemoteSwiftPackageReference "JWTDecode" */,
+			);
+			productRefGroup = 228B49C1296CB64C0046DFD4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				228B49BF296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */,
+				2295EFF129A60FFD008CD151 /* remote-mobility-monitoring-iOS-tests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		228B49BE296CB64C0046DFD4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				228B49CB296CB6510046DFD4 /* Preview Assets.xcassets in Resources */,
+				228B49C8296CB6510046DFD4 /* Assets.xcassets in Resources */,
+				A6DA5599FA0EAB5BD96A555A /* awsconfiguration.json in Resources */,
+				FE240C055E5430A88E234154 /* amplifyconfiguration.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2295EFF029A60FFD008CD151 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		228B49BC296CB64C0046DFD4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				227547B92980BD5100D12030 /* MobilityView.swift in Sources */,
+				2249F5ED2994F85200DC8503 /* ApiCallers.swift in Sources */,
+				22EE32112990AC8C0096DCA5 /* Styling.swift in Sources */,
+				223F25C229C1B5750036539B /* CognitoView.swift in Sources */,
+				2238C27629D93F9D00C65CDE /* Helper.swift in Sources */,
+				2262043129DA835900E48D46 /* LogoutButtonView.swift in Sources */,
+				22606A0B29E052AF00CB097B /* HealthStore.swift in Sources */,
+				22EECF4C29DCDE1A0048A2B5 /* KeyboardModifier.swift in Sources */,
+				22EECF4E29DCE4930048A2B5 /* PasswordFieldsView.swift in Sources */,
+				2238C27429D914AD00C65CDE /* InitialLoadView.swift in Sources */,
+				228B49C4296CB64C0046DFD4 /* remote_mobility_monitoring_iOSApp.swift in Sources */,
+				2290931B29C43008008C650A /* VerificationView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2295EFEE29A60FFD008CD151 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2295EFF529A60FFD008CD151 /* remote_mobility_monitoring_iOS_tests.swift in Sources */,
+				2295EFFC29A610B9008CD151 /* RegisterViewTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2295EFF729A60FFD008CD151 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 228B49BF296CB64C0046DFD4 /* remote-mobility-monitoring-iOS */;
+			targetProxy = 2295EFF629A60FFD008CD151 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		228B49CC296CB6510046DFD4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Apple Development: hunglnl01@gmail.com (PGRVNHX2WM)";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		228B49CD296CB6510046DFD4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Apple Development: hunglnl01@gmail.com (PGRVNHX2WM)";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		228B49CF296CB6510046DFD4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "remote-mobility-monitoring-iOS/remote-mobility-monitoring-iOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"remote-mobility-monitoring-iOS/Preview Content\"";
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "remote-mobility-monitoring-iOS/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to scan QR code";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your mobility metrics and share with your healthcare providers.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app requires access to HealthKit";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		228B49D0296CB6510046DFD4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "remote-mobility-monitoring-iOS/remote-mobility-monitoring-iOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"remote-mobility-monitoring-iOS/Preview Content\"";
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "remote-mobility-monitoring-iOS/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to scan QR code";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your mobility metrics and share with your healthcare providers.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app requires access to HealthKit";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		2295EFF829A60FFD008CD151 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS-tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/remote-mobility-monitoring-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/remote-mobility-monitoring-iOS";
+			};
+			name = Debug;
+		};
+		2295EFF929A60FFD008CD151 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U6XMW9P652;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hachi.codingcat.remote-mobility-monitoring-iOS-tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/remote-mobility-monitoring-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/remote-mobility-monitoring-iOS";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		228B49BB296CB64C0046DFD4 /* Build configuration list for PBXProject "remote-mobility-monitoring-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				228B49CC296CB6510046DFD4 /* Debug */,
+				228B49CD296CB6510046DFD4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		228B49CE296CB6510046DFD4 /* Build configuration list for PBXNativeTarget "remote-mobility-monitoring-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				228B49CF296CB6510046DFD4 /* Debug */,
+				228B49D0296CB6510046DFD4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2295EFFA29A60FFD008CD151 /* Build configuration list for PBXNativeTarget "remote-mobility-monitoring-iOS-tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2295EFF829A60FFD008CD151 /* Debug */,
+				2295EFF929A60FFD008CD151 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		223F25C329C1BC970036539B /* XCRemoteSwiftPackageReference "amplify-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aws-amplify/amplify-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		22C4DCD429C45C6300E20F4F /* XCRemoteSwiftPackageReference "JWTDecode" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/auth0/JWTDecode.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		223F25C429C1BC970036539B /* AWSCognitoAuthPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 223F25C329C1BC970036539B /* XCRemoteSwiftPackageReference "amplify-swift" */;
+			productName = AWSCognitoAuthPlugin;
+		};
+		223F25C629C1BC970036539B /* Amplify */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 223F25C329C1BC970036539B /* XCRemoteSwiftPackageReference "amplify-swift" */;
+			productName = Amplify;
+		};
+		2259546929930D1900879733 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2259546829930D1900879733 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
+		};
+		22C4DCD529C45C6300E20F4F /* JWTDecode */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 22C4DCD429C45C6300E20F4F /* XCRemoteSwiftPackageReference "JWTDecode" */;
+			productName = JWTDecode;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 228B49B8296CB64C0046DFD4 /* Project object */;
+}

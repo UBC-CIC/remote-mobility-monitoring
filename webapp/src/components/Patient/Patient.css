@@ -1,0 +1,101 @@
+
+html, body {
+    height: 100%;
+}
+
+.patient-container {
+    display: grid;
+    grid-template-columns: 22% 75%;
+    min-height: 600px;
+    text-align: center;
+}
+
+.patient-container .date-label {
+    font-size: 0.8em;
+}
+
+.patient-container .chart-title {
+    font-size: 0.6em;
+    padding-left: 10px;
+}
+
+.patient-container .time-label {
+    font-size: 0.8em;
+    text-align: right;
+    margin-left: -40%;
+}
+.patient-container .sex {
+    min-width: 120px;
+}
+
+.patient-container .filter-text {
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.patient-container .date {
+    text-align: center;
+    width: 50%;
+    font-size: 0.6em;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.patient-container .filters {
+    min-height: 100%;
+    border-right: 1px solid #DBDBDB;
+    padding: 5%;
+}
+
+.patient-container .data {
+    min-height: 100%;
+}
+
+.patient-container .padding {
+    min-height: 20px;
+}
+
+.patient-container .padding2 {
+    min-height: 10px;
+}
+
+.data {
+    text-align: left;
+}
+
+
+.patient-container .share {
+    height: 32px;
+    border-radius: 5px;
+    padding-left:8px;
+    padding-right: 8px;
+    background-color: #4D47C3;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 0.8em ;
+    margin-top: 1%;
+    margin-left: 1%;
+}
+
+.patient-container .share:hover {
+    cursor: pointer;
+    background-color: #554FCA;
+}
+
+.patient-container .unlink {
+    height: 32px;
+    border-radius: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: #CC2727;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.5);
+    font-size: 0.8em ;
+    margin-top: 1%;
+    margin-left: 1%;
+}
+
+.patient-container .unlink:hover {
+    cursor: pointer;
+    background-color: #DD3232;
+}

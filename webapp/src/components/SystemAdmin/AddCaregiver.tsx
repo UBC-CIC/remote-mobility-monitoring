@@ -5,6 +5,7 @@ import {FaArrowLeft} from "react-icons/fa";
 import { useNavigate} from "react-router-dom";
 import AdminNavbar from "../Navbar/AdminNavbar";
 import {ServiceHandler} from "../../helpers/ServiceHandler";
+import {TextField} from "@mui/material";
 
 function AddCaregiver() {
     const [firstName, setFirstName] = useState("");
@@ -45,7 +46,6 @@ function AddCaregiver() {
         setError("");
         ServiceHandler.addCaregiver(firstName, lastName, email, contact)
             .then((data: any) => {
-                console.log(data);
                 alert("Caregiver sucessfully added. They have received an email with further instructions.");
                 nav("/admindashboard");
             })
@@ -57,7 +57,7 @@ function AddCaregiver() {
             <AdminNavbar/>
             <div className="sysadmin">
                 <div className='wrapper'>
-                    <div className="icon" onClick={() => nav("/admindashboard")}><FaArrowLeft size="15px"/> Home</div>
+                    <div className="icon" onClick={() => nav("/admindashboard")}><FaArrowLeft size="15px"/> Dashboard</div>
                     <div className="text-wrapper">
                         <h2>Add a caregiver</h2>
                         <p className="desc">
@@ -68,19 +68,19 @@ function AddCaregiver() {
                     <div className='form-wrapper'>
                         <form onSubmit={handleSubmit} noValidate >
                             <div className='username'>
-                                <input type='text' placeholder="First Name" onChange={
+                                <TextField color="secondary" variant="outlined" type='text' label="First Name" onChange={
                                     (e) => setFirstName(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
                             </div>
                             <div className='username'>
-                                <input type='text' placeholder="Last Name" onChange={
+                                <TextField color="secondary" variant="outlined" type='text' label="Last Name" onChange={
                                     (e) => setLastName(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
                             </div>
                             <div className='email'>
-                                <input type='email' name='email' placeholder="Email" onChange={
+                                <TextField color="secondary" variant="outlined" type='email' name='email' label="Email" onChange={
                                     (e) => setEmail(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
                             </div>
                             <div className='contact_number'>
-                                <input type='contact_number' name='contact number' placeholder="Contact number" onChange={
+                                <TextField color="secondary" variant="outlined" type='contact_number' name='contact number' label="Contact number" onChange={
                                     (e) => setContact(e.target.value)} onKeyDown={(e) => handleKey(e)}/>
                             </div>
                             <div className='submit'>
