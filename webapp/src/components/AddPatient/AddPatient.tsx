@@ -15,7 +15,7 @@ type response = {
     device_id: string
 }
 
-function AddCaregiver() {
+function AddPatient() {
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [submitted, setSubmitted] = useState(false);
@@ -127,4 +127,4 @@ function AddCaregiver() {
     );
 }
 
-export default AddCaregiver;
+export default AddPatient;

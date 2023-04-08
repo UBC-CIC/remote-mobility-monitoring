@@ -823,3 +823,74 @@ function AllPatients() {
 }
 
 export default AllPatients;
+
+
+// Functions below are just for testing.
+export function buildWalkingSpeedChartTest(walkingSpeedData: any) {
+    const walkingSpeedSeries = transformData(walkingSpeedData, "walking_speed").map((series: any, idx: any) => {
+        return {
+            ...series,
+            color: getRandomColorTest(),
+        };
+    });
+    const walkingSpeedOptions = {
+        chart: {
+            id: "walkingSpeedChart",
+            group: "social",
+            type: "line",
+            height: 300,
+        },
+        title: {
+            text: "",
+            align: "left",
+        },
+        yaxis: {
+            labels: {
+                minWidth: 40,
+                formatter: function (value: any) {
+                    return Math.round((value + Number.EPSILON) * 100) / 100;
+                },
+            },
+        },
+        xaxis: {
+            type: "datetime",
+            labels: {
+                rotate: -45,
+                rotateAlways: false,
+                format: "MM.dd.yy",
+                offsetX: 90,
+            },
+            title: {
+                text: "Date",
+            },
+        },
+    };
+    const options = {
+        ...walkingSpeedOptions,
+        colors: walkingSpeedSeries.map(() => getRandomColorTest()),
+        series: walkingSpeedSeries,
+    };
+
+    return (
+        <div key={"step-count"}>
+            <div className="chart-title">Walking Speed</div>
+            <ReactApexChart
+                options={options as any}
+                series={walkingSpeedSeries as any}
+                type="line"
+                height={300}
+            />
+            <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+            </div>
+        </div>
+    );
+
+};
+
+function getRandomColorTest () {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = Math.floor(Math.random() * 100) + 1;
+    const lightness = Math.floor(Math.random() * 60) + 20;
+  
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
