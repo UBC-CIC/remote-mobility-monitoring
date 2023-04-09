@@ -299,9 +299,9 @@ function Patient() {
     };
 
     const getRandomColor = () => {
-        const hue = Math.floor(Math.random() * 360);
-        const saturation = Math.floor(Math.random() * 100) + 1;
-        const lightness = Math.floor(Math.random() * 60) + 20;
+        const hue = 215;
+        const saturation = 100;
+        const lightness = 36;
       
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     };
@@ -493,6 +493,7 @@ function Patient() {
                 color: getRandomColor(),
             };
         });
+        console.log(stepLengthSeries);
         const walkingSpeedOptions = {
             chart: {
                 id: "stepLengthChart",

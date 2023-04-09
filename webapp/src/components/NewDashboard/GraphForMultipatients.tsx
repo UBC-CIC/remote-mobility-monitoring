@@ -2,6 +2,30 @@ import React, { useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import "./Graph.css";
 
+
+export const transformDataAll = (data: any[], metric: string, colors: any) => {
+    const series: any = {};
+  
+    data.forEach((item) => {
+        const { patient_name, metric_name, metric_value, timestamp, patient_id }: any = item;
+  
+        if (metric_name !== metric) {
+            return;
+        }
+  
+        if (!series[patient_name]) {
+            series[patient_name] = { name: patient_name, data: [], color: colors[patient_id]};
+        }
+  
+        series[patient_name].data.push({
+            x: new Date(timestamp).getTime(),
+            y: Number(metric_value),
+        });
+    });
+  
+    return Object.values(series);
+};
+
 export const transformData = (data: any[], metric: string) => {
     const series: any = {};
   
@@ -13,7 +37,7 @@ export const transformData = (data: any[], metric: string) => {
         }
   
         if (!series[patient_name]) {
-            series[patient_name] = { name: patient_name, data: [] };
+            series[patient_name] = { name: patient_name, data: []};
         }
   
         series[patient_name].data.push({

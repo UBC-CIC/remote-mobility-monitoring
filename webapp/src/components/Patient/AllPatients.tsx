@@ -16,7 +16,7 @@ import ReactApexChart from "react-apexcharts";
 import {encrypt} from "../../helpers/Crypto";
 import MuliPatientGraph from "../NewDashboard/GraphForMultipatients";
 import "react-datepicker/dist/react-datepicker.css";
-import LineGraphbyMetrics, { transformData} from "../NewDashboard/GraphForMultipatients";
+import LineGraphbyMetrics, { transformDataAll} from "../NewDashboard/GraphForMultipatients";
 import "./Patient.css";
 
 export interface Patient {
@@ -77,6 +77,7 @@ function AllPatients() {
     const [asymmetryData, setAssymetryData]: any = useState(null);
     const [distanceWalkedData, setDistanceWalkedData]: any = useState(null);
     const [walkingSteadinessData, setwalkingSteadinessData]: any = useState(null);
+    const [colors, setColors]: any = useState("");
     const graphData = { data: data };
     
     // pass the `graphData` object as the props to `LineGraph`
@@ -145,7 +146,6 @@ function AllPatients() {
         ServiceHandler.queryMetrics(selectedPatients, start.toISOString(), end.toISOString(), Number(minHeightNumber), 
             Number(maxHeightNumber), Number(minWeightNumber), Number(maxWeightNumber), sex)
             .then((data: any) => {
-                console.log(data);
                 const allStepCount: any = [];
                 const allWalkingSpeed: any = [];
                 const allStepLength: any = [];
@@ -158,7 +158,8 @@ function AllPatients() {
                         "patient_name": nameMap[m.patient_id],
                         "metric_name": m.metric_name,
                         "timestamp": m.timestamp,
-                        "metric_value": m.metric_value
+                        "metric_value": m.metric_value, 
+                        "patient_id": m.patient_id
                     };
                     if(m.metric_name === "step_count") {
                         allStepCount.push(currMetric);
@@ -206,6 +207,7 @@ function AllPatients() {
         ServiceHandler.getAllPatients()
             .then((data: any) => {
                 const patientArray:any = [];
+                const allColors: any = {};
                 data.patients.forEach((pat: any) => {
                     if (pat.verified===null || pat.verified===true) {
                         const toAdd = {"patient_id": pat.patient_id, 
@@ -218,11 +220,15 @@ function AllPatients() {
                         }
                         patientArray.push(toAdd);
                         currNameMap[pat.patient_id] = `${pat.first_name} ${pat.last_name}`;
+                        if (!allColors[pat.patient_id]) {
+                            allColors[pat.patient_id] = getRandomColor();
+                        }
                     }
                 });
                 setAllPatients(patientArray);
                 setIsPrimary(currIsPrimary);
                 setNameMap(currNameMap);
+                setColors(allColors);
             })
             .catch((err: any) => console.log(err));
     };
@@ -284,12 +290,8 @@ function AllPatients() {
     };
 
     const buildWalkingSpeedChart = (walkingSpeedData: any) => {
-        const walkingSpeedSeries = transformData(walkingSpeedData, "walking_speed").map((series: any, idx: any) => {
-            return {
-                ...series,
-                color: getRandomColor(),
-            };
-        });
+        const walkingSpeedSeries = transformDataAll(walkingSpeedData, "walking_speed", colors);
+        console.log(walkingSpeedSeries);
         const walkingSpeedOptions = {
             chart: {
                 id: "walkingSpeedChart",
@@ -345,12 +347,7 @@ function AllPatients() {
     };
 
     const buildStepCountChart = (stepCountData: any) => {
-        const stepCountSeries = transformData(stepCountData, "step_count").map((series: any, idx: any) => {
-            return {
-                ...series,
-                color: getRandomColor(),
-            };
-        });
+        const stepCountSeries = transformDataAll(stepCountData, "step_count", colors);
         const stepCountOptions = {
             chart: {
                 id: "stepCountChart",
@@ -406,12 +403,7 @@ function AllPatients() {
     };
 
     const buildStepLengthChart = (stepLengthData: any) => {
-        const stepLengthSeries = transformData(stepLengthData, "step_length").map((series: any, idx: any) => {
-            return {
-                ...series,
-                color: getRandomColor(),
-            };
-        });
+        const stepLengthSeries = transformDataAll(stepLengthData, "step_length", colors);
         const walkingSpeedOptions = {
             chart: {
                 id: "stepLengthChart",
@@ -467,12 +459,7 @@ function AllPatients() {
     };
 
     const buildDoubleSupportChart = (doubleSupportData: any) => {
-        const doubleSupportSeries = transformData(doubleSupportData, "double_support_time").map((series: any, idx: any) => {
-            return {
-                ...series,
-                color: getRandomColor(),
-            };
-        });
+        const doubleSupportSeries = transformDataAll(doubleSupportData, "double_support_time", colors);
         const doubleSupportOptions = {
             chart: {
                 id: "doubleSupportChart",
@@ -528,12 +515,7 @@ function AllPatients() {
     };
 
     const buildAssymetryChart = (asymmetryData: any) => {
-        const asymmetrySeries = transformData(asymmetryData, "walking_asymmetry").map((series: any, idx: any) => {
-            return {
-                ...series,
-                color: getRandomColor(),
-            };
-        });
+        const asymmetrySeries = transformDataAll(asymmetryData, "walking_asymmetry", colors);
         const walkingSpeedOptions = {
             chart: {
                 id: "asymmetryChart",
@@ -589,12 +571,7 @@ function AllPatients() {
     };
 
     const buildDistanceWalkedChart = (distanceWalked: any) => {
-        const distanceWalkedSeries = transformData(distanceWalked, "distance_walked").map((series: any, idx: any) => {
-            return {
-                ...series,
-                color: getRandomColor(),
-            };
-        });
+        const distanceWalkedSeries = transformDataAll(distanceWalked, "distance_walked", colors);
         const distanceWalkedOptions = {
             chart: {
                 id: "distanceWalkedChart",
@@ -650,12 +627,7 @@ function AllPatients() {
     };
 
     const buildWalkingSteadinessChart = (walkingSteadinessData: any) => {
-        const walkingSteadinessSeries = transformData(walkingSteadinessData, "walking_steadiness").map((series: any, idx: any) => {
-            return {
-                ...series,
-                color: getRandomColor(),
-            };
-        });
+        const walkingSteadinessSeries = transformDataAll(walkingSteadinessData, "walking_steadiness", colors);
         const distanceWalkedOptions = {
             chart: {
                 id: "walkingSteadinessChart",
