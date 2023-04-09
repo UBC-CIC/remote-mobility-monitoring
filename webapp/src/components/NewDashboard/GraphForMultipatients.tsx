@@ -130,7 +130,8 @@ export const metrics = [
     "walking_speed",
     "walking_asymmetry",
     "distance_walked",
-    "step_count"
+    "step_count",
+    "walking_steadiness"
 ];
 
 // eslint-disable-next-line react/prop-types

@@ -88,6 +88,7 @@ function Patient() {
     const [asymmetryData, setAssymetryData]: any = useState(null);
     const [distanceWalkedData, setDistanceWalkedData]: any = useState(null);
     const [tableData, setTableData]: any = useState({});
+    const [walkingSteadinessData, setwalkingSteadinessData]: any = useState(null);
 
     const generatePDF = () => {
         window.print();
@@ -149,6 +150,7 @@ function Patient() {
         setDoubleSupportData(null);
         setAssymetryData(null);
         setDistanceWalkedData(null);
+        setwalkingSteadinessData(null);
         ServiceHandler.queryMetrics(selectedPatients, start.toISOString(), end.toISOString())
             .then((data: any) => {
                 console.log(data);
@@ -160,6 +162,7 @@ function Patient() {
                 const allAssymetry: any = [];
                 const allDistanceWalked: any = [];
                 const dateMetrics: any = {};
+                const allWalkingSteadiness: any = [];
                 data.metrics.forEach((m: any) => {
                     const currMetric = {
                         "patient_name": patientDetails.first_name.concat(" ").concat(patientDetails.last_name),
@@ -193,6 +196,9 @@ function Patient() {
                     else if (m.metric_name === "distance_walked") {
                         allDistanceWalked.push(currMetric);
                     }
+                    else if (m.metric_name === "walking_steadiness") {
+                        allWalkingSteadiness.push(currMetric);
+                    }
                     else {
                         console.log(m.metric_name);
                     }
@@ -205,6 +211,7 @@ function Patient() {
                 setDoubleSupportData(allDoubleSupport);
                 setAssymetryData(allAssymetry);
                 setDistanceWalkedData(allDistanceWalked);
+                setwalkingSteadinessData(allWalkingSteadiness);
                 setTableData(dateMetrics);
 
                 // setmultiPatientsGraph(LineGraphbyMetrics({"data": allMetrics}));
@@ -662,6 +669,67 @@ function Patient() {
 
     };
 
+    const buildWalkingSteadinessChart = (walkingSteadinessData: any) => {
+        const walkingSteadinessSeries = transformData(walkingSteadinessData, "walking_steadiness").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const distanceWalkedOptions = {
+            chart: {
+                id: "walkingSteadinessChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...distanceWalkedOptions,
+            colors: walkingSteadinessSeries.map(() => getRandomColor()),
+            series: walkingSteadinessSeries,
+        };
+
+        return (
+            <div key={"distance"}>
+                <div className="chart-title">Walking Steadiness</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={walkingSteadinessSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
+    };
+
     return (
         <>
             <CaregiverNavbar/>
@@ -823,17 +891,26 @@ function Patient() {
                             </>:null}
                         </div>
                         <div className="padding"></div>
+                        <div id="dist">
+                            {walkingSteadinessData !== null?<> {buildWalkingSteadinessChart(walkingSteadinessData)}
+                                <div className="padding"></div>
+                                <Divider/>
+                            </>:null}
+                        </div>
+                        <div className="padding"></div>
                         {Object.keys(tableData).length > 0?
                             <TableContainer component={Paper}>
                                 <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>Step Count</TableCell>
-                                            <TableCell align="right">Walking Speed</TableCell>
-                                            <TableCell align="right">Step Length</TableCell>
-                                            <TableCell align="right">Double Support Time</TableCell>
-                                            <TableCell align="right">Walking Assymetry</TableCell>
-                                            <TableCell align="right">Distance Walked</TableCell>
+                                            <TableCell align="center">Date</TableCell>
+                                            <TableCell align="center">Step Count</TableCell>
+                                            <TableCell align="center">Walking Speed</TableCell>
+                                            <TableCell align="center">Step Length</TableCell>
+                                            <TableCell align="center">Double Support Time</TableCell>
+                                            <TableCell align="center">Walking Assymetry</TableCell>
+                                            <TableCell align="center">Distance Walked</TableCell>
+                                            <TableCell align="center">Walking Steadiness</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -842,12 +919,14 @@ function Patient() {
                                                 key={time}
                                                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                                             >
-                                                <TableCell align="right">{Math.round(tableData[time]["step_count"]*100)/100}</TableCell>
-                                                <TableCell align="right">{Math.round(tableData[time]["walking_speed"]*100)/100}</TableCell>
-                                                <TableCell align="right">{Math.round(tableData[time]["step_length"]*100)/100}</TableCell>
-                                                <TableCell align="right">{Math.round(tableData[time]["double_support_time"]*100)/100}</TableCell>
-                                                <TableCell align="right">{Math.round(tableData[time]["walking_asymmetry"]*100)/100}</TableCell>
-                                                <TableCell align="right">{Math.round(tableData[time]["distance_walked"]*100)/100}</TableCell>
+                                                <TableCell align="center">{time.substring(0, 10)}</TableCell>
+                                                <TableCell align="center">{Math.round(tableData[time]["step_count"]*100)/100}</TableCell>
+                                                <TableCell align="center">{Math.round(tableData[time]["walking_speed"]*100)/100}</TableCell>
+                                                <TableCell align="center">{Math.round(tableData[time]["step_length"]*100)/100}</TableCell>
+                                                <TableCell align="center">{Math.round(tableData[time]["double_support_time"]*100)/100}</TableCell>
+                                                <TableCell align="center">{Math.round(tableData[time]["walking_asymmetry"]*100)/100}</TableCell>
+                                                <TableCell align="center">{Math.round(tableData[time]["distance_walked"]*100)/100}</TableCell>
+                                                <TableCell align="center">{Math.round(tableData[time]["walking_steadiness"]*100)/100}</TableCell>
                                             </TableRow>;
                                         })}
                                     </TableBody>

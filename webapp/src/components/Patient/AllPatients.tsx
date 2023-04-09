@@ -76,6 +76,7 @@ function AllPatients() {
     const [doubleSupportData, setDoubleSupportData]: any = useState(null);
     const [asymmetryData, setAssymetryData]: any = useState(null);
     const [distanceWalkedData, setDistanceWalkedData]: any = useState(null);
+    const [walkingSteadinessData, setwalkingSteadinessData]: any = useState(null);
     const graphData = { data: data };
     
     // pass the `graphData` object as the props to `LineGraph`
@@ -99,14 +100,6 @@ function AllPatients() {
         }
         setSelectedToDate(date);
         setIntervals("C");
-    };
-
-    const handleDelete = () => {
-        ServiceHandler.deletePatient(patientId)
-            .then((data) => {
-                alert("Patient unlinked");
-                nav("/dashboard");
-            });
     };
 
     const queryDateMetrics = () => {
@@ -148,6 +141,7 @@ function AllPatients() {
         setDoubleSupportData(null);
         setAssymetryData(null);
         setDistanceWalkedData(null);
+        setwalkingSteadinessData(null);
         ServiceHandler.queryMetrics(selectedPatients, start.toISOString(), end.toISOString(), Number(minHeightNumber), 
             Number(maxHeightNumber), Number(minWeightNumber), Number(maxWeightNumber), sex)
             .then((data: any) => {
@@ -158,6 +152,7 @@ function AllPatients() {
                 const allDoubleSupport: any = [];
                 const allAssymetry: any = [];
                 const allDistanceWalked: any = [];
+                const allWalkingSteadiness: any = [];
                 data.metrics.forEach((m: any) => {
                     const currMetric = {
                         "patient_name": nameMap[m.patient_id],
@@ -184,6 +179,9 @@ function AllPatients() {
                     else if (m.metric_name === "distance_walked") {
                         allDistanceWalked.push(currMetric);
                     }
+                    else if (m.metric_name === "walking_steadiness") {
+                        allWalkingSteadiness.push(currMetric);
+                    }
                     else {
                         console.log(m.metric_name);
                     }
@@ -194,6 +192,7 @@ function AllPatients() {
                 setDoubleSupportData(allDoubleSupport);
                 setAssymetryData(allAssymetry);
                 setDistanceWalkedData(allDistanceWalked);
+                setwalkingSteadinessData(allWalkingSteadiness);
             })
             .catch((err) => console.log());
         return;
@@ -202,7 +201,6 @@ function AllPatients() {
 
     const getAllPatients = () => {
         ServiceHandler.getAllPatients();
-        let currPatientId = "all";
         let currIsPrimary = false;
         const currNameMap:any = {};
         ServiceHandler.getAllPatients()
@@ -214,7 +212,6 @@ function AllPatients() {
                             "name": `${pat.first_name} ${pat.last_name}`,
                             "is_primary": pat.is_primary};
                         if(pat.patient_id === patientId) {
-                            currPatientId = patientId;
                             if (pat.is_primary) {
                                 currIsPrimary = true;
                             }
@@ -348,7 +345,6 @@ function AllPatients() {
     };
 
     const buildStepCountChart = (stepCountData: any) => {
-        console.log("here");
         const stepCountSeries = transformData(stepCountData, "step_count").map((series: any, idx: any) => {
             return {
                 ...series,
@@ -653,6 +649,67 @@ function AllPatients() {
 
     };
 
+    const buildWalkingSteadinessChart = (walkingSteadinessData: any) => {
+        const walkingSteadinessSeries = transformData(walkingSteadinessData, "walking_steadiness").map((series: any, idx: any) => {
+            return {
+                ...series,
+                color: getRandomColor(),
+            };
+        });
+        const distanceWalkedOptions = {
+            chart: {
+                id: "walkingSteadinessChart",
+                group: "social",
+                type: "line",
+                height: 300,
+            },
+            title: {
+                text: "",
+                align: "left",
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 40,
+                    formatter: function (value: any) {
+                        return Math.round((value + Number.EPSILON) * 100) / 100;
+                    },
+                },
+            },
+            xaxis: {
+                type: "datetime",
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    format: "MM.dd.yy",
+                    offsetX: 90,
+                },
+                title: {
+                    text: "Date",
+                },
+            },
+        };
+        const options = {
+            ...distanceWalkedOptions,
+            colors: walkingSteadinessSeries.map(() => getRandomColor()),
+            series: walkingSteadinessSeries,
+        };
+
+        return (
+            <div key={"distance"}>
+                <div className="chart-title">Walking Steadiness</div>
+                <ReactApexChart
+                    options={options as any}
+                    series={walkingSteadinessSeries as any}
+                    type="line"
+                    height={300}
+                />
+                <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>
+                </div>
+            </div>
+        );
+
+    };
+
     return (
         <>
             <CaregiverNavbar/>
@@ -815,6 +872,12 @@ function AllPatients() {
                         </>:null}
                     </div>
                     <div className="padding"></div>
+                    <div id="dist">
+                        {walkingSteadinessData !== null?<> {buildWalkingSteadinessChart(walkingSteadinessData)}
+                            <div className="padding"></div>
+                            <Divider/>
+                        </>:null}
+                    </div>
                 </div>
 
             </div>
