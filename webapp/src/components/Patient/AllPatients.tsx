@@ -298,6 +298,9 @@ function AllPatients() {
                 group: "social",
                 type: "line",
                 height: 300,
+                toolbar: {
+                    show: false
+                }
             },
             title: {
                 text: "",
@@ -354,6 +357,9 @@ function AllPatients() {
                 group: "social",
                 type: "line",
                 height: 300,
+                toolbar: {
+                    show: false
+                }
             },
             title: {
                 text: "",
@@ -410,6 +416,9 @@ function AllPatients() {
                 group: "social",
                 type: "line",
                 height: 300,
+                toolbar: {
+                    show: false
+                }
             },
             title: {
                 text: "",
@@ -466,6 +475,9 @@ function AllPatients() {
                 group: "social",
                 type: "line",
                 height: 300,
+                toolbar: {
+                    show: false
+                }
             },
             title: {
                 text: "",
@@ -522,6 +534,9 @@ function AllPatients() {
                 group: "social",
                 type: "line",
                 height: 300,
+                toolbar: {
+                    show: false
+                }
             },
             title: {
                 text: "",
@@ -578,6 +593,9 @@ function AllPatients() {
                 group: "social",
                 type: "line",
                 height: 300,
+                toolbar: {
+                    show: false
+                }
             },
             title: {
                 text: "",
@@ -634,6 +652,9 @@ function AllPatients() {
                 group: "social",
                 type: "line",
                 height: 300,
+                toolbar: {
+                    show: false
+                }
             },
             title: {
                 text: "",

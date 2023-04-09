@@ -85,6 +85,7 @@ function CaregiverDashboard() {
                                 const patientIdEncrypt = encrypt(patient.patient_id);
                                 const navUrl = "patient/".concat(patientIdEncrypt);
                                 nav(navUrl);
+                                window.location.reload();
                             }
                             else {
                                 const emailEncrypt = encrypt(patient.email);
@@ -111,7 +112,9 @@ function CaregiverDashboard() {
                     </div>
                     <div>
                         <button className={"addl"}
-                            onClick={(e) => nav("allPatients")}>View All Patient Metrics</button>
+                            onClick={(e) => {
+                                nav("allPatients");
+                            }}>View All Patient Metrics</button>
                     </div>
                 </div>
             </div>
