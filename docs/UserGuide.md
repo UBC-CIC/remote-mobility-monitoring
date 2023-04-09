@@ -9,6 +9,7 @@
 | [Admin creates a caregiver](#admin-creates-a-caregiver) | Login as an admin |
 | [Patient creates an account](#patient-creates-an-account) |
 [Caregiver links a patient](#caregiver-links-a-patient)|
+[Patient uploads mobility metrics](#patient-uploads-mobility-metrics)|
 [Caregiver views metrics](#caregiver-views-metrics)|
 [Caregiver shares metrics with another caregiver](#caregiver-shares-metrics-with-another-caregiver)
 
@@ -45,15 +46,29 @@ Now there are two options.
 
 Option 1: The patient can scan this qr code using their mobile app as follows:
 
-TODO
+<p align="center">
+  <kbd>
+    <img src="./images/iphone_scanqr_button.png" alt="image1" width="250" style="border: 1px solid black; padding: 5px;">
+  </kbd>
+</p>
 
 Once the qr code is scanned, the patient is automatically linked to the caregiver.
 
 Option 2: If the patient want to be linked remotely, they will also get an email with a verification link as follows:
 
-TODO
+<img src="./images/iphone_verify.gif" alt="image1" width="100%" style="border: 1px solid black; padding: 5px;">
 
 The patient simply has to open this link and they will be verified
+
+## Patient uploads mobility metrics
+
+Once patient is already linked to at least one caregiver, the patient can view and send mobility metrics by clicking `Send Data`. Alternatively, the mobility data is also automatically uploaded in the background once every hour.
+
+<p align="center">
+  <kbd>
+    <img src="./images/iphone_mobility.png" alt="image1" width="250" style="border: 1px solid black; padding: 5px;">
+  </kbd>
+</p>
 
 ## Caregiver views metrics
 
