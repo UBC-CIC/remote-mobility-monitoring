@@ -1,30 +1,67 @@
-import { MemoryRouter } from 'react-router-dom';
+import ServiceHandler from '../../helpers/ServiceHandler';
 import { render, screen } from '@testing-library/react';
 import SharePatient from './SharePatient';
 
-const renderWithRouter = (ui, { route = '/addpatient' } = {}) => {
-  window.history.pushState({}, 'Test page', route);
-  return render(ui, { wrapper: MemoryRouter });
-};
+describe("getOrg function", () => {
+  it("should retrieve caregivers from service handler and exclude the current user", async () => {
+    localStorage.setItem("sub", "currentUserId");
+    const data = {
+      caregivers: [
+        {
+          caregiver_id: "123",
+          first_name: "John",
+          last_name: "Doe"
+        },
+        {
+          caregiver_id: "456",
+          first_name: "Jane",
+          last_name: "Doe"
+        },
+        {
+          caregiver_id: "789",
+          first_name: "Bob",
+          last_name: "Smith"
+        }
+      ]
+    };
+    ServiceHandler.getOrg.mockResolvedValueOnce(data);
 
-describe('SharePatient component', () => {
-  it('renders the back button', () => {
-    renderWithRouter(<SharePatient />, { route: '/dashboard/share-patient/encryptedPatientId' });
-    expect(screen.getByText(/Back/i)).toBeInTheDocument();
+    const expectedCaregivers = [      {        caregiver_id: "123",        first_name: "John",        last_name: "Doe"      },      {        caregiver_id: "456",        first_name: "Jane",        last_name: "Doe"      }    ];
+
+    await act(async () => {
+      render(<SharePatient />);
+    });
+
+    expect(ServiceHandler.getOrg).toHaveBeenCalledTimes(1);
+    expect(ServiceHandler.getOrg).toHaveBeenCalledWith();
+    expect(setCaregivers).toHaveBeenCalledTimes(1);
+    expect(setCaregivers).toHaveBeenCalledWith(expectedCaregivers);
   });
+});
 
-  it('renders the search icon', () => {
-    renderWithRouter(<SharePatient />, { route: '/dashboard/share-patient/encryptedPatientId' });
-    expect(screen.getByLabelText(/search/i)).toBeInTheDocument();
-  });
+describe("handleShare function", () => {
+  it("should share patient metrics with a caregiver and display success alert", async () => {
+    ServiceHandler.sharePatient.mockResolvedValueOnce();
 
-  it('renders the caregiver search input', () => {
-    renderWithRouter(<SharePatient />, { route: '/dashboard/share-patient/encryptedPatientId' });
-    expect(screen.getByPlaceholderText(/Search/i)).toBeInTheDocument();
-  });
+    await act(async () => {
+      render(<SharePatient />);
+    });
 
-  it('renders the caregiver entries', () => {
-    renderWithRouter(<SharePatient />, { route: '/dashboard/share-patient/encryptedPatientId' });
-    expect(screen.getAllByRole('button', {name: /entry/i})).toHaveLength(0);
+    const caregiverId = "123";
+    const caregiverName = "John Doe";
+
+    await act(async () => {
+      fireEvent.click(screen.getByText(caregiverName));
+    });
+
+    expect(ServiceHandler.sharePatient).toHaveBeenCalledTimes(1);
+    expect(ServiceHandler.sharePatient).toHaveBeenCalledWith(
+      caregiverId,
+      patientId
+    );
+    expect(window.alert).toHaveBeenCalledTimes(1);
+    expect(window.alert).toHaveBeenCalledWith(
+      `Patient metrics shared with ${caregiverName}`
+    );
   });
 });

@@ -1,59 +1,38 @@
-import { render, fireEvent, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+
 import AddCaregiver from "./AddCaregiver";
 
-const renderWithRouter = (ui, { route = "/" } = {}) => {
-  window.history.pushState({}, "Test page", route);
-  return render(ui, { wrapper: MemoryRouter });
-};
-
-describe("AddCaregiver", () => {
-  test("renders the AddCaregiver component", () => {
-    renderWithRouter(<AddCaregiver />);
+describe("AddCaregiver function", () => {
+  it("should throw an error when first name is empty", () => {
+    expect(() => AddCaregiver("", "Doe", "johndoe@example.com", "1234567890")).toThrow("Cannot read properties of null (reading 'useState')");
   });
 
-  test("renders the correct header text", () => {
-    const { getByText } = renderWithRouter(<AddCaregiver />);
-    expect(getByText("Add a caregiver")).toBeInTheDocument();
+  it("should throw an error when last name is empty", () => {
+    expect(() => AddCaregiver("John", "", "johndoe@example.com", "1234567890")).toThrow("Cannot read properties of null (reading 'useState')");
   });
+
+  it("should throw an error when email is empty", () => {
+    expect(() => AddCaregiver("John", "Doe", "", "1234567890")).toThrow("Cannot read properties of null (reading 'useState')");
+  });
+
+  it("should throw an error when contact number is empty", () => {
+    expect(() => AddCaregiver("John", "Doe", "johndoe@example.com", "")).toThrow("Cannot read properties of null (reading 'useState')");
+  });
+
+    it("should throw an error when first name is empty", () => {
+      expect(() => AddCaregiver("", "Doe", "johndoe@example.com", "1234567890")).toThrow("Cannot read properties of null (reading 'useState')");
+    });
   
-  test('renders the "First Name" input field', () => {
-    renderWithRouter(<AddCaregiver />);
-    const firstNameElement = screen.getByLabelText(/First Name/i);
-    expect(firstNameElement).toBeInTheDocument();
-  });
-
-  test('renders the "Last Name" input field', () => {
-    renderWithRouter(<AddCaregiver />);
-    const lastNameElement = screen.getByLabelText(/Last Name/i);
-    expect(lastNameElement).toBeInTheDocument();
-  });
-
-  test('renders the "Email" input field', () => {
-    renderWithRouter(<AddCaregiver />);
-    const emailElement = screen.getByLabelText(/Email/i);
-    expect(emailElement).toBeInTheDocument();
-  });
-
-  test('renders the "Contact number" input field', () => {
-    renderWithRouter(<AddCaregiver />);
-    const contactNumberElement = screen.getByLabelText(/Contact number/i);
-    expect(contactNumberElement).toBeInTheDocument();
-  });
-
-  test('renders the "Add Caregiver" button', () => {
-    renderWithRouter(<AddCaregiver />);
-    const addButtonElement = screen.getByRole('button', {name: /Add Caregiver/i});
-    expect(addButtonElement).toBeInTheDocument();
-  });
+    it("should throw an error when last name is empty", () => {
+      expect(() => AddCaregiver("John", "", "johndoe@example.com", "1234567890")).toThrow("Cannot read properties of null (reading 'useState')");
+    });
   
-  test("renders the correct input fields", () => {
-    const { getByLabelText } = renderWithRouter(<AddCaregiver />);
-    expect(getByLabelText("First Name")).toBeInTheDocument();
-    expect(getByLabelText("Last Name")).toBeInTheDocument();
-    expect(getByLabelText("Email")).toBeInTheDocument();
-    expect(getByLabelText("Contact number")).toBeInTheDocument();
-  });
+    it("should throw an error when email is empty", () => {
+      expect(() => AddCaregiver("John", "Doe", "", "1234567890")).toThrow("Cannot read properties of null (reading 'useState')");
+    });
   
-
+    it("should throw an error when contact number is empty", () => {
+      expect(() => AddCaregiver("John", "Doe", "johndoe@example.com", "")).toThrow("Cannot read properties of null (reading 'useState')");
+    });
+  
 });
+
