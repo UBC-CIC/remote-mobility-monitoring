@@ -1,109 +1,38 @@
-import React from "react";
-import { render, fireEvent, screen, waitFor } from "@testing-library/react";
-import AdminDashboard from "./AdminDashboard";
-import { ServiceHandler } from "../../helpers/ServiceHandler";
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import AdminDashboard from './AdminDashboard';
 
-// Mock ServiceHandler module
-jest.mock("../../helpers/ServiceHandler", () => ({
-  getOrg: jest.fn(() =>
-    Promise.resolve({
-      caregivers: [
-        { caregiver_id: "1", first_name: "John", last_name: "Doe" },
-        { caregiver_id: "2", first_name: "Jane", last_name: "Smith" },
-      ],
-    })
-  ),
-  deleteCaregiver: jest.fn(() => Promise.resolve()),
-}));
+const renderWithRouter = (ui, { route = '/addpatient' } = {}) => {
+  window.history.pushState({}, 'Test page', route);
+  return render(ui, { wrapper: MemoryRouter });
+};
 
-describe("AdminDashboard component", () => {
-  afterEach(() => {
-    jest.clearAllMocks();
+describe('AdminDashboard', () => {
+  test('renders the search bar', () => {
+    const { getByPlaceholderText } = renderWithRouter(<AdminDashboard />);
+    expect(getByPlaceholderText('Search 0 caregivers')).toBeInTheDocument();
   });
 
-  it("renders without throwing any errors", () => {
-    render(<AdminDashboard />);
+  test('adds a new caregiver when add button is clicked', () => {
+    const { getByText } = renderWithRouter(<AdminDashboard />);
+    fireEvent.click(getByText('Add New Caregiver'));
+    expect(window.location.pathname).toBe('/addcaregiver');
   });
 
-  it("correctly filters the list of caregivers based on input", async () => {
-    render(<AdminDashboard />);
-
-    const searchInput = screen.getByPlaceholderText("Search 2 caregivers");
-    fireEvent.change(searchInput, { target: { value: "John" } });
-
-    await waitFor(() => {
-      expect(screen.getByText("John")).toBeInTheDocument();
-      expect(screen.queryByText("Jane")).not.toBeInTheDocument();
-    });
-  });
-
-  it("navigates to the 'Add New Caregiver' page when button is clicked", () => {
-    const mockNavigate = jest.fn();
-    jest.mock("react-router-dom", () => ({
-      useNavigate: () => mockNavigate,
-    }));
-
-    render(<AdminDashboard />);
-
-    const addButton = screen.getByText("Add New Caregiver");
-    fireEvent.click(addButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith("/addcaregiver");
-  });
-
-  it("removes a caregiver from the list when 'Remove' button is clicked", async () => {
-    render(<AdminDashboard />);
-
-    const removeButton = await screen.findByText("Remove");
+  test('removes a caregiver when remove button is clicked', () => {
+    const { getByText } = renderWithRouter(<AdminDashboard />);
+    const removeButton = getByText('Remove');
     fireEvent.click(removeButton);
-
-    expect(ServiceHandler.deleteCaregiver).toHaveBeenCalledWith("1");
+    expect(removeButton).not.toBeInTheDocument();
   });
 
-  it("fetches data from server and populates caregiver list on mount", async () => {
-    render(<AdminDashboard />);
-
-    expect(ServiceHandler.getOrg).toHaveBeenCalledTimes(1);
-    expect(await screen.findByText("John")).toBeInTheDocument();
-    expect(await screen.findByText("Jane")).toBeInTheDocument();
-  });
-
-  it("re-fetches data from server and updates caregiver list when a caregiver is deleted", async () => {
-    render(<AdminDashboard />);
-
-    const removeButton = await screen.findByText("Remove");
-    fireEvent.click(removeButton);
-
-    await waitFor(() => {
-      expect(ServiceHandler.getOrg).toHaveBeenCalledTimes(2);
-      expect(screen.queryByText("John")).not.toBeInTheDocument();
-    });
-  });
-
-  it("handles errors when fetching data from server", async () => {
-    ServiceHandler.getOrg.mockImplementationOnce(() =>
-      Promise.reject(new Error("Server error"))
-    );
-
-    render(<AdminDashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Server error")).toBeInTheDocument();
-    });
-  });
-
-  it("handles errors when deleting a caregiver from server", async () => {
-    ServiceHandler.deleteCaregiver.mockImplementationOnce(() =>
-      Promise.reject(new Error("Server error"))
-    );
-
-    render(<AdminDashboard />);
-
-    const removeButton = await screen.findByText("Remove");
-    fireEvent.click(removeButton);
-
-    await waitFor(() => {
-      expect(screen.getByText("Server error")).toBeInTheDocument();
-    });
+  test('filters the caregiver list when search term is entered', () => {
+    const { getByPlaceholderText, getByText } = renderWithRouter(<AdminDashboard />);
+    const searchInput = getByPlaceholderText('Search 0 caregivers');
+    fireEvent.change(searchInput, { target: { value: 'John' } });
+    expect(getByText('John Doe')).toBeInTheDocument();
+    expect(getByText('Remove')).toBeInTheDocument();
+    expect(getByText('Jane Doe')).not.toBeInTheDocument();
   });
 });

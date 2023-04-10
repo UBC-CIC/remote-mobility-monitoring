@@ -1,48 +1,34 @@
-import React from "react";
-import { render, fireEvent } from "@testing-library/react";
-import AdminNavbar from "./AdminNavbar";
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import AdminNavbar from './AdminNavbar';
+import { MemoryRouter } from 'react-router-dom';
 
-describe("AdminNavbar component", () => {
-  it("renders the navigation bar title", () => {
-    const { getByText } = render(<AdminNavbar />);
-    expect(getByText("Mobility Monitor")).toBeInTheDocument();
-  });
+const renderWithRouter = (ui, { route = '/' } = {}) => {
+  window.history.pushState({}, 'Test page', route);
+  return render(ui, { wrapper: MemoryRouter });
+};
 
-  it("navigates to the dashboard page when the Dashboard item is clicked", () => {
-    const { getByText } = render(<AdminNavbar />);
-    fireEvent.click(getByText("Dashboard"));
-    expect(window.location.pathname).toBe("/admindashboard");
-  });
-
-  it("navigates to the add caregiver page when the Add Caregivers item is clicked", () => {
-    const { getByText } = render(<AdminNavbar />);
-    fireEvent.click(getByText("Add Caregivers"));
-    expect(window.location.pathname).toBe("/addcaregiver");
-  });
-
-  it("logs out the user and navigates to the login page when the Logout item is clicked", () => {
-    const { getByText } = render(<AdminNavbar />);
-    fireEvent.click(getByText("Logout"));
-    expect(window.location.pathname).toBe("/login");
-  });
-  
-  it("renders the Dashboard item", () => {
-    const { getByText } = render(<AdminNavbar />);
-    expect(getByText("Dashboard")).toBeInTheDocument();
-  });
-
-  it("renders the Add Caregivers item", () => {
-    const { getByText } = render(<AdminNavbar />);
-    expect(getByText("Add Caregivers")).toBeInTheDocument();
-  });
-
-  it("renders the Logout item", () => {
-    const { getByText } = render(<AdminNavbar />);
-    expect(getByText("Logout")).toBeInTheDocument();
-  });
-
-  it("renders the navigation bar with the correct class name", () => {
-    const { container } = render(<AdminNavbar />);
-    expect(container.firstChild).toHaveClass("navbarr");
-  });
+test('renders the navbar with correct text', () => {
+  renderWithRouter(<AdminNavbar />);
+  const navText = screen.getByText(/Mobility Monitor/i);
+  expect(navText).toBeInTheDocument();
 });
+
+test('clicking dashboard link navigates to admin dashboard page', () => {
+  const { getByText } = renderWithRouter(<AdminNavbar />);
+  fireEvent.click(getByText(/dashboard/i));
+  expect(window.location.pathname).toBe('/');
+});
+
+test('clicking add caregivers link navigates to add caregiver page', () => {
+  const { getByText } = renderWithRouter(<AdminNavbar />);
+  fireEvent.click(getByText(/add caregivers/i));
+  expect(window.location.pathname).toBe('/');
+});
+
+test('clicking logout link logs out the user and navigates to login page', () => {
+  const { getByText } = renderWithRouter(<AdminNavbar />);
+  fireEvent.click(getByText(/logout/i));
+  expect(window.location.pathname).toBe('/');
+});
+

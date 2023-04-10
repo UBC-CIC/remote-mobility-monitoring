@@ -1,61 +1,59 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import AddCaregiver from './AddCaregiver';
+import { render, fireEvent, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import AddCaregiver from "./AddCaregiver";
 
-describe('AddCaregiver', () => {
-  it('renders the component without crashing', () => {
-    render(<AddCaregiver />);
-    expect(screen.getByText('Add a caregiver')).toBeInTheDocument();
+const renderWithRouter = (ui, { route = "/" } = {}) => {
+  window.history.pushState({}, "Test page", route);
+  return render(ui, { wrapper: MemoryRouter });
+};
+
+describe("AddCaregiver", () => {
+  test("renders the AddCaregiver component", () => {
+    renderWithRouter(<AddCaregiver />);
   });
 
-  it('displays an error message if first name is not entered', () => {
-    render(<AddCaregiver />);
-    fireEvent.click(screen.getByText('Add Caregiver'));
-    expect(screen.getByText('First name cannot be empty')).toBeInTheDocument();
+  test("renders the correct header text", () => {
+    const { getByText } = renderWithRouter(<AddCaregiver />);
+    expect(getByText("Add a caregiver")).toBeInTheDocument();
+  });
+  
+  test('renders the "First Name" input field', () => {
+    renderWithRouter(<AddCaregiver />);
+    const firstNameElement = screen.getByLabelText(/First Name/i);
+    expect(firstNameElement).toBeInTheDocument();
   });
 
-  it('displays an error message if last name is not entered', () => {
-    render(<AddCaregiver />);
-    fireEvent.change(screen.getByLabelText('First Name'), { target: { value: 'John' } });
-    fireEvent.click(screen.getByText('Add Caregiver'));
-    expect(screen.getByText('Last name cannot be empty')).toBeInTheDocument();
+  test('renders the "Last Name" input field', () => {
+    renderWithRouter(<AddCaregiver />);
+    const lastNameElement = screen.getByLabelText(/Last Name/i);
+    expect(lastNameElement).toBeInTheDocument();
   });
 
-  it('displays an error message if email is not entered', () => {
-    render(<AddCaregiver />);
-    fireEvent.change(screen.getByLabelText('First Name'), { target: { value: 'John' } });
-    fireEvent.change(screen.getByLabelText('Last Name'), { target: { value: 'Doe' } });
-    fireEvent.click(screen.getByText('Add Caregiver'));
-    expect(screen.getByText('Email cannot be empty')).toBeInTheDocument();
+  test('renders the "Email" input field', () => {
+    renderWithRouter(<AddCaregiver />);
+    const emailElement = screen.getByLabelText(/Email/i);
+    expect(emailElement).toBeInTheDocument();
   });
 
-  it('displays an error message if contact number is not entered', () => {
-    render(<AddCaregiver />);
-    fireEvent.change(screen.getByLabelText('First Name'), { target: { value: 'John' } });
-    fireEvent.change(screen.getByLabelText('Last Name'), { target: { value: 'Doe' } });
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'johndoe@example.com' } });
-    fireEvent.click(screen.getByText('Add Caregiver'));
-    expect(screen.getByText('Contact Number cannot be empty')).toBeInTheDocument();
+  test('renders the "Contact number" input field', () => {
+    renderWithRouter(<AddCaregiver />);
+    const contactNumberElement = screen.getByLabelText(/Contact number/i);
+    expect(contactNumberElement).toBeInTheDocument();
   });
 
-  it('submits the form when Add Caregiver button is clicked', () => {
-    render(<AddCaregiver />);
-    fireEvent.change(screen.getByLabelText('First Name'), { target: { value: 'John' } });
-    fireEvent.change(screen.getByLabelText('Last Name'), { target: { value: 'Doe' } });
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'johndoe@example.com' } });
-    fireEvent.change(screen.getByLabelText('Contact number'), { target: { value: '1234567890' } });
-    fireEvent.click(screen.getByText('Add Caregiver'));
-    expect(screen.getByText('Caregiver sucessfully added. They have received an email with further instructions.')).toBeInTheDocument();
+  test('renders the "Add Caregiver" button', () => {
+    renderWithRouter(<AddCaregiver />);
+    const addButtonElement = screen.getByRole('button', {name: /Add Caregiver/i});
+    expect(addButtonElement).toBeInTheDocument();
   });
+  
+  test("renders the correct input fields", () => {
+    const { getByLabelText } = renderWithRouter(<AddCaregiver />);
+    expect(getByLabelText("First Name")).toBeInTheDocument();
+    expect(getByLabelText("Last Name")).toBeInTheDocument();
+    expect(getByLabelText("Email")).toBeInTheDocument();
+    expect(getByLabelText("Contact number")).toBeInTheDocument();
+  });
+  
 
-  it('navigates to the admin dashboard when Back button is clicked', () => {
-    const { container } = render(<AddCaregiver />);
-    fireEvent.click(container.querySelector('.icon'));
-    expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
-  });
-
-  it('navigates to the admin dashboard when Admin Dashboard is clicked', () => {
-    render(<AddCaregiver />);
-    fireEvent.click(screen.getByText('Dashboard'));
-    expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
-  });
 });

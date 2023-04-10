@@ -9,6 +9,7 @@ import { QRCode } from "react-qr-svg";
 import CaregiverNavbar from "../Navbar/CaregiverNavbar";
 import {TextField} from "@mui/material";
 
+
 type response = {
     patient_id: string,
     auth_code: string,

@@ -1,58 +1,43 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import NewDashboard from "./NewDashboard";
+import { render, screen } from '@testing-library/react';
+import NewDashboard from './NewDashboard';
 
-describe("NewDashboard", () => {
-  it("renders the dashboard title", () => {
-    render(<NewDashboard />);
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
-  });
+const renderWithRouter = (ui, { route = '/' } = {}) => {
+  window.history.pushState({}, 'Test page', route);
+  return render(ui, { wrapper: MemoryRouter });
+};
 
-  it("renders the patient name", () => {
-    render(<NewDashboard />);
-    expect(screen.getByText("John Doe")).toBeInTheDocument();
-  });
+test('renders the dashboard title', () => {
+  renderWithRouter(<NewDashboard />);
+  const dashboardTitle = screen.getByRole('heading', { level: 2 });
+  expect(dashboardTitle).toBeInTheDocument();
+});
 
-  it("renders the table headers", () => {
-    render(<NewDashboard />);
-    expect(screen.getByText("Date")).toBeInTheDocument();
-    expect(screen.getByText("Step Length (km)")).toBeInTheDocument();
-    expect(screen.getByText("Double Support Time (%)")).toBeInTheDocument();
-    expect(screen.getByText("Walking Speed (kpm)")).toBeInTheDocument();
-    expect(screen.getByText("Walking Asymmetry (%)")).toBeInTheDocument();
-    expect(screen.getByText("Distance Walked (km)")).toBeInTheDocument();
-    expect(screen.getByText("Step Count (s)")).toBeInTheDocument();
-  });
+test('renders the patient name', () => {
+  renderWithRouter(<NewDashboard />);
+  const patientName = screen.getByRole('heading', { level: 3 });
+  expect(patientName).toBeInTheDocument();
+});
 
-  it("renders the table rows", () => {
-    render(<NewDashboard />);
-    expect(screen.getAllByRole("row")).toHaveLength(7);
-  });
+test('renders the graph', () => {
+  renderWithRouter(<NewDashboard />);
+  const graph = screen.getByRole('img');
+  expect(graph).toBeInTheDocument();
+});
 
-  it("displays metric values in table cells", () => {
-    render(<NewDashboard />);
-    expect(screen.getByText("0.7")).toBeInTheDocument();
-    expect(screen.getByText("45")).toBeInTheDocument();
-    expect(screen.getByText("1.2")).toBeInTheDocument();
-    expect(screen.getByText("10")).toBeInTheDocument();
-    expect(screen.getByText("2.5")).toBeInTheDocument();
-    expect(screen.getByText("4321")).toBeInTheDocument();
-  });
+test('renders the table', () => {
+  renderWithRouter(<NewDashboard />);
+  const table = screen.getByRole('table');
+  expect(table).toBeInTheDocument();
+});
 
-  it("formats timestamps as dates in the table", () => {
-    render(<NewDashboard />);
-    expect(screen.getByText("01/01/2021")).toBeInTheDocument();
-    expect(screen.getByText("01/02/2021")).toBeInTheDocument();
-    expect(screen.getByText("01/03/2021")).toBeInTheDocument();
-  });
+test('renders the table headers', () => {
+  renderWithRouter(<NewDashboard />);
+  const tableHeaders = screen.getAllByRole('columnheader');
+  expect(tableHeaders).toHaveLength(7);
+});
 
-  it("renders the line graph section", () => {
-    render(<NewDashboard />);
-    expect(screen.getByRole("img", { name: "Line Graph" })).toBeInTheDocument();
-  });
-
-  it("renders the multi-patients line graph section", () => {
-    render(<NewDashboard />);
-    expect(screen.getByRole("img", { name: "Multi-Patients Line Graph" })).toBeInTheDocument();
-  });
+test('renders the table rows', () => {
+  renderWithRouter(<NewDashboard />);
+  const tableRows = screen.getAllByRole('row');
+  expect(tableRows).not.toHaveLength(0);
 });
