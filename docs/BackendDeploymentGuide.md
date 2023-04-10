@@ -86,7 +86,7 @@ cdk deploy RemoteMobilityMonitoringApiGatewayStack-prod --profile YOUR_AWS_CLI_P
 # Step 2.1: Create Organization
 
 ## Backend Stages
-All CDK stacks except for the SES stack are deployed in 2 stages: dev and prod. The dev stage is used for development and testing, while the prod stage is used for production. The SES stack is shared by both dev and prod stages, so it is only deployed once. All other stacks are deployed in dev and prod stages, an example is the DynamoDB table as follows:
+All CDK stacks except for the SES stack are deployed in 2 stages: dev and prod. The dev stage is used for development and testing, while the prod stage is used for production. Functionally, the only difference between dev and prod is that ID tokens sent in the prod stage cannot be expired, while ID tokens sent in the dev stage can be expired. The SES stack is shared by both dev and prod stages, so it is only deployed once. All other stacks are deployed in dev and prod stages, an example is the DynamoDB table as follows:
 ![alt text](./images/dynamodb_stages.png)
 It can be seen that there are 2 DynamoDB tables, one with the suffix -dev and one with the suffix -prod, indicating which stage the table belongs to. When using the AWS Console, be mindful of which stage you are using, as resources (except for SES) are not shared between stages.
 
