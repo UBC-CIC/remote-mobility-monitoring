@@ -79,8 +79,7 @@ Once the caregiver clicks on this patient, they will be brought to a page that d
 ![met](./images/met1.png)
 ![met2](./images/met2.png)
 ![met3](./images/met3.png)
-
-TODO (Aniket) add graph and table after new metric is complete
+![met4](./images/met4.png)
 
 The caregiver can also view the metrics of all their patients. To do so, the caregiver clicks on the view all patient metrics button:
 ![all_button](./images/all_button.png)
