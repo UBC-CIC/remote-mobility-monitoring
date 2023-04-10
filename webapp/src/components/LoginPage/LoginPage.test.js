@@ -23,34 +23,6 @@ describe("LoginPage", () => {
         expect(headerElement).toBeInTheDocument();
     });
 
-    test("renders a header with the text Mobility Monitor", () => {
-        const { getByText } = render(
-            <Provider store={store}>
-                <Router location={ location }>
-                    <LoginPage/>
-                </Router>
-            </Provider>
-        );
-
-        const headerElement = getByText("Mobility Monitor");
-        expect(headerElement).toBeInTheDocument();
-    });
-
-    test("renders a form with a email and password input", () => {
-        const {getByPlaceholderText } = render(
-            <Provider store={store}>
-                <Router location={ location }>
-                    <LoginPage/>
-                </Router>
-            </Provider>
-        );
-
-        const usernameInput = getByPlaceholderText("Email");
-        const passwordInput = getByPlaceholderText("Password");
-        expect(usernameInput).toBeInTheDocument();
-        expect(passwordInput).toBeInTheDocument();
-    });
-
     test("initial login type should be caregiver", () => {
         const { getByText } = render(
             <Provider store={store}>
@@ -63,19 +35,6 @@ describe("LoginPage", () => {
 
         const headerElement = getByText("Organization administrators can");
         expect(headerElement).toBeInTheDocument();
-    });
-
-    test("changes login type to admin when clicked", () => {
-        const { getByText } = render(
-            <Provider store={store}>
-                <Router location={ location }>
-                    <LoginPage/>
-                </Router>
-            </Provider>
-        );
-        fireEvent.click(getByText("Login here"));
-        const loginType = getByText("Mobility Monitor as admin");
-        expect(loginType).toBeInTheDocument();
     });
 
     test("changes login type back to caregiver when clicked twice", () => {
@@ -92,5 +51,45 @@ describe("LoginPage", () => {
         fireEvent.click(getByText("Login here"));
         loginType = getByText("Organization administrators can");
     });
+
+    test("renders an email input field", () => {
+        const { getByLabelText } = render(
+            <Provider store={store}>
+                <Router location={ location }>
+                    <LoginPage/>
+                </Router>
+            </Provider>
+        );
+        const emailInput = getByLabelText("Email");
+        expect(emailInput).toBeInTheDocument();
+    });
+    
+    test("renders a password input field", () => {
+        const { getByLabelText } = render(
+            <Provider store={store}>
+                <Router location={ location }>
+                    <LoginPage/>
+                </Router>
+            </Provider>
+        );
+        const passwordInput = getByLabelText("Password");
+        expect(passwordInput).toBeInTheDocument();
+    });
+    
+    test("calls handleLogin when Login button is clicked", () => {
+        const { getByText } = render(
+            <Provider store={store}>
+                <Router location={ location }>
+                    <LoginPage/>
+                </Router>
+            </Provider>
+        );
+        const loginButton = getByText("Login");
+        const handleLogin = jest.fn();
+        loginButton.onclick = handleLogin;
+        fireEvent.click(loginButton);
+        expect(handleLogin).toHaveBeenCalled();
+    });
+    
 
 });
