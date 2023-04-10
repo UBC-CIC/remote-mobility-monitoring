@@ -134,7 +134,7 @@ function AllPatients() {
         }
         else {
             start = selectedFromDate;
-            start.setDate(startDate.getDate() - 1);
+            start.setDate(selectedFromDate.getDate() - 1);
             end = selectedToDate;
         }
         setStepCountData(null);
