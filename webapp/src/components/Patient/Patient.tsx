@@ -142,6 +142,7 @@ function Patient() {
         }
         else {
             start = startDate;
+            start.setDate(startDate.getDate() - 1);
             end = endDate;
         }
         setStepCountData(null);
