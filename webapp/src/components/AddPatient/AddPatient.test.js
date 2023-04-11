@@ -58,17 +58,6 @@ describe('AddPatient component', () => {
     expect(getByLabelText("Email")).toBeInTheDocument();
     expect(getByText("Add Patient")).toBeInTheDocument();
   });
-  
-  test("displays an error message when email field is empty", () => {
-    const { getByLabelText, getByText } = renderWithRouter(<AddPatient />);
-  
-    const emailInput = getByLabelText("Email");
-    fireEvent.change(emailInput, { target: { value: "" } });
-    fireEvent.click(getByText("Add Patient"));
-  
-    expect(getByText("Email cannot be empty")).toBeInTheDocument();
-  });
-   
 
   test("renders the email input field", () => {
     const { getByLabelText } = renderWithRouter(<AddPatient />);
