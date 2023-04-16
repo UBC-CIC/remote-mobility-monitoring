@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import {userTypes, strObjMap}  from "../../helpers/types";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 import jwt_decode from "jwt-decode";
-import {Box, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, Switch, TextField, Theme} from "@mui/material";
+import {Box, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, Switch, TextField} from "@mui/material";
 
 function LoginPage() {
     const [loginType, setLoginType] = useState("caregiver");
@@ -128,7 +128,7 @@ function LoginPage() {
                             onChange={handleChange}
                         >
                             <MenuItem value={"caregiver"}>Caregiver</MenuItem>
-                            <MenuItem value={"Admin"}>Administrator</MenuItem>
+                            <MenuItem value={"admin"}>Administrator</MenuItem>
                         </Select>
                     </FormControl>
                     <img height = "100px" width = "100px" src = {loginType == "caregiver"? "/caregiver-icon.png" : "admin-icon.png"} />
