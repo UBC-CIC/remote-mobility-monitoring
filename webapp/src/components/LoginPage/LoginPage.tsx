@@ -6,15 +6,14 @@ import { useDispatch } from "react-redux";
 import {userTypes, strObjMap}  from "../../helpers/types";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 import jwt_decode from "jwt-decode";
-import {FormControlLabel, FormGroup, TextField} from "@mui/material";
-import { LoginSwitch } from "../LoginSwitch/LoginSwitch";
-
+import {Box, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, Switch, TextField, Theme} from "@mui/material";
 
 function LoginPage() {
     const [loginType, setLoginType] = useState("caregiver");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [open, setOpen] = useState(false);
     const nav = useNavigate();
     const dispatch = useDispatch();
 
@@ -94,24 +93,46 @@ function LoginPage() {
         login(cognitoUser, email, password, callback);
     };
 
-    const toggleLoginType = () => {
-        if (loginType === "caregiver") setLoginType("admin");
-        else setLoginType("caregiver");
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleChange = (event: any) => {
+        setLoginType(event.target.value);
     };
 
     return (
         <div className='login-page'>
             <div className='login'>
-                <h1>Sign in to Mobimon</h1>
-                <h2>{loginType === "caregiver" ? "as a caregiver": "as an admin"}</h2>
-                <FormGroup>
-                  <FormControlLabel
-                    control={<LoginSwitch sx={{ m: 1 }} defaultChecked />}
-                    label="Switch roles"
-                  />
-                </FormGroup>
-                <p>{loginType === "caregiver" ? "Organization administrators can ": "Caregivers can\n"}
-                    <span className='alternate' onClick={toggleLoginType}>Login here</span></p>
+                <Box textAlign="center">
+                    <h1>Welcome to Mobimon</h1>
+                    <h2>Select your role:</h2>
+                </Box>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <FormControl sx={{ mr: 1 }}>
+                        <Select
+                            open={open}
+                            onClose={handleClose}
+                            onOpen={handleOpen}
+                            value={loginType}
+                            onChange={handleChange}
+                        >
+                            <MenuItem value={"caregiver"}>Caregiver</MenuItem>
+                            <MenuItem value={"Admin"}>Administrator</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <img height = "100px" width = "100px" src = {loginType == "caregiver"? "/caregiver-icon.png" : "admin-icon.png"} />
+                </Box>
             </div>
             <div className='login user'>
                 <h2>Sign in</h2>
