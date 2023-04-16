@@ -6,7 +6,8 @@ import { useDispatch } from "react-redux";
 import {userTypes, strObjMap}  from "../../helpers/types";
 import * as AmazonCognitoIdentity from "amazon-cognito-identity-js";
 import jwt_decode from "jwt-decode";
-import {TextField} from "@mui/material";
+import {FormControlLabel, FormGroup, TextField} from "@mui/material";
+import { LoginSwitch } from "../LoginSwitch/LoginSwitch";
 
 
 function LoginPage() {
@@ -101,8 +102,14 @@ function LoginPage() {
     return (
         <div className='login-page'>
             <div className='login'>
-                <h1>Sign in to</h1>
-                <h2>Mobility Monitor {loginType === "caregiver" ? "as a caregiver": "as an admin"}</h2>
+                <h1>Sign in to Mobimon</h1>
+                <h2>{loginType === "caregiver" ? "as a caregiver": "as an admin"}</h2>
+                <FormGroup>
+                  <FormControlLabel
+                    control={<LoginSwitch sx={{ m: 1 }} defaultChecked />}
+                    label="Switch roles"
+                  />
+                </FormGroup>
                 <p>{loginType === "caregiver" ? "Organization administrators can ": "Caregivers can\n"}
                     <span className='alternate' onClick={toggleLoginType}>Login here</span></p>
             </div>

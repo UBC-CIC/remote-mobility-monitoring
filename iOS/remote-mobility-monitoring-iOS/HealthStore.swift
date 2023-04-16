@@ -161,12 +161,12 @@ class HealthStore: ObservableObject {
     func updateMetrics() {
         // Initialize all the data to some arbitrary mock data if data is not available in the store
         let stepCountStandard = HKQuantity(unit: HKUnit.count(), doubleValue: 2348)
-        let stepLengthStandard = HKQuantity(unit: HKUnit(from: "cm"), doubleValue: 10.0)
+        let stepLengthStandard = HKQuantity(unit: HKUnit(from: "cm"), doubleValue: 52.6)
         let doubleSupportTimeStandard = HKQuantity(unit: HKUnit.percent(), doubleValue: 0.15)
-        let walkingSpeedStandard = HKQuantity(unit: HKUnit(from: "m/s"), doubleValue: 20.0)
+        let walkingSpeedStandard = HKQuantity(unit: HKUnit(from: "m/s"), doubleValue: 1.4)
         let walkingAsymmetryStandard = HKQuantity(unit: HKUnit.percent(), doubleValue: 0.083)
         let distanceWalkingRunningStandard = HKQuantity(unit: HKUnit.meter(), doubleValue: 1563.0)
-        let walkingSteadinessStandard = HKQuantity(unit: HKUnit.percent(), doubleValue: 0.5)
+        let walkingSteadinessStandard = HKQuantity(unit: HKUnit.percent(), doubleValue: 0.91)
         
         DispatchQueue.main.async {
             self.metrics = [
