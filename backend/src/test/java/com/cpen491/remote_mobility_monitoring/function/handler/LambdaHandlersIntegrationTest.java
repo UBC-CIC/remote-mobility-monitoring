@@ -79,7 +79,7 @@ public class LambdaHandlersIntegrationTest {
     private static final String PATIENT_NAME2 = "PatientTest2";
     private static final String PATIENT_UPDATED_NAME2 = "PatientTestTwo";
     private static final String PATIENT_NAME3 = "PatientTest3";
-    private static final String PATIENT_PASSWORD = "Passwordppp99!";
+    private static final String PATIENT_PASSWORD = "";
     private static final String PATIENT_PHONE_NUMBER = "+1010101010";
     private static final String INVALID_AUTH_CODE = "invalid";
     private static final String CREATED_AT = getCurrentUtcTimeString();
