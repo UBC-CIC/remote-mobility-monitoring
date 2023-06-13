@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.262.0",
+    "@aws-sdk/client-lambda": "^3.350.0",
     "aws-cdk-lib": "^2.60.0"
   },
   "devDependencies": {
